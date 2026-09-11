@@ -1,0 +1,48 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
+        with:
+          go-version: '1.25.x'
+          check-latest: true
+          cache: true
+      - name: Require the tagged commit to be on main
+        run: |
+          git fetch --no-tags origin main
+          git merge-base --is-ancestor HEAD origin/main
+      - name: Verify tag matches SDK version
+        run: |
+          sdk_version="$(sed -n 's/^[[:space:]]*Version = "\([^"]*\)"/\1/p' client.go)"
+          test -n "$sdk_version"
+          test "$GITHUB_REF_NAME" = "v$sdk_version"
+      - name: Verify release without write credentials
+        run: make verify
+
+  release:
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Publish GitHub release without executing repository code
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_REPOSITORY: ${{ github.repository }}
+        run: gh release create "$RELEASE_TAG" --repo "$RELEASE_REPOSITORY" --verify-tag --generate-notes

@@ -1,0 +1,24 @@
+name: Public contract drift
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 6 * * 1-5'
+
+permissions:
+  contents: read
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+      - uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
+        with:
+          go-version: '1.25.x'
+          check-latest: true
+          cache: true
+      - name: Download modules
+        run: go mod download
+      - name: Compare canonical OpenAPI semantically
+        run: go run ./internal/cmd/contract-drift https://docs.viapost.io/openapi/public.yaml openapi.yaml

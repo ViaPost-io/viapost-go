@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+      - uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
+        with:
+          go-version: '1.25.x'
+          check-latest: true
+          cache: true
+      - name: Download modules
+        run: go mod download
+      - name: Verify generated client, auth surface, tests, vet, and vulnerabilities
+        run: make verify
+      - name: Check formatting
+        run: test -z "$(gofmt -l .)"
+      - name: Check repository diff
+        run: git diff --check && test -z "$(git status --porcelain)"
