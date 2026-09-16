@@ -808,7 +808,8 @@ func (s *ContactList) SetNextCursor(val OptString) {
 	s.NextCursor = val
 }
 
-func (*ContactList) getContactsRes() {}
+func (*ContactList) getContactsRes()           {}
+func (*ContactList) getSegmentsIDContactsRes() {}
 
 type ContactProperties map[string]jx.Raw
 
@@ -3452,11 +3453,6 @@ func (*GetSegmentsIDContactsForbidden) getSegmentsIDContactsRes() {}
 type GetSegmentsIDContactsInternalServerError Error
 
 func (*GetSegmentsIDContactsInternalServerError) getSegmentsIDContactsRes() {}
-
-// GetSegmentsIDContactsNoContent is response for GetSegmentsIDContacts operation.
-type GetSegmentsIDContactsNoContent struct{}
-
-func (*GetSegmentsIDContactsNoContent) getSegmentsIDContactsRes() {}
 
 type GetSegmentsIDContactsNotFound Error
 

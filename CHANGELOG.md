@@ -3,6 +3,22 @@
 All notable changes to this project are documented in this file. This project follows
 [Semantic Versioning](https://semver.org/).
 
+## [0.3.0] - 2026-09-16
+
+### Breaking changes
+
+- `api.GetSegmentsIDContacts` now returns the documented paginated `*api.ContactList` on HTTP
+  `200` instead of the incorrect generated `*api.GetSegmentsIDContactsNoContent` on HTTP `204`.
+
+### Changed
+
+- Synchronize the generated client with the public OpenAPI contract reviewed at
+  `ViaPost-io/base-code@891adebbe79a26178fb780ec986172c890a5e261`.
+- Add a regression test that decodes the documented segment-contact list response.
+- Keep JSON responses capped at 8 MiB while allowing raw RFC822 messages and CSV exports up to
+  the API-supported 40 MiB by default, with a separately configurable bounded limit.
+- Redact the active API key from error bodies, parsed messages, request IDs, and response headers.
+
 ## [0.2.0] - 2026-09-16
 
 ### Breaking changes

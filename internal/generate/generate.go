@@ -4,6 +4,7 @@ package generate
 
 import (
 	"fmt"
+	"go/format"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -90,6 +91,84 @@ func Generate(sourcePath, targetPath string) error {
 	command.Stderr = os.Stderr
 	if err := command.Run(); err != nil {
 		return fmt.Errorf("generate client: %w", err)
+	}
+	return hardenSensitiveResponses(targetPath)
+}
+
+func hardenSensitiveResponses(targetPath string) error {
+	path := filepath.Join(targetPath, "oas_json_gen.go")
+	generated, err := os.ReadFile(path)
+	if err != nil {
+		return fmt.Errorf("read generated JSON codecs: %w", err)
+	}
+	content := string(generated)
+	replacements := map[string]string{
+		`func (s *CreateWebhookResponse) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}`: `func (s CreateWebhookResponse) MarshalJSON() ([]byte, error) {
+	s.Secret = "[REDACTED]"
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}`,
+		`func (s *RotateWebhookSecretResponse) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}`: `func (s RotateWebhookSecretResponse) MarshalJSON() ([]byte, error) {
+	if s.Secret.Set {
+		s.Secret.Value = "[REDACTED]"
+	}
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}`,
+	}
+	for original, hardened := range replacements {
+		if strings.Count(content, original) != 1 {
+			return fmt.Errorf("expected exactly one generated sensitive codec to harden")
+		}
+		content = strings.Replace(content, original, hardened, 1)
+	}
+	formattedContent, err := format.Source([]byte(content))
+	if err != nil {
+		return fmt.Errorf("format hardened generated JSON codecs: %w", err)
+	}
+	if err := os.WriteFile(path, formattedContent, 0o644); err != nil {
+		return fmt.Errorf("write hardened generated JSON codecs: %w", err)
+	}
+	sensitiveSource := `package api
+
+import "log/slog"
+
+const redactedSensitiveValue = "[REDACTED]"
+
+func (s CreateWebhookResponse) String() string { return "CreateWebhookResponse{Secret:[REDACTED]}" }
+func (s CreateWebhookResponse) GoString() string { return s.String() }
+func (s CreateWebhookResponse) LogValue() slog.Value {
+	return slog.GroupValue(slog.String("secret", redactedSensitiveValue))
+}
+
+func (s RotateWebhookSecretResponse) String() string { return "RotateWebhookSecretResponse{Secret:[REDACTED]}" }
+func (s RotateWebhookSecretResponse) GoString() string { return s.String() }
+func (s RotateWebhookSecretResponse) LogValue() slog.Value {
+	return slog.GroupValue(slog.String("secret", redactedSensitiveValue))
+}
+
+func (c Client) String() string { return "ViaPostOpenAPIClient{Security:[REDACTED]}" }
+func (c Client) GoString() string { return c.String() }
+func (c Client) LogValue() slog.Value {
+	return slog.GroupValue(slog.String("security", redactedSensitiveValue))
+}
+`
+	formattedSensitiveSource, err := format.Source([]byte(sensitiveSource))
+	if err != nil {
+		return fmt.Errorf("format generated sensitive representations: %w", err)
+	}
+	if err := os.WriteFile(filepath.Join(targetPath, "sensitive.go"), formattedSensitiveSource, 0o644); err != nil {
+		return fmt.Errorf("write generated sensitive representations: %w", err)
 	}
 	return nil
 }

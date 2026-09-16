@@ -1,6 +1,6 @@
 # ViaPost Go SDK
 
-SDK oficial, server-side, para a API pública do ViaPost. A versão `v0.2.0` cobre envio de e-mails,
+SDK oficial, server-side, para a API pública do ViaPost. A versão `v0.3.0` cobre envio de e-mails,
 mensagens e métricas, domínios, templates, webhooks, automações e consumo mensal.
 
 > Nunca coloque uma API key no frontend, em logs ou no repositório. Leia a chave de um secret ou
@@ -9,7 +9,7 @@ mensagens e métricas, domínios, templates, webhooks, automações e consumo me
 ## Instalação
 
 ```bash
-go get github.com/ViaPost-io/viapost-go@v0.2.0
+go get github.com/ViaPost-io/viapost-go@v0.3.0
 ```
 
 O SDK requer Go 1.25 ou posterior. Desenvolvimento, CI e releases usam o toolchain
@@ -63,14 +63,17 @@ Um programa executável está em [`examples/send`](./examples/send).
 ## Configuração
 
 `NewClient` usa autenticação Bearer, `https://api.viapost.io`, timeout de 60 segundos e o
-User-Agent `viapost-go/0.2.0`. Use `WithBaseURL`, `WithTimeout`, `WithUserAgent` ou
-`WithHTTPClient` para customizar. Todo método recebe `context.Context`; o primeiro limite atingido
+User-Agent `viapost-go/0.3.0`. Use `WithBaseURL`, `WithTimeout`, `WithUserAgent`,
+`WithHTTPClient` ou `WithMaxRawResponseBytes` para customizar. Todo método recebe
+`context.Context`; o primeiro limite atingido
 entre o contexto e o timeout do cliente encerra a requisição. Mutações não são repetidas
 automaticamente.
 
 Por segurança, endpoints remotos exigem HTTPS; HTTP é aceito apenas para `localhost` e IPs de
 loopback em desenvolvimento. O cliente não segue redirects, não envia cookies, limita respostas
-de sucesso a 8 MiB e clona cada request antes de adicionar headers do SDK.
+JSON de sucesso a 8 MiB e mensagens RFC822/exports CSV a 40 MiB por padrão, e clona cada request
+antes de adicionar headers do SDK. O limite de conteúdo bruto pode ser reduzido (ou ampliado até
+128 MiB) com `WithMaxRawResponseBytes` sem alterar os limites de JSON e de erros.
 
 A camada principal oferece:
 
@@ -83,17 +86,30 @@ Use `client.Raw()` somente quando precisar de uma operação ainda não promovid
 ergonômica. Esse cliente de baixo nível é gerado diretamente do OpenAPI e seus nomes podem mudar
 com o contrato.
 
+As operações anônimas da página pública usam um cliente dedicado para que a API key nunca seja
+enviada ao host de status:
+
+```go
+statusClient, err := viapost.NewPublicStatusClient()
+if err != nil {
+	log.Fatal(err)
+}
+snapshot, err := statusClient.GetPublicStatus(ctx)
+```
+
+O cliente público bloqueia operações autenticadas e usa `https://status.viapost.io` por padrão.
+
 ## Contrato e geração
 
 O arquivo [`openapi.yaml`](./openapi.yaml) é um snapshot versionado do contrato público em
 [`docs.viapost.io/openapi/public.yaml`](https://docs.viapost.io/openapi/public.yaml), sincronizado
 da fonte `ViaPost-io/base-code/docs/openapi/public.yaml` no merge
-`5eed29795633d3c4509851ce8638ef97d2370b07`.
+`891adebbe79a26178fb780ec986172c890a5e261`.
 
 SHA-256 do snapshot:
 
 ```text
-b23e2c8615b4dccaa1bf89bdd026c3101616bebb86b17d0a7aba6776717723e7
+f1b1fc0f198a2b0b36f0e893515dad191d6bb7d139fcf1e942c036bfa2f5169b
 ```
 
 O código em `api/` é gerado com ogen `v1.24.0`, está versionado e não busca schemas remotos:
@@ -122,7 +138,7 @@ Consulte [CONTRIBUTING.md](./CONTRIBUTING.md), [SECURITY.md](./SECURITY.md) e
 The official server-side Go SDK for the ViaPost public API. Install it with:
 
 ```bash
-go get github.com/ViaPost-io/viapost-go@v0.2.0
+go get github.com/ViaPost-io/viapost-go@v0.3.0
 ```
 
 Create a client with `viapost.NewClient(os.Getenv("VIAPOST_API_KEY"))`, then call the resource

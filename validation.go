@@ -2,8 +2,10 @@ package viapost
 
 import (
 	"errors"
+	"net"
+	"net/netip"
 	"net/url"
-	"unicode/utf8"
+	"strings"
 
 	"github.com/google/uuid"
 )
@@ -58,7 +60,7 @@ func validateSendRequest(request SendRequest, cfg sendConfig) error {
 			return ErrInvalidAttachment
 		}
 	}
-	if cfg.idempotencyKeySet && (cfg.idempotencyKey == "" || utf8.RuneCountInString(cfg.idempotencyKey) > MaxIdempotencyKeyLength) {
+	if cfg.idempotencyKeySet && !isVisibleASCII(cfg.idempotencyKey, MaxIdempotencyKeyLength) {
 		return ErrInvalidIdempotencyKey
 	}
 	return nil
@@ -69,5 +71,58 @@ func parseWebhookURL(value string) (*url.URL, error) {
 	if err != nil || parsed.Scheme != "https" || parsed.Hostname() == "" || parsed.User != nil || parsed.Fragment != "" {
 		return nil, ErrInvalidWebhookURL
 	}
+	host := strings.TrimSuffix(parsed.Hostname(), ".")
+	if ip, err := netip.ParseAddr(host); err == nil {
+		ip = ip.Unmap()
+		if !ip.IsGlobalUnicast() || ip.IsPrivate() || isSpecialPurposeIP(ip) {
+			return nil, ErrInvalidWebhookURL
+		}
+	} else if looksLikeNumericHost(host) || strings.EqualFold(host, "localhost") || strings.HasSuffix(strings.ToLower(host), ".localhost") {
+		return nil, ErrInvalidWebhookURL
+	}
 	return parsed, nil
+}
+
+var specialPurposeNetworks = []netip.Prefix{
+	netip.MustParsePrefix("100.64.0.0/10"),
+	netip.MustParsePrefix("192.0.0.0/24"),
+	netip.MustParsePrefix("192.0.2.0/24"),
+	netip.MustParsePrefix("192.88.99.0/24"),
+	netip.MustParsePrefix("198.18.0.0/15"),
+	netip.MustParsePrefix("198.51.100.0/24"),
+	netip.MustParsePrefix("203.0.113.0/24"),
+	netip.MustParsePrefix("2001:db8::/32"),
+}
+
+func isSpecialPurposeIP(ip netip.Addr) bool {
+	for _, network := range specialPurposeNetworks {
+		if network.Contains(ip) {
+			return true
+		}
+	}
+	return false
+}
+
+func isVisibleASCII(value string, maximum int) bool {
+	if len(value) == 0 || len(value) > maximum {
+		return false
+	}
+	for index := 0; index < len(value); index++ {
+		if value[index] < 0x21 || value[index] > 0x7e {
+			return false
+		}
+	}
+	return true
+}
+
+func looksLikeNumericHost(host string) bool {
+	if strings.HasPrefix(strings.ToLower(host), "0x") {
+		return true
+	}
+	for _, character := range host {
+		if (character < '0' || character > '9') && character != '.' {
+			return false
+		}
+	}
+	return net.ParseIP(host) == nil
 }

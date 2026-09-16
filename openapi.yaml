@@ -2035,8 +2035,12 @@ paths:
           schema:
             type: string
       responses:
-        '204':
-          description: Sucesso
+        '200':
+          description: Lista paginada de contatos do segmento
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactList'
         '400':
           $ref: '#/components/responses/ValidationError'
         '401':
