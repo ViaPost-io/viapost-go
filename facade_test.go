@@ -2,6 +2,7 @@ package viapost
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -102,3 +103,94 @@ func TestResourceFacade_HTTPContracts(t *testing.T) {
 		})
 	}
 }
+
+func TestAutomations_CurrentVersionIDStates(t *testing.T) {
+	const (
+		id        = "018f0000-0000-7000-8000-000000000001"
+		versionID = "018f0000-0000-7000-8000-000000000002"
+		timestamp = "2026-09-11T12:00:00Z"
+	)
+	automation := func(currentVersion string) string {
+		return `{"id":"` + id + `","name":"Welcome","status":"disabled","graph":{},` + currentVersion + `"created_at":"` + timestamp + `","updated_at":"` + timestamp + `"}`
+	}
+
+	tests := []struct {
+		name        string
+		method      string
+		path        string
+		response    string
+		call        func(context.Context, *Client) (*Automation, error)
+		wantVersion *string
+	}{
+		{
+			name:     "list omitted",
+			method:   http.MethodGet,
+			path:     "/v1/automations",
+			response: `{"data":[` + automation("") + `]}`,
+			call: func(ctx context.Context, client *Client) (*Automation, error) {
+				items, err := client.Automations.List(ctx, AutomationListOptions{})
+				if err != nil {
+					return nil, err
+				}
+				if len(items) != 1 {
+					return nil, fmt.Errorf("automation count = %d, want 1", len(items))
+				}
+				return &items[0], nil
+			},
+		},
+		{
+			name:     "get null",
+			method:   http.MethodGet,
+			path:     "/v1/automations/" + id,
+			response: automation(`"current_version_id":null,`),
+			call: func(ctx context.Context, client *Client) (*Automation, error) {
+				return client.Automations.Get(ctx, id)
+			},
+		},
+		{
+			name:        "create UUID",
+			method:      http.MethodPost,
+			path:        "/v1/automations",
+			response:    automation(`"current_version_id":"` + versionID + `",`),
+			wantVersion: stringPointer(versionID),
+			call: func(ctx context.Context, client *Client) (*Automation, error) {
+				return client.Automations.Create(ctx, "Welcome")
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, request *http.Request) {
+				if request.Method != test.method || request.URL.Path != test.path {
+					t.Errorf("request = %s %s, want %s %s", request.Method, request.URL.Path, test.method, test.path)
+				}
+				w.Header().Set("Content-Type", "application/json")
+				if test.method == http.MethodPost {
+					w.Header().Set("Cache-Control", "private, no-store")
+					w.WriteHeader(http.StatusCreated)
+				}
+				_, _ = w.Write([]byte(test.response))
+			}))
+			defer server.Close()
+
+			client, err := NewClient("vp_test_example", WithBaseURL(server.URL))
+			if err != nil {
+				t.Fatalf("NewClient() error = %v", err)
+			}
+			result, err := test.call(context.Background(), client)
+			if err != nil {
+				t.Fatalf("automation call error = %v", err)
+			}
+			if test.wantVersion == nil {
+				if result.CurrentVersionID != nil {
+					t.Fatalf("CurrentVersionID = %q, want nil", *result.CurrentVersionID)
+				}
+			} else if result.CurrentVersionID == nil || *result.CurrentVersionID != *test.wantVersion {
+				t.Fatalf("CurrentVersionID = %v, want %q", result.CurrentVersionID, *test.wantVersion)
+			}
+		})
+	}
+}
+
+func stringPointer(value string) *string { return &value }

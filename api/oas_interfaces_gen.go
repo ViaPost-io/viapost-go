@@ -85,6 +85,10 @@ type GetHealthRes interface {
 	getHealthRes()
 }
 
+type GetInboundMessagesIDRawRes interface {
+	getInboundMessagesIDRawRes()
+}
+
 type GetInboundMessagesIDRes interface {
 	getInboundMessagesIDRes()
 }
@@ -99,6 +103,10 @@ type GetMessagesEngagementRes interface {
 
 type GetMessagesIDEventsRes interface {
 	getMessagesIDEventsRes()
+}
+
+type GetMessagesIDRawRes interface {
+	getMessagesIDRawRes()
 }
 
 type GetMessagesIDRes interface {
@@ -133,6 +141,18 @@ type GetSegmentsRes interface {
 	getSegmentsRes()
 }
 
+type GetSuppressionsExportRes interface {
+	getSuppressionsExportRes()
+}
+
+type GetSuppressionsIDRes interface {
+	getSuppressionsIDRes()
+}
+
+type GetSuppressionsRes interface {
+	getSuppressionsRes()
+}
+
 type GetTemplatesIDRes interface {
 	getTemplatesIDRes()
 }
@@ -155,6 +175,14 @@ type GetThemesRes interface {
 
 type GetUsageRes interface {
 	getUsageRes()
+}
+
+type GetWebhooksIDDeliveriesDeliveryIDRes interface {
+	getWebhooksIDDeliveriesDeliveryIDRes()
+}
+
+type GetWebhooksIDDeliveriesRes interface {
+	getWebhooksIDDeliveriesRes()
 }
 
 type GetWebhooksRes interface {
@@ -187,6 +215,10 @@ type PatchSegmentsIDRes interface {
 
 type PatchTemplatesIDDraftRes interface {
 	patchTemplatesIDDraftRes()
+}
+
+type PatchWebhooksIDRes interface {
+	patchWebhooksIDRes()
 }
 
 type PostAutomationsIDActivateRes interface {
@@ -245,6 +277,30 @@ type PostSendRes interface {
 	postSendRes()
 }
 
+type PostStatusSubscriptionsConfirmRes interface {
+	postStatusSubscriptionsConfirmRes()
+}
+
+type PostStatusSubscriptionsRes interface {
+	postStatusSubscriptionsRes()
+}
+
+type PostStatusSubscriptionsUnsubscribeRes interface {
+	postStatusSubscriptionsUnsubscribeRes()
+}
+
+type PostSuppressionsIDReleaseRes interface {
+	postSuppressionsIDReleaseRes()
+}
+
+type PostSuppressionsImportRes interface {
+	postSuppressionsImportRes()
+}
+
+type PostSuppressionsRes interface {
+	postSuppressionsRes()
+}
+
 type PostTemplatesIDArchiveRes interface {
 	postTemplatesIDArchiveRes()
 }
@@ -275,6 +331,18 @@ type PostTemplatesRes interface {
 
 type PostThemesRes interface {
 	postThemesRes()
+}
+
+type PostWebhooksIDDeliveriesDeliveryIDReplayRes interface {
+	postWebhooksIDDeliveriesDeliveryIDReplayRes()
+}
+
+type PostWebhooksIDSecretRotateRes interface {
+	postWebhooksIDSecretRotateRes()
+}
+
+type PostWebhooksIDTestRes interface {
+	postWebhooksIDTestRes()
 }
 
 type PostWebhooksRes interface {

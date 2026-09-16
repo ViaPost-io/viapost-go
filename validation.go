@@ -34,8 +34,8 @@ var (
 	ErrInvalidMessagePeriod = errors.New("viapost: message period must be 24h, 7d, 14d, or 30d")
 	// ErrInvalidAutomationStatus indicates an unsupported automation list status.
 	ErrInvalidAutomationStatus = errors.New("viapost: automation status must be disabled, enabled, or archived")
-	// ErrInvalidWebhookURL indicates that a webhook URL is not an absolute HTTP(S) URL.
-	ErrInvalidWebhookURL = errors.New("viapost: webhook URL must be an absolute HTTP(S) URL without credentials")
+	// ErrInvalidWebhookURL indicates that a webhook URL does not satisfy the public HTTPS contract.
+	ErrInvalidWebhookURL = errors.New("viapost: webhook URL must be an absolute HTTPS URL without credentials or fragment")
 )
 
 func validateSendRequest(request SendRequest, cfg sendConfig) error {
@@ -66,7 +66,7 @@ func validateSendRequest(request SendRequest, cfg sendConfig) error {
 
 func parseWebhookURL(value string) (*url.URL, error) {
 	parsed, err := url.Parse(value)
-	if err != nil || (parsed.Scheme != "http" && parsed.Scheme != "https") || parsed.Host == "" || parsed.User != nil {
+	if err != nil || parsed.Scheme != "https" || parsed.Hostname() == "" || parsed.User != nil || parsed.Fragment != "" {
 		return nil, ErrInvalidWebhookURL
 	}
 	return parsed, nil

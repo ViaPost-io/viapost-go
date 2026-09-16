@@ -144,7 +144,11 @@ func (s *WebhooksService) Create(ctx context.Context, endpointURL string, eventT
 	if err != nil {
 		return nil, err
 	}
-	response, err := s.client.raw.PostWebhooks(ctx, &api.CreateWebhookRequest{URL: *parsedURL, EventTypes: eventTypes})
+	generatedEventTypes := make([]api.WebhookSubscribableEventType, len(eventTypes))
+	for index, eventType := range eventTypes {
+		generatedEventTypes[index] = api.WebhookSubscribableEventType(eventType)
+	}
+	response, err := s.client.raw.PostWebhooks(ctx, &api.CreateWebhookRequest{URL: *parsedURL, EventTypes: generatedEventTypes})
 	if err != nil {
 		return nil, err
 	}
@@ -198,7 +202,7 @@ func (s *AutomationsService) List(ctx context.Context, options AutomationListOpt
 	if !ok {
 		return nil, unexpectedResponse("GET /v1/automations", response)
 	}
-	return convertGenerated[[]Automation](result.Data)
+	return convertAutomations(result.Data)
 }
 
 func (status AutomationStatus) valid() bool {
@@ -219,7 +223,7 @@ func (s *AutomationsService) Get(ctx context.Context, id string) (*Automation, e
 	if !ok {
 		return nil, unexpectedResponse("GET /v1/automations/{id}", response)
 	}
-	converted, err := convertGenerated[Automation](result)
+	converted, err := convertAutomation(*result)
 	return &converted, err
 }
 
@@ -228,12 +232,34 @@ func (s *AutomationsService) Create(ctx context.Context, name string) (*Automati
 	if err != nil {
 		return nil, err
 	}
-	result, ok := response.(*api.Automation)
+	result, ok := response.(*api.AutomationHeaders)
 	if !ok {
 		return nil, unexpectedResponse("POST /v1/automations", response)
 	}
-	converted, err := convertGenerated[Automation](result)
+	converted, err := convertAutomation(result.Response)
 	return &converted, err
+}
+
+func convertAutomations(source []api.Automation) ([]Automation, error) {
+	result := make([]Automation, len(source))
+	for index, generated := range source {
+		converted, err := convertAutomation(generated)
+		if err != nil {
+			return nil, err
+		}
+		result[index] = converted
+	}
+	return result, nil
+}
+
+func convertAutomation(source api.Automation) (Automation, error) {
+	// The field is optional and nullable in the public contract. ogen's JSON
+	// marshaler rejects an omitted OptNilUUID, so normalize omission to the
+	// equivalent null value before mapping to the stable facade model.
+	if source.CurrentVersionID.IsEmpty() {
+		source.CurrentVersionID.SetToNull()
+	}
+	return convertGenerated[Automation](source)
 }
 
 func (s *AutomationsService) Delete(ctx context.Context, id string) error {

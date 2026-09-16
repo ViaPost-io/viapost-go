@@ -94,6 +94,20 @@ func encodePatchTemplatesIDDraftRequest(
 	return nil
 }
 
+func encodePatchWebhooksIDRequest(
+	req *UpdateWebhookRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodePostAutomationsRequest(
 	req *CreateAutomationRequest,
 	r *http.Request,
@@ -206,6 +220,86 @@ func encodePostSendRequest(
 	return nil
 }
 
+func encodePostStatusSubscriptionsRequest(
+	req *StatusSubscriptionRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodePostStatusSubscriptionsConfirmRequest(
+	req *StatusSubscriptionTokenRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodePostStatusSubscriptionsUnsubscribeRequest(
+	req *StatusSubscriptionTokenRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodePostSuppressionsRequest(
+	req *CreateSuppressionRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodePostSuppressionsIDReleaseRequest(
+	req *ReleaseSuppressionRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodePostSuppressionsImportRequest(
+	req PostSuppressionsImportReq,
+	r *http.Request,
+) error {
+	const contentType = "text/csv"
+	body := req
+	ht.SetBody(r, body, contentType)
+	return nil
+}
+
 func encodePostTemplatesRequest(
 	req *CreateTemplateRequest,
 	r *http.Request,
@@ -304,6 +398,48 @@ func encodePostThemesRequest(
 
 func encodePostWebhooksRequest(
 	req *CreateWebhookRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodePostWebhooksIDDeliveriesDeliveryIDReplayRequest(
+	req *EmptyObjectRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodePostWebhooksIDSecretRotateRequest(
+	req *EmptyObjectRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodePostWebhooksIDTestRequest(
+	req *EmptyObjectRequest,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

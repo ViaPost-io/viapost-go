@@ -114,6 +114,11 @@ type GetInboundMessagesIDParams struct {
 	ID string
 }
 
+// GetInboundMessagesIDRawParams is parameters of getInboundMessagesIdRaw operation.
+type GetInboundMessagesIDRawParams struct {
+	ID string
+}
+
 // GetMessagesParams is parameters of getMessages operation.
 type GetMessagesParams struct {
 	// Cursor RFC 3339 exclusivo; ausente ou inválido usa um instante futuro.
@@ -139,6 +144,11 @@ type GetMessagesIDParams struct {
 
 // GetMessagesIDEventsParams is parameters of getMessagesIdEvents operation.
 type GetMessagesIDEventsParams struct {
+	ID string
+}
+
+// GetMessagesIDRawParams is parameters of getMessagesIdRaw operation.
+type GetMessagesIDRawParams struct {
 	ID string
 }
 
@@ -177,6 +187,35 @@ type GetSegmentsIDContactsParams struct {
 	Search OptString `json:",omitempty,omitzero"`
 }
 
+// GetSuppressionsParams is parameters of getSuppressions operation.
+type GetSuppressionsParams struct {
+	// Cursor opaco retornado em `next_cursor`.
+	Cursor OptString `json:",omitempty,omitzero"`
+	Limit  OptInt    `json:",omitempty,omitzero"`
+	// Busca parcial sem diferenciação de maiúsculas no endereço.
+	Search OptString               `json:",omitempty,omitzero"`
+	Reason OptSuppressionReason    `json:",omitempty,omitzero"`
+	State  OptGetSuppressionsState `json:",omitempty,omitzero"`
+	Origin OptSuppressionOrigin    `json:",omitempty,omitzero"`
+}
+
+// GetSuppressionsExportParams is parameters of getSuppressionsExport operation.
+type GetSuppressionsExportParams struct {
+	Search OptString                     `json:",omitempty,omitzero"`
+	Reason OptSuppressionReason          `json:",omitempty,omitzero"`
+	State  OptGetSuppressionsExportState `json:",omitempty,omitzero"`
+	Origin OptSuppressionOrigin          `json:",omitempty,omitzero"`
+}
+
+// GetSuppressionsIDParams is parameters of getSuppressionsId operation.
+type GetSuppressionsIDParams struct {
+	ID string
+	// Cursor opaco para carregar eventos de auditoria anteriores.
+	HistoryCursor OptString `json:",omitempty,omitzero"`
+	// Quantidade de eventos de auditoria por página.
+	HistoryLimit OptInt `json:",omitempty,omitzero"`
+}
+
 // GetTemplatesParams is parameters of getTemplates operation.
 type GetTemplatesParams struct {
 	// Cursor RFC 3339 exclusivo; ausente ou inválido usa um instante futuro.
@@ -200,6 +239,22 @@ type GetTemplatesIDVersionsParams struct {
 type GetTemplatesIDVersionsVersionIDParams struct {
 	ID        string
 	VersionID string
+}
+
+// GetWebhooksIDDeliveriesParams is parameters of getWebhooksIdDeliveries operation.
+type GetWebhooksIDDeliveriesParams struct {
+	ID string
+	// Cursor opaco retornado em `next_cursor`.
+	Cursor    OptString                   `json:",omitempty,omitzero"`
+	Limit     OptInt                      `json:",omitempty,omitzero"`
+	Status    OptWebhookDeliveryStatus    `json:",omitempty,omitzero"`
+	EventType OptWebhookDeliveryEventType `json:",omitempty,omitzero"`
+}
+
+// GetWebhooksIDDeliveriesDeliveryIDParams is parameters of getWebhooksIdDeliveriesDeliveryId operation.
+type GetWebhooksIDDeliveriesDeliveryIDParams struct {
+	ID         string
+	DeliveryID string
 }
 
 // PatchAutomationsIDParams is parameters of patchAutomationsId operation.
@@ -229,6 +284,11 @@ type PatchSegmentsIDParams struct {
 
 // PatchTemplatesIDDraftParams is parameters of patchTemplatesIdDraft operation.
 type PatchTemplatesIDDraftParams struct {
+	ID string
+}
+
+// PatchWebhooksIDParams is parameters of patchWebhooksId operation.
+type PatchWebhooksIDParams struct {
 	ID string
 }
 
@@ -273,6 +333,11 @@ type PostSendParams struct {
 	IdempotencyKey OptString `json:",omitempty,omitzero"`
 }
 
+// PostSuppressionsIDReleaseParams is parameters of postSuppressionsIdRelease operation.
+type PostSuppressionsIDReleaseParams struct {
+	ID string
+}
+
 // PostTemplatesIDArchiveParams is parameters of postTemplatesIdArchive operation.
 type PostTemplatesIDArchiveParams struct {
 	ID string
@@ -302,4 +367,29 @@ type PostTemplatesIDPublishParams struct {
 type PostTemplatesIDVersionsVersionIDRevertParams struct {
 	ID        string
 	VersionID string
+}
+
+// PostWebhooksIDDeliveriesDeliveryIDReplayParams is parameters of postWebhooksIdDeliveriesDeliveryIdReplay operation.
+type PostWebhooksIDDeliveriesDeliveryIDReplayParams struct {
+	ID         string
+	DeliveryID string
+	// Identifica uma operação de escrita. Deve ser reutilizada apenas ao repetir exatamente a mesma
+	// solicitação; uso conflitante retorna `409`.
+	IdempotencyKey string
+}
+
+// PostWebhooksIDSecretRotateParams is parameters of postWebhooksIdSecretRotate operation.
+type PostWebhooksIDSecretRotateParams struct {
+	ID string
+	// Identifica uma operação de escrita. Deve ser reutilizada apenas ao repetir exatamente a mesma
+	// solicitação; uso conflitante retorna `409`.
+	IdempotencyKey string
+}
+
+// PostWebhooksIDTestParams is parameters of postWebhooksIdTest operation.
+type PostWebhooksIDTestParams struct {
+	ID string
+	// Identifica uma operação de escrita. Deve ser reutilizada apenas ao repetir exatamente a mesma
+	// solicitação; uso conflitante retorna `409`.
+	IdempotencyKey string
 }
