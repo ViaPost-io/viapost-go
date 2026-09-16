@@ -10,13 +10,24 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    outputs:
+      source_sha: ${{ steps.source.outputs.sha }}
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ github.sha }}
           fetch-depth: 0
           persist-credentials: false
+      - name: Freeze the event source commit
+        id: source
+        env:
+          EVENT_SHA: ${{ github.sha }}
+        run: |
+          SOURCE_SHA=$(git rev-parse HEAD)
+          test "$SOURCE_SHA" = "$EVENT_SHA"
+          echo "sha=$SOURCE_SHA" >> "$GITHUB_OUTPUT"
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: '1.26.6'
@@ -44,4 +55,13 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ github.ref_name }}
           RELEASE_REPOSITORY: ${{ github.repository }}
-        run: gh release create "$RELEASE_TAG" --repo "$RELEASE_REPOSITORY" --verify-tag --generate-notes
+          SOURCE_SHA: ${{ needs.verify.outputs.source_sha }}
+        run: |
+          REMOTE_TAG_SHA=$(gh api "repos/${RELEASE_REPOSITORY}/commits/${RELEASE_TAG}" --jq .sha)
+          test "$REMOTE_TAG_SHA" = "$SOURCE_SHA"
+          if gh release view "$RELEASE_TAG" --repo "$RELEASE_REPOSITORY" --json isDraft --jq .isDraft >/tmp/release-draft 2>/dev/null; then
+            test "$(cat /tmp/release-draft)" = false
+          else
+            gh release create "$RELEASE_TAG" --repo "$RELEASE_REPOSITORY" --verify-tag --target "$SOURCE_SHA" --generate-notes
+          fi
+          test "$(gh api "repos/${RELEASE_REPOSITORY}/commits/${RELEASE_TAG}" --jq .sha)" = "$SOURCE_SHA"

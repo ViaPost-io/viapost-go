@@ -2,6 +2,7 @@ package viapost
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -156,8 +157,17 @@ func (s *WebhooksService) Create(ctx context.Context, endpointURL string, eventT
 	if !ok {
 		return nil, unexpectedResponse("POST /v1/webhooks", response)
 	}
-	converted, err := convertGenerated[CreateWebhookResult](result)
-	return &converted, err
+	encoded, err := result.MarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	var payload struct {
+		Endpoint WebhookEndpoint `json:"endpoint"`
+	}
+	if err := json.Unmarshal(encoded, &payload); err != nil {
+		return nil, fmt.Errorf("viapost: decode webhook endpoint: %w", err)
+	}
+	return &CreateWebhookResult{Endpoint: payload.Endpoint, secret: result.Secret}, nil
 }
 
 func (s *WebhooksService) Delete(ctx context.Context, id string) error {

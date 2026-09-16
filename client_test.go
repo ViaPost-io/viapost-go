@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -766,6 +767,71 @@ func TestClient_RejectsOversizedSuccessResponse(t *testing.T) {
 	}
 }
 
+func TestClient_AllowsRawMessageLargerThanJSONLimit(t *testing.T) {
+	const messageID = "018f0000-0000-7000-8000-000000000001"
+	body := make([]byte, maxSuccessResponseBytes+1)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if got, want := r.URL.Path, "/v1/messages/"+messageID+"/raw"; got != want {
+			t.Errorf("path = %q, want %q", got, want)
+		}
+		w.Header().Set("Content-Type", "message/rfc822")
+		_, _ = w.Write(body)
+	}))
+	defer server.Close()
+
+	client, err := NewClient("vp_test_example", WithBaseURL(server.URL))
+	if err != nil {
+		t.Fatalf("NewClient() error = %v", err)
+	}
+	response, err := client.Raw().GetMessagesIDRaw(context.Background(), api.GetMessagesIDRawParams{ID: messageID})
+	if err != nil {
+		t.Fatalf("GetMessagesIDRaw() error = %v", err)
+	}
+	raw, ok := response.(*api.GetMessagesIDRawOKHeaders)
+	if !ok {
+		t.Fatalf("GetMessagesIDRaw() response = %T, want *api.GetMessagesIDRawOKHeaders", response)
+	}
+	decoded, err := io.ReadAll(raw.Response)
+	if err != nil {
+		t.Fatalf("read raw response: %v", err)
+	}
+	if got, want := len(decoded), len(body); got != want {
+		t.Fatalf("raw response length = %d, want %d", got, want)
+	}
+}
+
+func TestClient_RejectsRawMessageAboveConfiguredLimit(t *testing.T) {
+	const (
+		messageID = "018f0000-0000-7000-8000-000000000001"
+		limit     = 1 << 20
+	)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "message/rfc822")
+		_, _ = w.Write(make([]byte, limit+1))
+	}))
+	defer server.Close()
+
+	client, err := NewClient(
+		"vp_test_example",
+		WithBaseURL(server.URL),
+		WithMaxRawResponseBytes(limit),
+	)
+	if err != nil {
+		t.Fatalf("NewClient() error = %v", err)
+	}
+	_, err = client.Raw().GetMessagesIDRaw(context.Background(), api.GetMessagesIDRawParams{ID: messageID})
+	if !errors.Is(err, ErrResponseBodyTooLarge) {
+		t.Fatalf("GetMessagesIDRaw() error = %v, want ErrResponseBodyTooLarge", err)
+	}
+}
+
+func TestClient_RejectsInvalidRawResponseLimit(t *testing.T) {
+	_, err := NewClient("vp_test_example", WithMaxRawResponseBytes(0))
+	if !errors.Is(err, ErrInvalidResponseBodyLimit) {
+		t.Fatalf("NewClient() error = %v, want ErrInvalidResponseBodyLimit", err)
+	}
+}
+
 func TestClient_TruncatesOversizedAPIErrorBody(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("X-Request-ID", "req-large-error")
@@ -786,10 +852,42 @@ func TestClient_TruncatesOversizedAPIErrorBody(t *testing.T) {
 	if !apiError.Truncated {
 		t.Fatal("APIError.Truncated = false, want true")
 	}
-	if got, want := len(apiError.Body), maxErrorBodyBytes; got != want {
-		t.Fatalf("APIError body length = %d, want %d", got, want)
+	if got, want := string(apiError.Body), `{"error":{"message":"response body truncated by SDK safety limit"}}`; got != want {
+		t.Fatalf("APIError body = %q, want fail-closed body %q", got, want)
 	}
 	if apiError.RequestID != "req-large-error" {
 		t.Fatalf("APIError.RequestID = %q, want req-large-error", apiError.RequestID)
+	}
+}
+
+func TestClient_RedactsAPIKeyFromErrorResponse(t *testing.T) {
+	const apiKey = "vp_test_super_secret_value"
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("X-Request-ID", "request-"+apiKey)
+		w.Header().Set("X-Debug", "Bearer "+apiKey)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		_, _ = w.Write([]byte(`{"error":{"code":"invalid_key","message":"received ` + apiKey + `"}}`))
+	}))
+	defer server.Close()
+
+	client, err := NewClient(apiKey, WithBaseURL(server.URL))
+	if err != nil {
+		t.Fatalf("NewClient() error = %v", err)
+	}
+	_, err = client.Usage.Get(context.Background())
+	var apiError *APIError
+	if !errors.As(err, &apiError) {
+		t.Fatalf("Usage.Get() error = %T %v, want *APIError", err, err)
+	}
+	for label, value := range map[string]string{
+		"Error()":   apiError.Error(),
+		"Body":      string(apiError.Body),
+		"RequestID": apiError.RequestID,
+		"Header":    fmt.Sprint(apiError.Header),
+	} {
+		if strings.Contains(value, apiKey) {
+			t.Fatalf("%s contains API key: %q", label, value)
+		}
 	}
 }

@@ -7,9 +7,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"reflect"
+	"strings"
 	"time"
 
 	"github.com/ghodss/yaml"
@@ -45,7 +48,10 @@ func main() {
 }
 
 func downloadContract(rawURL string) ([]byte, error) {
-	client := &http.Client{Timeout: 30 * time.Second}
+	client, err := newContractHTTPClient(rawURL)
+	if err != nil {
+		return nil, err
+	}
 	response, err := client.Get(rawURL)
 	if err != nil {
 		return nil, fmt.Errorf("download canonical contract: %w", err)
@@ -62,6 +68,41 @@ func downloadContract(rawURL string) ([]byte, error) {
 		return nil, fmt.Errorf("canonical contract exceeds %d bytes", maxContractBytes)
 	}
 	return body, nil
+}
+
+func newContractHTTPClient(rawURL string) (*http.Client, error) {
+	origin, err := url.Parse(rawURL)
+	if err != nil || !strings.EqualFold(origin.Scheme, "https") || origin.Hostname() == "" || origin.User != nil || origin.Fragment != "" {
+		return nil, fmt.Errorf("canonical contract URL must be an absolute HTTPS URL without credentials or fragment")
+	}
+	return &http.Client{
+		Timeout:       30 * time.Second,
+		CheckRedirect: contractRedirectPolicy(origin),
+	}, nil
+}
+
+func contractRedirectPolicy(origin *url.URL) func(*http.Request, []*http.Request) error {
+	wantOrigin := contractOrigin(origin)
+	return func(request *http.Request, via []*http.Request) error {
+		if len(via) > 3 {
+			return fmt.Errorf("canonical contract redirect limit exceeded")
+		}
+		if request == nil || request.URL == nil || request.URL.User != nil || contractOrigin(request.URL) != wantOrigin {
+			return fmt.Errorf("canonical contract redirect changed origin")
+		}
+		return nil
+	}
+}
+
+func contractOrigin(target *url.URL) string {
+	if target == nil || !strings.EqualFold(target.Scheme, "https") || target.Hostname() == "" {
+		return ""
+	}
+	port := target.Port()
+	if port == "" {
+		port = "443"
+	}
+	return "https://" + net.JoinHostPort(strings.ToLower(target.Hostname()), port)
 }
 
 func semanticallyEqualYAML(first, second []byte) (bool, error) {

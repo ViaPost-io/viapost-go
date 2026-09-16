@@ -3638,7 +3638,8 @@ func (s *CreateWebhookResponse) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *CreateWebhookResponse) MarshalJSON() ([]byte, error) {
+func (s CreateWebhookResponse) MarshalJSON() ([]byte, error) {
+	s.Secret = "[REDACTED]"
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
@@ -31305,7 +31306,10 @@ func (s *RotateWebhookSecretResponse) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *RotateWebhookSecretResponse) MarshalJSON() ([]byte, error) {
+func (s RotateWebhookSecretResponse) MarshalJSON() ([]byte, error) {
+	if s.Secret.Set {
+		s.Secret.Value = "[REDACTED]"
+	}
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil

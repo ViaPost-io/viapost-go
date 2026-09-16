@@ -3,6 +3,7 @@ package viapost
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"time"
 )
 
@@ -178,7 +179,27 @@ type WebhookEndpoint struct {
 // CreateWebhookResult contains the endpoint and its one-time signing secret.
 type CreateWebhookResult struct {
 	Endpoint WebhookEndpoint `json:"endpoint"`
-	Secret   string          `json:"secret"`
+	secret   string
+}
+
+// Secret returns the one-time signing secret. Callers should consume it once
+// and avoid including it in logs or serialized application state.
+func (r CreateWebhookResult) Secret() string { return r.secret }
+
+func (r CreateWebhookResult) String() string   { return "CreateWebhookResult{Secret:[REDACTED]}" }
+func (r CreateWebhookResult) GoString() string { return r.String() }
+func (r CreateWebhookResult) LogValue() slog.Value {
+	return slog.GroupValue(
+		slog.Any("endpoint", r.Endpoint),
+		slog.String("secret", "[REDACTED]"),
+	)
+}
+
+func (r CreateWebhookResult) MarshalJSON() ([]byte, error) {
+	return json.Marshal(struct {
+		Endpoint WebhookEndpoint `json:"endpoint"`
+		Secret   string          `json:"secret"`
+	}{Endpoint: r.Endpoint, Secret: "[REDACTED]"})
 }
 
 // Automation represents an automation definition. Graph remains opaque so
