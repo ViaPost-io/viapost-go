@@ -1,4 +1,4 @@
-.PHONY: generate check-generated check-auth-surface test vet vuln verify
+.PHONY: generate check-generated check-auth-surface api-diff test-version-policy test vet vuln verify
 
 generate:
 	go generate ./internal/generate
@@ -12,6 +12,12 @@ check-auth-surface:
 		exit 1; \
 	fi
 
+api-diff:
+	./scripts/check-api-version.sh
+
+test-version-policy:
+	./scripts/test-api-version-policy.sh
+
 test:
 	go test ./... -race -count=1
 
@@ -21,4 +27,4 @@ vet:
 vuln:
 	go tool govulncheck ./...
 
-verify: check-generated check-auth-surface test vet vuln
+verify: check-generated check-auth-surface test-version-policy test vet vuln

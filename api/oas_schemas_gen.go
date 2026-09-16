@@ -3,6 +3,7 @@
 package api
 
 import (
+	"io"
 	"net/url"
 	"time"
 
@@ -161,7 +162,6 @@ func (*Automation) patchAutomationsIDRes()         {}
 func (*Automation) postAutomationsIDActivateRes()  {}
 func (*Automation) postAutomationsIDDisableRes()   {}
 func (*Automation) postAutomationsIDDuplicateRes() {}
-func (*Automation) postAutomationsRes()            {}
 
 type AutomationGraph map[string]jx.Raw
 
@@ -173,6 +173,34 @@ func (s *AutomationGraph) init() AutomationGraph {
 	}
 	return m
 }
+
+// AutomationHeaders wraps Automation with response headers.
+type AutomationHeaders struct {
+	CacheControl OptString
+	Response     Automation
+}
+
+// GetCacheControl returns the value of CacheControl.
+func (s *AutomationHeaders) GetCacheControl() OptString {
+	return s.CacheControl
+}
+
+// GetResponse returns the value of Response.
+func (s *AutomationHeaders) GetResponse() Automation {
+	return s.Response
+}
+
+// SetCacheControl sets the value of CacheControl.
+func (s *AutomationHeaders) SetCacheControl(val OptString) {
+	s.CacheControl = val
+}
+
+// SetResponse sets the value of Response.
+func (s *AutomationHeaders) SetResponse(val Automation) {
+	s.Response = val
+}
+
+func (*AutomationHeaders) postAutomationsRes() {}
 
 // Ref: #/components/schemas/AutomationList
 type AutomationList struct {
@@ -984,6 +1012,95 @@ func (s *CreateSegmentRequest) SetDescription(val OptString) {
 	s.Description = val
 }
 
+// Ref: #/components/schemas/CreateSuppressionRequest
+type CreateSuppressionRequest struct {
+	Email     string                         `json:"email"`
+	Reason    CreateSuppressionRequestReason `json:"reason"`
+	ExpiresAt OptNilTimestamp                `json:"expires_at"`
+	Note      OptNilString                   `json:"note"`
+}
+
+// GetEmail returns the value of Email.
+func (s *CreateSuppressionRequest) GetEmail() string {
+	return s.Email
+}
+
+// GetReason returns the value of Reason.
+func (s *CreateSuppressionRequest) GetReason() CreateSuppressionRequestReason {
+	return s.Reason
+}
+
+// GetExpiresAt returns the value of ExpiresAt.
+func (s *CreateSuppressionRequest) GetExpiresAt() OptNilTimestamp {
+	return s.ExpiresAt
+}
+
+// GetNote returns the value of Note.
+func (s *CreateSuppressionRequest) GetNote() OptNilString {
+	return s.Note
+}
+
+// SetEmail sets the value of Email.
+func (s *CreateSuppressionRequest) SetEmail(val string) {
+	s.Email = val
+}
+
+// SetReason sets the value of Reason.
+func (s *CreateSuppressionRequest) SetReason(val CreateSuppressionRequestReason) {
+	s.Reason = val
+}
+
+// SetExpiresAt sets the value of ExpiresAt.
+func (s *CreateSuppressionRequest) SetExpiresAt(val OptNilTimestamp) {
+	s.ExpiresAt = val
+}
+
+// SetNote sets the value of Note.
+func (s *CreateSuppressionRequest) SetNote(val OptNilString) {
+	s.Note = val
+}
+
+type CreateSuppressionRequestReason string
+
+const (
+	CreateSuppressionRequestReasonManual         CreateSuppressionRequestReason = "manual"
+	CreateSuppressionRequestReasonInvalidAddress CreateSuppressionRequestReason = "invalid_address"
+)
+
+// AllValues returns all CreateSuppressionRequestReason values.
+func (CreateSuppressionRequestReason) AllValues() []CreateSuppressionRequestReason {
+	return []CreateSuppressionRequestReason{
+		CreateSuppressionRequestReasonManual,
+		CreateSuppressionRequestReasonInvalidAddress,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s CreateSuppressionRequestReason) MarshalText() ([]byte, error) {
+	switch s {
+	case CreateSuppressionRequestReasonManual:
+		return []byte(s), nil
+	case CreateSuppressionRequestReasonInvalidAddress:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *CreateSuppressionRequestReason) UnmarshalText(data []byte) error {
+	switch CreateSuppressionRequestReason(data) {
+	case CreateSuppressionRequestReasonManual:
+		*s = CreateSuppressionRequestReasonManual
+		return nil
+	case CreateSuppressionRequestReasonInvalidAddress:
+		*s = CreateSuppressionRequestReasonInvalidAddress
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Ref: #/components/schemas/CreateTemplateAssetRequest
 type CreateTemplateAssetRequest struct {
 	Filename    string `json:"filename"`
@@ -1093,8 +1210,8 @@ func (s *CreateThemeRequestStyle) init() CreateThemeRequestStyle {
 
 // Ref: #/components/schemas/CreateWebhookRequest
 type CreateWebhookRequest struct {
-	URL        url.URL  `json:"url"`
-	EventTypes []string `json:"event_types"`
+	URL        url.URL                        `json:"url"`
+	EventTypes []WebhookSubscribableEventType `json:"event_types"`
 }
 
 // GetURL returns the value of URL.
@@ -1103,7 +1220,7 @@ func (s *CreateWebhookRequest) GetURL() url.URL {
 }
 
 // GetEventTypes returns the value of EventTypes.
-func (s *CreateWebhookRequest) GetEventTypes() []string {
+func (s *CreateWebhookRequest) GetEventTypes() []WebhookSubscribableEventType {
 	return s.EventTypes
 }
 
@@ -1113,14 +1230,15 @@ func (s *CreateWebhookRequest) SetURL(val url.URL) {
 }
 
 // SetEventTypes sets the value of EventTypes.
-func (s *CreateWebhookRequest) SetEventTypes(val []string) {
+func (s *CreateWebhookRequest) SetEventTypes(val []WebhookSubscribableEventType) {
 	s.EventTypes = val
 }
 
 // Ref: #/components/schemas/CreateWebhookResponse
 type CreateWebhookResponse struct {
 	Endpoint WebhookEndpoint `json:"endpoint"`
-	Secret   string          `json:"secret"`
+	// Secret retornado uma única vez; não é recuperável por operações de leitura.
+	Secret string `json:"secret"`
 }
 
 // GetEndpoint returns the value of Endpoint.
@@ -1283,6 +1401,176 @@ func (s *CustomEventSchema) init() CustomEventSchema {
 		*s = m
 	}
 	return m
+}
+
+// Ref: #/components/schemas/DKIMAuthenticationResult
+type DKIMAuthenticationResult string
+
+const (
+	DKIMAuthenticationResultPass         DKIMAuthenticationResult = "pass"
+	DKIMAuthenticationResultFail         DKIMAuthenticationResult = "fail"
+	DKIMAuthenticationResultPolicy       DKIMAuthenticationResult = "policy"
+	DKIMAuthenticationResultNeutral      DKIMAuthenticationResult = "neutral"
+	DKIMAuthenticationResultNone         DKIMAuthenticationResult = "none"
+	DKIMAuthenticationResultTemperror    DKIMAuthenticationResult = "temperror"
+	DKIMAuthenticationResultPermerror    DKIMAuthenticationResult = "permerror"
+	DKIMAuthenticationResultNotEvaluated DKIMAuthenticationResult = "not_evaluated"
+)
+
+// AllValues returns all DKIMAuthenticationResult values.
+func (DKIMAuthenticationResult) AllValues() []DKIMAuthenticationResult {
+	return []DKIMAuthenticationResult{
+		DKIMAuthenticationResultPass,
+		DKIMAuthenticationResultFail,
+		DKIMAuthenticationResultPolicy,
+		DKIMAuthenticationResultNeutral,
+		DKIMAuthenticationResultNone,
+		DKIMAuthenticationResultTemperror,
+		DKIMAuthenticationResultPermerror,
+		DKIMAuthenticationResultNotEvaluated,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s DKIMAuthenticationResult) MarshalText() ([]byte, error) {
+	switch s {
+	case DKIMAuthenticationResultPass:
+		return []byte(s), nil
+	case DKIMAuthenticationResultFail:
+		return []byte(s), nil
+	case DKIMAuthenticationResultPolicy:
+		return []byte(s), nil
+	case DKIMAuthenticationResultNeutral:
+		return []byte(s), nil
+	case DKIMAuthenticationResultNone:
+		return []byte(s), nil
+	case DKIMAuthenticationResultTemperror:
+		return []byte(s), nil
+	case DKIMAuthenticationResultPermerror:
+		return []byte(s), nil
+	case DKIMAuthenticationResultNotEvaluated:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *DKIMAuthenticationResult) UnmarshalText(data []byte) error {
+	switch DKIMAuthenticationResult(data) {
+	case DKIMAuthenticationResultPass:
+		*s = DKIMAuthenticationResultPass
+		return nil
+	case DKIMAuthenticationResultFail:
+		*s = DKIMAuthenticationResultFail
+		return nil
+	case DKIMAuthenticationResultPolicy:
+		*s = DKIMAuthenticationResultPolicy
+		return nil
+	case DKIMAuthenticationResultNeutral:
+		*s = DKIMAuthenticationResultNeutral
+		return nil
+	case DKIMAuthenticationResultNone:
+		*s = DKIMAuthenticationResultNone
+		return nil
+	case DKIMAuthenticationResultTemperror:
+		*s = DKIMAuthenticationResultTemperror
+		return nil
+	case DKIMAuthenticationResultPermerror:
+		*s = DKIMAuthenticationResultPermerror
+		return nil
+	case DKIMAuthenticationResultNotEvaluated:
+		*s = DKIMAuthenticationResultNotEvaluated
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Os valores quarantine e reject são mantidos para compatibilidade de clientes antigos; novas
+// avaliações retornam pass/fail e informam a política em dmarc_disposition.
+// Ref: #/components/schemas/DMARCAuthenticationResult
+type DMARCAuthenticationResult string
+
+const (
+	DMARCAuthenticationResultPass         DMARCAuthenticationResult = "pass"
+	DMARCAuthenticationResultFail         DMARCAuthenticationResult = "fail"
+	DMARCAuthenticationResultQuarantine   DMARCAuthenticationResult = "quarantine"
+	DMARCAuthenticationResultReject       DMARCAuthenticationResult = "reject"
+	DMARCAuthenticationResultNone         DMARCAuthenticationResult = "none"
+	DMARCAuthenticationResultTemperror    DMARCAuthenticationResult = "temperror"
+	DMARCAuthenticationResultPermerror    DMARCAuthenticationResult = "permerror"
+	DMARCAuthenticationResultNotEvaluated DMARCAuthenticationResult = "not_evaluated"
+)
+
+// AllValues returns all DMARCAuthenticationResult values.
+func (DMARCAuthenticationResult) AllValues() []DMARCAuthenticationResult {
+	return []DMARCAuthenticationResult{
+		DMARCAuthenticationResultPass,
+		DMARCAuthenticationResultFail,
+		DMARCAuthenticationResultQuarantine,
+		DMARCAuthenticationResultReject,
+		DMARCAuthenticationResultNone,
+		DMARCAuthenticationResultTemperror,
+		DMARCAuthenticationResultPermerror,
+		DMARCAuthenticationResultNotEvaluated,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s DMARCAuthenticationResult) MarshalText() ([]byte, error) {
+	switch s {
+	case DMARCAuthenticationResultPass:
+		return []byte(s), nil
+	case DMARCAuthenticationResultFail:
+		return []byte(s), nil
+	case DMARCAuthenticationResultQuarantine:
+		return []byte(s), nil
+	case DMARCAuthenticationResultReject:
+		return []byte(s), nil
+	case DMARCAuthenticationResultNone:
+		return []byte(s), nil
+	case DMARCAuthenticationResultTemperror:
+		return []byte(s), nil
+	case DMARCAuthenticationResultPermerror:
+		return []byte(s), nil
+	case DMARCAuthenticationResultNotEvaluated:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *DMARCAuthenticationResult) UnmarshalText(data []byte) error {
+	switch DMARCAuthenticationResult(data) {
+	case DMARCAuthenticationResultPass:
+		*s = DMARCAuthenticationResultPass
+		return nil
+	case DMARCAuthenticationResultFail:
+		*s = DMARCAuthenticationResultFail
+		return nil
+	case DMARCAuthenticationResultQuarantine:
+		*s = DMARCAuthenticationResultQuarantine
+		return nil
+	case DMARCAuthenticationResultReject:
+		*s = DMARCAuthenticationResultReject
+		return nil
+	case DMARCAuthenticationResultNone:
+		*s = DMARCAuthenticationResultNone
+		return nil
+	case DMARCAuthenticationResultTemperror:
+		*s = DMARCAuthenticationResultTemperror
+		return nil
+	case DMARCAuthenticationResultPermerror:
+		*s = DMARCAuthenticationResultPermerror
+		return nil
+	case DMARCAuthenticationResultNotEvaluated:
+		*s = DMARCAuthenticationResultNotEvaluated
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // Ref: #/components/schemas/DNSRecord
@@ -2156,6 +2444,9 @@ func (s *EmailTemplateVersionStatus) UnmarshalText(data []byte) error {
 	}
 }
 
+// Ref: #/components/schemas/EmptyObjectRequest
+type EmptyObjectRequest struct{}
+
 // Ref: #/components/schemas/EngagementResponse
 type EngagementResponse struct {
 	Since     Timestamp `json:"since"`
@@ -2681,6 +2972,98 @@ type GetInboundMessagesIDNotFound Error
 
 func (*GetInboundMessagesIDNotFound) getInboundMessagesIDRes() {}
 
+type GetInboundMessagesIDRawBadRequest Error
+
+func (*GetInboundMessagesIDRawBadRequest) getInboundMessagesIDRawRes() {}
+
+type GetInboundMessagesIDRawConflict Error
+
+func (*GetInboundMessagesIDRawConflict) getInboundMessagesIDRawRes() {}
+
+type GetInboundMessagesIDRawForbidden Error
+
+func (*GetInboundMessagesIDRawForbidden) getInboundMessagesIDRawRes() {}
+
+type GetInboundMessagesIDRawInternalServerError Error
+
+func (*GetInboundMessagesIDRawInternalServerError) getInboundMessagesIDRawRes() {}
+
+type GetInboundMessagesIDRawNotFound Error
+
+func (*GetInboundMessagesIDRawNotFound) getInboundMessagesIDRawRes() {}
+
+type GetInboundMessagesIDRawOK struct {
+	Data io.Reader
+}
+
+// Read reads data from the Data reader.
+//
+// Kept to satisfy the io.Reader interface.
+func (s GetInboundMessagesIDRawOK) Read(p []byte) (n int, err error) {
+	if s.Data == nil {
+		return 0, io.EOF
+	}
+	return s.Data.Read(p)
+}
+
+// GetInboundMessagesIDRawOKHeaders wraps GetInboundMessagesIDRawOK with response headers.
+type GetInboundMessagesIDRawOKHeaders struct {
+	CacheControl        OptString
+	ContentDisposition  OptString
+	XContentTypeOptions OptString
+	Response            GetInboundMessagesIDRawOK
+}
+
+// GetCacheControl returns the value of CacheControl.
+func (s *GetInboundMessagesIDRawOKHeaders) GetCacheControl() OptString {
+	return s.CacheControl
+}
+
+// GetContentDisposition returns the value of ContentDisposition.
+func (s *GetInboundMessagesIDRawOKHeaders) GetContentDisposition() OptString {
+	return s.ContentDisposition
+}
+
+// GetXContentTypeOptions returns the value of XContentTypeOptions.
+func (s *GetInboundMessagesIDRawOKHeaders) GetXContentTypeOptions() OptString {
+	return s.XContentTypeOptions
+}
+
+// GetResponse returns the value of Response.
+func (s *GetInboundMessagesIDRawOKHeaders) GetResponse() GetInboundMessagesIDRawOK {
+	return s.Response
+}
+
+// SetCacheControl sets the value of CacheControl.
+func (s *GetInboundMessagesIDRawOKHeaders) SetCacheControl(val OptString) {
+	s.CacheControl = val
+}
+
+// SetContentDisposition sets the value of ContentDisposition.
+func (s *GetInboundMessagesIDRawOKHeaders) SetContentDisposition(val OptString) {
+	s.ContentDisposition = val
+}
+
+// SetXContentTypeOptions sets the value of XContentTypeOptions.
+func (s *GetInboundMessagesIDRawOKHeaders) SetXContentTypeOptions(val OptString) {
+	s.XContentTypeOptions = val
+}
+
+// SetResponse sets the value of Response.
+func (s *GetInboundMessagesIDRawOKHeaders) SetResponse(val GetInboundMessagesIDRawOK) {
+	s.Response = val
+}
+
+func (*GetInboundMessagesIDRawOKHeaders) getInboundMessagesIDRawRes() {}
+
+type GetInboundMessagesIDRawServiceUnavailable Error
+
+func (*GetInboundMessagesIDRawServiceUnavailable) getInboundMessagesIDRawRes() {}
+
+type GetInboundMessagesIDRawUnauthorized Error
+
+func (*GetInboundMessagesIDRawUnauthorized) getInboundMessagesIDRawRes() {}
+
 type GetInboundMessagesIDUnauthorized Error
 
 func (*GetInboundMessagesIDUnauthorized) getInboundMessagesIDRes() {}
@@ -2817,6 +3200,98 @@ func (*GetMessagesIDInternalServerError) getMessagesIDRes() {}
 type GetMessagesIDNotFound Error
 
 func (*GetMessagesIDNotFound) getMessagesIDRes() {}
+
+type GetMessagesIDRawBadRequest Error
+
+func (*GetMessagesIDRawBadRequest) getMessagesIDRawRes() {}
+
+type GetMessagesIDRawConflict Error
+
+func (*GetMessagesIDRawConflict) getMessagesIDRawRes() {}
+
+type GetMessagesIDRawForbidden Error
+
+func (*GetMessagesIDRawForbidden) getMessagesIDRawRes() {}
+
+type GetMessagesIDRawInternalServerError Error
+
+func (*GetMessagesIDRawInternalServerError) getMessagesIDRawRes() {}
+
+type GetMessagesIDRawNotFound Error
+
+func (*GetMessagesIDRawNotFound) getMessagesIDRawRes() {}
+
+type GetMessagesIDRawOK struct {
+	Data io.Reader
+}
+
+// Read reads data from the Data reader.
+//
+// Kept to satisfy the io.Reader interface.
+func (s GetMessagesIDRawOK) Read(p []byte) (n int, err error) {
+	if s.Data == nil {
+		return 0, io.EOF
+	}
+	return s.Data.Read(p)
+}
+
+// GetMessagesIDRawOKHeaders wraps GetMessagesIDRawOK with response headers.
+type GetMessagesIDRawOKHeaders struct {
+	CacheControl        OptString
+	ContentDisposition  OptString
+	XContentTypeOptions OptString
+	Response            GetMessagesIDRawOK
+}
+
+// GetCacheControl returns the value of CacheControl.
+func (s *GetMessagesIDRawOKHeaders) GetCacheControl() OptString {
+	return s.CacheControl
+}
+
+// GetContentDisposition returns the value of ContentDisposition.
+func (s *GetMessagesIDRawOKHeaders) GetContentDisposition() OptString {
+	return s.ContentDisposition
+}
+
+// GetXContentTypeOptions returns the value of XContentTypeOptions.
+func (s *GetMessagesIDRawOKHeaders) GetXContentTypeOptions() OptString {
+	return s.XContentTypeOptions
+}
+
+// GetResponse returns the value of Response.
+func (s *GetMessagesIDRawOKHeaders) GetResponse() GetMessagesIDRawOK {
+	return s.Response
+}
+
+// SetCacheControl sets the value of CacheControl.
+func (s *GetMessagesIDRawOKHeaders) SetCacheControl(val OptString) {
+	s.CacheControl = val
+}
+
+// SetContentDisposition sets the value of ContentDisposition.
+func (s *GetMessagesIDRawOKHeaders) SetContentDisposition(val OptString) {
+	s.ContentDisposition = val
+}
+
+// SetXContentTypeOptions sets the value of XContentTypeOptions.
+func (s *GetMessagesIDRawOKHeaders) SetXContentTypeOptions(val OptString) {
+	s.XContentTypeOptions = val
+}
+
+// SetResponse sets the value of Response.
+func (s *GetMessagesIDRawOKHeaders) SetResponse(val GetMessagesIDRawOK) {
+	s.Response = val
+}
+
+func (*GetMessagesIDRawOKHeaders) getMessagesIDRawRes() {}
+
+type GetMessagesIDRawServiceUnavailable Error
+
+func (*GetMessagesIDRawServiceUnavailable) getMessagesIDRawRes() {}
+
+type GetMessagesIDRawUnauthorized Error
+
+func (*GetMessagesIDRawUnauthorized) getMessagesIDRawRes() {}
 
 type GetMessagesIDUnauthorized Error
 
@@ -3019,6 +3494,221 @@ type GetSegmentsUnauthorized Error
 
 func (*GetSegmentsUnauthorized) getSegmentsRes() {}
 
+type GetSuppressionsBadRequest Error
+
+func (*GetSuppressionsBadRequest) getSuppressionsRes() {}
+
+type GetSuppressionsExportBadRequest Error
+
+func (*GetSuppressionsExportBadRequest) getSuppressionsExportRes() {}
+
+type GetSuppressionsExportForbidden Error
+
+func (*GetSuppressionsExportForbidden) getSuppressionsExportRes() {}
+
+type GetSuppressionsExportInternalServerError Error
+
+func (*GetSuppressionsExportInternalServerError) getSuppressionsExportRes() {}
+
+type GetSuppressionsExportOK struct {
+	Data io.Reader
+}
+
+// Read reads data from the Data reader.
+//
+// Kept to satisfy the io.Reader interface.
+func (s GetSuppressionsExportOK) Read(p []byte) (n int, err error) {
+	if s.Data == nil {
+		return 0, io.EOF
+	}
+	return s.Data.Read(p)
+}
+
+// GetSuppressionsExportOKHeaders wraps GetSuppressionsExportOK with response headers.
+type GetSuppressionsExportOKHeaders struct {
+	CacheControl       OptString
+	ContentDisposition OptString
+	Response           GetSuppressionsExportOK
+}
+
+// GetCacheControl returns the value of CacheControl.
+func (s *GetSuppressionsExportOKHeaders) GetCacheControl() OptString {
+	return s.CacheControl
+}
+
+// GetContentDisposition returns the value of ContentDisposition.
+func (s *GetSuppressionsExportOKHeaders) GetContentDisposition() OptString {
+	return s.ContentDisposition
+}
+
+// GetResponse returns the value of Response.
+func (s *GetSuppressionsExportOKHeaders) GetResponse() GetSuppressionsExportOK {
+	return s.Response
+}
+
+// SetCacheControl sets the value of CacheControl.
+func (s *GetSuppressionsExportOKHeaders) SetCacheControl(val OptString) {
+	s.CacheControl = val
+}
+
+// SetContentDisposition sets the value of ContentDisposition.
+func (s *GetSuppressionsExportOKHeaders) SetContentDisposition(val OptString) {
+	s.ContentDisposition = val
+}
+
+// SetResponse sets the value of Response.
+func (s *GetSuppressionsExportOKHeaders) SetResponse(val GetSuppressionsExportOK) {
+	s.Response = val
+}
+
+func (*GetSuppressionsExportOKHeaders) getSuppressionsExportRes() {}
+
+type GetSuppressionsExportState string
+
+const (
+	GetSuppressionsExportStateActive   GetSuppressionsExportState = "active"
+	GetSuppressionsExportStateExpired  GetSuppressionsExportState = "expired"
+	GetSuppressionsExportStateReleased GetSuppressionsExportState = "released"
+	GetSuppressionsExportStateAll      GetSuppressionsExportState = "all"
+)
+
+// AllValues returns all GetSuppressionsExportState values.
+func (GetSuppressionsExportState) AllValues() []GetSuppressionsExportState {
+	return []GetSuppressionsExportState{
+		GetSuppressionsExportStateActive,
+		GetSuppressionsExportStateExpired,
+		GetSuppressionsExportStateReleased,
+		GetSuppressionsExportStateAll,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s GetSuppressionsExportState) MarshalText() ([]byte, error) {
+	switch s {
+	case GetSuppressionsExportStateActive:
+		return []byte(s), nil
+	case GetSuppressionsExportStateExpired:
+		return []byte(s), nil
+	case GetSuppressionsExportStateReleased:
+		return []byte(s), nil
+	case GetSuppressionsExportStateAll:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *GetSuppressionsExportState) UnmarshalText(data []byte) error {
+	switch GetSuppressionsExportState(data) {
+	case GetSuppressionsExportStateActive:
+		*s = GetSuppressionsExportStateActive
+		return nil
+	case GetSuppressionsExportStateExpired:
+		*s = GetSuppressionsExportStateExpired
+		return nil
+	case GetSuppressionsExportStateReleased:
+		*s = GetSuppressionsExportStateReleased
+		return nil
+	case GetSuppressionsExportStateAll:
+		*s = GetSuppressionsExportStateAll
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type GetSuppressionsExportUnauthorized Error
+
+func (*GetSuppressionsExportUnauthorized) getSuppressionsExportRes() {}
+
+type GetSuppressionsForbidden Error
+
+func (*GetSuppressionsForbidden) getSuppressionsRes() {}
+
+type GetSuppressionsIDBadRequest Error
+
+func (*GetSuppressionsIDBadRequest) getSuppressionsIDRes() {}
+
+type GetSuppressionsIDForbidden Error
+
+func (*GetSuppressionsIDForbidden) getSuppressionsIDRes() {}
+
+type GetSuppressionsIDInternalServerError Error
+
+func (*GetSuppressionsIDInternalServerError) getSuppressionsIDRes() {}
+
+type GetSuppressionsIDNotFound Error
+
+func (*GetSuppressionsIDNotFound) getSuppressionsIDRes() {}
+
+type GetSuppressionsIDUnauthorized Error
+
+func (*GetSuppressionsIDUnauthorized) getSuppressionsIDRes() {}
+
+type GetSuppressionsInternalServerError Error
+
+func (*GetSuppressionsInternalServerError) getSuppressionsRes() {}
+
+type GetSuppressionsState string
+
+const (
+	GetSuppressionsStateActive   GetSuppressionsState = "active"
+	GetSuppressionsStateExpired  GetSuppressionsState = "expired"
+	GetSuppressionsStateReleased GetSuppressionsState = "released"
+	GetSuppressionsStateAll      GetSuppressionsState = "all"
+)
+
+// AllValues returns all GetSuppressionsState values.
+func (GetSuppressionsState) AllValues() []GetSuppressionsState {
+	return []GetSuppressionsState{
+		GetSuppressionsStateActive,
+		GetSuppressionsStateExpired,
+		GetSuppressionsStateReleased,
+		GetSuppressionsStateAll,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s GetSuppressionsState) MarshalText() ([]byte, error) {
+	switch s {
+	case GetSuppressionsStateActive:
+		return []byte(s), nil
+	case GetSuppressionsStateExpired:
+		return []byte(s), nil
+	case GetSuppressionsStateReleased:
+		return []byte(s), nil
+	case GetSuppressionsStateAll:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *GetSuppressionsState) UnmarshalText(data []byte) error {
+	switch GetSuppressionsState(data) {
+	case GetSuppressionsStateActive:
+		*s = GetSuppressionsStateActive
+		return nil
+	case GetSuppressionsStateExpired:
+		*s = GetSuppressionsStateExpired
+		return nil
+	case GetSuppressionsStateReleased:
+		*s = GetSuppressionsStateReleased
+		return nil
+	case GetSuppressionsStateAll:
+		*s = GetSuppressionsStateAll
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type GetSuppressionsUnauthorized Error
+
+func (*GetSuppressionsUnauthorized) getSuppressionsRes() {}
+
 type GetTemplatesBadRequest Error
 
 func (*GetTemplatesBadRequest) getTemplatesRes() {}
@@ -3174,6 +3864,46 @@ func (*GetWebhooksConflict) getWebhooksRes() {}
 type GetWebhooksForbidden Error
 
 func (*GetWebhooksForbidden) getWebhooksRes() {}
+
+type GetWebhooksIDDeliveriesBadRequest Error
+
+func (*GetWebhooksIDDeliveriesBadRequest) getWebhooksIDDeliveriesRes() {}
+
+type GetWebhooksIDDeliveriesDeliveryIDBadRequest Error
+
+func (*GetWebhooksIDDeliveriesDeliveryIDBadRequest) getWebhooksIDDeliveriesDeliveryIDRes() {}
+
+type GetWebhooksIDDeliveriesDeliveryIDForbidden Error
+
+func (*GetWebhooksIDDeliveriesDeliveryIDForbidden) getWebhooksIDDeliveriesDeliveryIDRes() {}
+
+type GetWebhooksIDDeliveriesDeliveryIDInternalServerError Error
+
+func (*GetWebhooksIDDeliveriesDeliveryIDInternalServerError) getWebhooksIDDeliveriesDeliveryIDRes() {}
+
+type GetWebhooksIDDeliveriesDeliveryIDNotFound Error
+
+func (*GetWebhooksIDDeliveriesDeliveryIDNotFound) getWebhooksIDDeliveriesDeliveryIDRes() {}
+
+type GetWebhooksIDDeliveriesDeliveryIDUnauthorized Error
+
+func (*GetWebhooksIDDeliveriesDeliveryIDUnauthorized) getWebhooksIDDeliveriesDeliveryIDRes() {}
+
+type GetWebhooksIDDeliveriesForbidden Error
+
+func (*GetWebhooksIDDeliveriesForbidden) getWebhooksIDDeliveriesRes() {}
+
+type GetWebhooksIDDeliveriesInternalServerError Error
+
+func (*GetWebhooksIDDeliveriesInternalServerError) getWebhooksIDDeliveriesRes() {}
+
+type GetWebhooksIDDeliveriesNotFound Error
+
+func (*GetWebhooksIDDeliveriesNotFound) getWebhooksIDDeliveriesRes() {}
+
+type GetWebhooksIDDeliveriesUnauthorized Error
+
+func (*GetWebhooksIDDeliveriesUnauthorized) getWebhooksIDDeliveriesRes() {}
 
 type GetWebhooksInternalServerError Error
 
@@ -3369,16 +4099,44 @@ func (s *InboundMessage) SetReceivedAt(val Timestamp) {
 // Merged schema.
 // Ref: #/components/schemas/InboundMessageDetail
 type InboundMessageDetail struct {
-	ID               UUID                `json:"id"`
-	DomainID         UUID                `json:"domain_id"`
-	FromAddress      string              `json:"from_address"`
-	ToAddress        string              `json:"to_address"`
-	Subject          OptString           `json:"subject"`
-	AttachmentCount  int                 `json:"attachment_count"`
-	IsFeedbackReport bool                `json:"is_feedback_report"`
-	ReceivedAt       Timestamp           `json:"received_at"`
-	Attachments      []InboundAttachment `json:"attachments"`
-	RawMessageURL    OptURI              `json:"raw_message_url"`
+	ID               UUID      `json:"id"`
+	DomainID         UUID      `json:"domain_id"`
+	FromAddress      string    `json:"from_address"`
+	ToAddress        string    `json:"to_address"`
+	Subject          OptString `json:"subject"`
+	AttachmentCount  int       `json:"attachment_count"`
+	IsFeedbackReport bool      `json:"is_feedback_report"`
+	ReceivedAt       Timestamp `json:"received_at"`
+	// HTML sanitizado no servidor e limitado a 1 MiB decodificado; consumidores ainda devem renderizá-lo
+	// como conteúdo não confiável. A prévia MIME só é processada para objetos de até 2 MiB.
+	BodyHTML OptString `json:"body_html"`
+	// Corpo de texto decodificado e limitado a 1 MiB para visualização.
+	BodyPlain OptString `json:"body_plain"`
+	// `available` quando há corpo compatível; `not_present` quando o MIME válido não contém corpo de
+	// texto; `unavailable` quando o objeto não pode ser lido ou decodificado com segurança.
+	ContentStatus InboundMessageDetailContentStatus `json:"content_status"`
+	// Rota relativa autenticada; ausente quando a mensagem não possui referência de conteúdo
+	// armazenado.
+	RawMessageAPIPath OptString           `json:"raw_message_api_path"`
+	Attachments       []InboundAttachment `json:"attachments"`
+	ContentVariant    string              `json:"content_variant"`
+	// URL S3 pré-assinada mantida temporariamente para compatibilidade; use raw_message_api_path.
+	//
+	// Deprecated: schema marks this property as deprecated.
+	RawMessageURL OptURI                     `json:"raw_message_url"`
+	SpfResult     OptSPFAuthenticationResult `json:"spf_result"`
+	// Indica alinhamento SPF com o domínio From para DMARC; nulo quando não foi possível avaliar.
+	SpfAligned OptNilBool                  `json:"spf_aligned"`
+	DkimResult OptDKIMAuthenticationResult `json:"dkim_result"`
+	// Indica alinhamento de ao menos uma assinatura DKIM aprovada com o domínio From; nulo quando não
+	// foi possível avaliar.
+	DkimAligned OptNilBool                   `json:"dkim_aligned"`
+	DmarcResult OptDMARCAuthenticationResult `json:"dmarc_result"`
+	// Disposição calculada para esta avaliação DMARC, separada do resultado pass/fail.
+	DmarcDisposition OptNilInboundMessageDetailDmarcDisposition `json:"dmarc_disposition"`
+	// Instante em que a autenticação foi avaliada no recebimento; nulo em registros legados ou não
+	// avaliados.
+	AuthenticationEvaluatedAt OptNilTimestamp `json:"authentication_evaluated_at"`
 }
 
 // GetID returns the value of ID.
@@ -3421,14 +4179,74 @@ func (s *InboundMessageDetail) GetReceivedAt() Timestamp {
 	return s.ReceivedAt
 }
 
+// GetBodyHTML returns the value of BodyHTML.
+func (s *InboundMessageDetail) GetBodyHTML() OptString {
+	return s.BodyHTML
+}
+
+// GetBodyPlain returns the value of BodyPlain.
+func (s *InboundMessageDetail) GetBodyPlain() OptString {
+	return s.BodyPlain
+}
+
+// GetContentStatus returns the value of ContentStatus.
+func (s *InboundMessageDetail) GetContentStatus() InboundMessageDetailContentStatus {
+	return s.ContentStatus
+}
+
+// GetRawMessageAPIPath returns the value of RawMessageAPIPath.
+func (s *InboundMessageDetail) GetRawMessageAPIPath() OptString {
+	return s.RawMessageAPIPath
+}
+
 // GetAttachments returns the value of Attachments.
 func (s *InboundMessageDetail) GetAttachments() []InboundAttachment {
 	return s.Attachments
 }
 
+// GetContentVariant returns the value of ContentVariant.
+func (s *InboundMessageDetail) GetContentVariant() string {
+	return s.ContentVariant
+}
+
 // GetRawMessageURL returns the value of RawMessageURL.
 func (s *InboundMessageDetail) GetRawMessageURL() OptURI {
 	return s.RawMessageURL
+}
+
+// GetSpfResult returns the value of SpfResult.
+func (s *InboundMessageDetail) GetSpfResult() OptSPFAuthenticationResult {
+	return s.SpfResult
+}
+
+// GetSpfAligned returns the value of SpfAligned.
+func (s *InboundMessageDetail) GetSpfAligned() OptNilBool {
+	return s.SpfAligned
+}
+
+// GetDkimResult returns the value of DkimResult.
+func (s *InboundMessageDetail) GetDkimResult() OptDKIMAuthenticationResult {
+	return s.DkimResult
+}
+
+// GetDkimAligned returns the value of DkimAligned.
+func (s *InboundMessageDetail) GetDkimAligned() OptNilBool {
+	return s.DkimAligned
+}
+
+// GetDmarcResult returns the value of DmarcResult.
+func (s *InboundMessageDetail) GetDmarcResult() OptDMARCAuthenticationResult {
+	return s.DmarcResult
+}
+
+// GetDmarcDisposition returns the value of DmarcDisposition.
+func (s *InboundMessageDetail) GetDmarcDisposition() OptNilInboundMessageDetailDmarcDisposition {
+	return s.DmarcDisposition
+}
+
+// GetAuthenticationEvaluatedAt returns the value of AuthenticationEvaluatedAt.
+func (s *InboundMessageDetail) GetAuthenticationEvaluatedAt() OptNilTimestamp {
+	return s.AuthenticationEvaluatedAt
 }
 
 // SetID sets the value of ID.
@@ -3471,9 +4289,34 @@ func (s *InboundMessageDetail) SetReceivedAt(val Timestamp) {
 	s.ReceivedAt = val
 }
 
+// SetBodyHTML sets the value of BodyHTML.
+func (s *InboundMessageDetail) SetBodyHTML(val OptString) {
+	s.BodyHTML = val
+}
+
+// SetBodyPlain sets the value of BodyPlain.
+func (s *InboundMessageDetail) SetBodyPlain(val OptString) {
+	s.BodyPlain = val
+}
+
+// SetContentStatus sets the value of ContentStatus.
+func (s *InboundMessageDetail) SetContentStatus(val InboundMessageDetailContentStatus) {
+	s.ContentStatus = val
+}
+
+// SetRawMessageAPIPath sets the value of RawMessageAPIPath.
+func (s *InboundMessageDetail) SetRawMessageAPIPath(val OptString) {
+	s.RawMessageAPIPath = val
+}
+
 // SetAttachments sets the value of Attachments.
 func (s *InboundMessageDetail) SetAttachments(val []InboundAttachment) {
 	s.Attachments = val
+}
+
+// SetContentVariant sets the value of ContentVariant.
+func (s *InboundMessageDetail) SetContentVariant(val string) {
+	s.ContentVariant = val
 }
 
 // SetRawMessageURL sets the value of RawMessageURL.
@@ -3481,7 +4324,140 @@ func (s *InboundMessageDetail) SetRawMessageURL(val OptURI) {
 	s.RawMessageURL = val
 }
 
+// SetSpfResult sets the value of SpfResult.
+func (s *InboundMessageDetail) SetSpfResult(val OptSPFAuthenticationResult) {
+	s.SpfResult = val
+}
+
+// SetSpfAligned sets the value of SpfAligned.
+func (s *InboundMessageDetail) SetSpfAligned(val OptNilBool) {
+	s.SpfAligned = val
+}
+
+// SetDkimResult sets the value of DkimResult.
+func (s *InboundMessageDetail) SetDkimResult(val OptDKIMAuthenticationResult) {
+	s.DkimResult = val
+}
+
+// SetDkimAligned sets the value of DkimAligned.
+func (s *InboundMessageDetail) SetDkimAligned(val OptNilBool) {
+	s.DkimAligned = val
+}
+
+// SetDmarcResult sets the value of DmarcResult.
+func (s *InboundMessageDetail) SetDmarcResult(val OptDMARCAuthenticationResult) {
+	s.DmarcResult = val
+}
+
+// SetDmarcDisposition sets the value of DmarcDisposition.
+func (s *InboundMessageDetail) SetDmarcDisposition(val OptNilInboundMessageDetailDmarcDisposition) {
+	s.DmarcDisposition = val
+}
+
+// SetAuthenticationEvaluatedAt sets the value of AuthenticationEvaluatedAt.
+func (s *InboundMessageDetail) SetAuthenticationEvaluatedAt(val OptNilTimestamp) {
+	s.AuthenticationEvaluatedAt = val
+}
+
 func (*InboundMessageDetail) getInboundMessagesIDRes() {}
+
+// `available` quando há corpo compatível; `not_present` quando o MIME válido não contém corpo de
+// texto; `unavailable` quando o objeto não pode ser lido ou decodificado com segurança.
+type InboundMessageDetailContentStatus string
+
+const (
+	InboundMessageDetailContentStatusAvailable   InboundMessageDetailContentStatus = "available"
+	InboundMessageDetailContentStatusNotPresent  InboundMessageDetailContentStatus = "not_present"
+	InboundMessageDetailContentStatusUnavailable InboundMessageDetailContentStatus = "unavailable"
+)
+
+// AllValues returns all InboundMessageDetailContentStatus values.
+func (InboundMessageDetailContentStatus) AllValues() []InboundMessageDetailContentStatus {
+	return []InboundMessageDetailContentStatus{
+		InboundMessageDetailContentStatusAvailable,
+		InboundMessageDetailContentStatusNotPresent,
+		InboundMessageDetailContentStatusUnavailable,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s InboundMessageDetailContentStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case InboundMessageDetailContentStatusAvailable:
+		return []byte(s), nil
+	case InboundMessageDetailContentStatusNotPresent:
+		return []byte(s), nil
+	case InboundMessageDetailContentStatusUnavailable:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *InboundMessageDetailContentStatus) UnmarshalText(data []byte) error {
+	switch InboundMessageDetailContentStatus(data) {
+	case InboundMessageDetailContentStatusAvailable:
+		*s = InboundMessageDetailContentStatusAvailable
+		return nil
+	case InboundMessageDetailContentStatusNotPresent:
+		*s = InboundMessageDetailContentStatusNotPresent
+		return nil
+	case InboundMessageDetailContentStatusUnavailable:
+		*s = InboundMessageDetailContentStatusUnavailable
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type InboundMessageDetailDmarcDisposition string
+
+const (
+	InboundMessageDetailDmarcDispositionNone       InboundMessageDetailDmarcDisposition = "none"
+	InboundMessageDetailDmarcDispositionQuarantine InboundMessageDetailDmarcDisposition = "quarantine"
+	InboundMessageDetailDmarcDispositionReject     InboundMessageDetailDmarcDisposition = "reject"
+)
+
+// AllValues returns all InboundMessageDetailDmarcDisposition values.
+func (InboundMessageDetailDmarcDisposition) AllValues() []InboundMessageDetailDmarcDisposition {
+	return []InboundMessageDetailDmarcDisposition{
+		InboundMessageDetailDmarcDispositionNone,
+		InboundMessageDetailDmarcDispositionQuarantine,
+		InboundMessageDetailDmarcDispositionReject,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s InboundMessageDetailDmarcDisposition) MarshalText() ([]byte, error) {
+	switch s {
+	case InboundMessageDetailDmarcDispositionNone:
+		return []byte(s), nil
+	case InboundMessageDetailDmarcDispositionQuarantine:
+		return []byte(s), nil
+	case InboundMessageDetailDmarcDispositionReject:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *InboundMessageDetailDmarcDisposition) UnmarshalText(data []byte) error {
+	switch InboundMessageDetailDmarcDisposition(data) {
+	case InboundMessageDetailDmarcDispositionNone:
+		*s = InboundMessageDetailDmarcDispositionNone
+		return nil
+	case InboundMessageDetailDmarcDispositionQuarantine:
+		*s = InboundMessageDetailDmarcDispositionQuarantine
+		return nil
+	case InboundMessageDetailDmarcDispositionReject:
+		*s = InboundMessageDetailDmarcDispositionReject
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
 
 // Ref: #/components/schemas/InboundMessageList
 type InboundMessageList struct {
@@ -3680,7 +4656,341 @@ func (s *Message) SetLastError(val OptNilString) {
 	s.LastError = val
 }
 
-func (*Message) getMessagesIDRes() {}
+// Merged schema.
+// Ref: #/components/schemas/MessageDetail
+type MessageDetail struct {
+	ID              UUID                `json:"id"`
+	Status          string              `json:"status"`
+	Stream          MessageDetailStream `json:"stream"`
+	FromAddress     string              `json:"from_address"`
+	ToAddress       string              `json:"to_address"`
+	Subject         OptNilString        `json:"subject"`
+	RecipientDomain string              `json:"recipient_domain"`
+	APIKeyID        OptString           `json:"api_key_id"`
+	CreatedAt       Timestamp           `json:"created_at"`
+	QueuedAt        OptTimestamp        `json:"queued_at"`
+	SentAt          OptTimestamp        `json:"sent_at"`
+	DeliveredAt     OptTimestamp        `json:"delivered_at"`
+	FailedAt        OptTimestamp        `json:"failed_at"`
+	FirstOpenedAt   OptTimestamp        `json:"first_opened_at"`
+	FirstClickedAt  OptTimestamp        `json:"first_clicked_at"`
+	LastError       OptNilString        `json:"last_error"`
+	// HTML sanitizado no servidor e limitado a 1 MiB decodificado; consumidores ainda devem renderizá-lo
+	// como conteúdo não confiável. A prévia MIME só é processada para objetos de até 2 MiB.
+	BodyHTML OptString `json:"body_html"`
+	// Corpo de texto decodificado e limitado a 1 MiB para visualização.
+	BodyPlain OptString `json:"body_plain"`
+	// `available` quando há corpo compatível; `not_present` quando o MIME válido não contém corpo de
+	// texto; `unavailable` quando o objeto não pode ser lido ou decodificado com segurança.
+	ContentStatus OptMessageDetailContentStatus `json:"content_status"`
+	// Rota relativa autenticada; ausente quando a mensagem não possui referência de conteúdo
+	// armazenado.
+	RawMessageAPIPath OptString `json:"raw_message_api_path"`
+	ContentVariant    OptString `json:"content_variant"`
+}
+
+// GetID returns the value of ID.
+func (s *MessageDetail) GetID() UUID {
+	return s.ID
+}
+
+// GetStatus returns the value of Status.
+func (s *MessageDetail) GetStatus() string {
+	return s.Status
+}
+
+// GetStream returns the value of Stream.
+func (s *MessageDetail) GetStream() MessageDetailStream {
+	return s.Stream
+}
+
+// GetFromAddress returns the value of FromAddress.
+func (s *MessageDetail) GetFromAddress() string {
+	return s.FromAddress
+}
+
+// GetToAddress returns the value of ToAddress.
+func (s *MessageDetail) GetToAddress() string {
+	return s.ToAddress
+}
+
+// GetSubject returns the value of Subject.
+func (s *MessageDetail) GetSubject() OptNilString {
+	return s.Subject
+}
+
+// GetRecipientDomain returns the value of RecipientDomain.
+func (s *MessageDetail) GetRecipientDomain() string {
+	return s.RecipientDomain
+}
+
+// GetAPIKeyID returns the value of APIKeyID.
+func (s *MessageDetail) GetAPIKeyID() OptString {
+	return s.APIKeyID
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *MessageDetail) GetCreatedAt() Timestamp {
+	return s.CreatedAt
+}
+
+// GetQueuedAt returns the value of QueuedAt.
+func (s *MessageDetail) GetQueuedAt() OptTimestamp {
+	return s.QueuedAt
+}
+
+// GetSentAt returns the value of SentAt.
+func (s *MessageDetail) GetSentAt() OptTimestamp {
+	return s.SentAt
+}
+
+// GetDeliveredAt returns the value of DeliveredAt.
+func (s *MessageDetail) GetDeliveredAt() OptTimestamp {
+	return s.DeliveredAt
+}
+
+// GetFailedAt returns the value of FailedAt.
+func (s *MessageDetail) GetFailedAt() OptTimestamp {
+	return s.FailedAt
+}
+
+// GetFirstOpenedAt returns the value of FirstOpenedAt.
+func (s *MessageDetail) GetFirstOpenedAt() OptTimestamp {
+	return s.FirstOpenedAt
+}
+
+// GetFirstClickedAt returns the value of FirstClickedAt.
+func (s *MessageDetail) GetFirstClickedAt() OptTimestamp {
+	return s.FirstClickedAt
+}
+
+// GetLastError returns the value of LastError.
+func (s *MessageDetail) GetLastError() OptNilString {
+	return s.LastError
+}
+
+// GetBodyHTML returns the value of BodyHTML.
+func (s *MessageDetail) GetBodyHTML() OptString {
+	return s.BodyHTML
+}
+
+// GetBodyPlain returns the value of BodyPlain.
+func (s *MessageDetail) GetBodyPlain() OptString {
+	return s.BodyPlain
+}
+
+// GetContentStatus returns the value of ContentStatus.
+func (s *MessageDetail) GetContentStatus() OptMessageDetailContentStatus {
+	return s.ContentStatus
+}
+
+// GetRawMessageAPIPath returns the value of RawMessageAPIPath.
+func (s *MessageDetail) GetRawMessageAPIPath() OptString {
+	return s.RawMessageAPIPath
+}
+
+// GetContentVariant returns the value of ContentVariant.
+func (s *MessageDetail) GetContentVariant() OptString {
+	return s.ContentVariant
+}
+
+// SetID sets the value of ID.
+func (s *MessageDetail) SetID(val UUID) {
+	s.ID = val
+}
+
+// SetStatus sets the value of Status.
+func (s *MessageDetail) SetStatus(val string) {
+	s.Status = val
+}
+
+// SetStream sets the value of Stream.
+func (s *MessageDetail) SetStream(val MessageDetailStream) {
+	s.Stream = val
+}
+
+// SetFromAddress sets the value of FromAddress.
+func (s *MessageDetail) SetFromAddress(val string) {
+	s.FromAddress = val
+}
+
+// SetToAddress sets the value of ToAddress.
+func (s *MessageDetail) SetToAddress(val string) {
+	s.ToAddress = val
+}
+
+// SetSubject sets the value of Subject.
+func (s *MessageDetail) SetSubject(val OptNilString) {
+	s.Subject = val
+}
+
+// SetRecipientDomain sets the value of RecipientDomain.
+func (s *MessageDetail) SetRecipientDomain(val string) {
+	s.RecipientDomain = val
+}
+
+// SetAPIKeyID sets the value of APIKeyID.
+func (s *MessageDetail) SetAPIKeyID(val OptString) {
+	s.APIKeyID = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *MessageDetail) SetCreatedAt(val Timestamp) {
+	s.CreatedAt = val
+}
+
+// SetQueuedAt sets the value of QueuedAt.
+func (s *MessageDetail) SetQueuedAt(val OptTimestamp) {
+	s.QueuedAt = val
+}
+
+// SetSentAt sets the value of SentAt.
+func (s *MessageDetail) SetSentAt(val OptTimestamp) {
+	s.SentAt = val
+}
+
+// SetDeliveredAt sets the value of DeliveredAt.
+func (s *MessageDetail) SetDeliveredAt(val OptTimestamp) {
+	s.DeliveredAt = val
+}
+
+// SetFailedAt sets the value of FailedAt.
+func (s *MessageDetail) SetFailedAt(val OptTimestamp) {
+	s.FailedAt = val
+}
+
+// SetFirstOpenedAt sets the value of FirstOpenedAt.
+func (s *MessageDetail) SetFirstOpenedAt(val OptTimestamp) {
+	s.FirstOpenedAt = val
+}
+
+// SetFirstClickedAt sets the value of FirstClickedAt.
+func (s *MessageDetail) SetFirstClickedAt(val OptTimestamp) {
+	s.FirstClickedAt = val
+}
+
+// SetLastError sets the value of LastError.
+func (s *MessageDetail) SetLastError(val OptNilString) {
+	s.LastError = val
+}
+
+// SetBodyHTML sets the value of BodyHTML.
+func (s *MessageDetail) SetBodyHTML(val OptString) {
+	s.BodyHTML = val
+}
+
+// SetBodyPlain sets the value of BodyPlain.
+func (s *MessageDetail) SetBodyPlain(val OptString) {
+	s.BodyPlain = val
+}
+
+// SetContentStatus sets the value of ContentStatus.
+func (s *MessageDetail) SetContentStatus(val OptMessageDetailContentStatus) {
+	s.ContentStatus = val
+}
+
+// SetRawMessageAPIPath sets the value of RawMessageAPIPath.
+func (s *MessageDetail) SetRawMessageAPIPath(val OptString) {
+	s.RawMessageAPIPath = val
+}
+
+// SetContentVariant sets the value of ContentVariant.
+func (s *MessageDetail) SetContentVariant(val OptString) {
+	s.ContentVariant = val
+}
+
+func (*MessageDetail) getMessagesIDRes() {}
+
+// `available` quando há corpo compatível; `not_present` quando o MIME válido não contém corpo de
+// texto; `unavailable` quando o objeto não pode ser lido ou decodificado com segurança.
+type MessageDetailContentStatus string
+
+const (
+	MessageDetailContentStatusAvailable   MessageDetailContentStatus = "available"
+	MessageDetailContentStatusNotPresent  MessageDetailContentStatus = "not_present"
+	MessageDetailContentStatusUnavailable MessageDetailContentStatus = "unavailable"
+)
+
+// AllValues returns all MessageDetailContentStatus values.
+func (MessageDetailContentStatus) AllValues() []MessageDetailContentStatus {
+	return []MessageDetailContentStatus{
+		MessageDetailContentStatusAvailable,
+		MessageDetailContentStatusNotPresent,
+		MessageDetailContentStatusUnavailable,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s MessageDetailContentStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case MessageDetailContentStatusAvailable:
+		return []byte(s), nil
+	case MessageDetailContentStatusNotPresent:
+		return []byte(s), nil
+	case MessageDetailContentStatusUnavailable:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *MessageDetailContentStatus) UnmarshalText(data []byte) error {
+	switch MessageDetailContentStatus(data) {
+	case MessageDetailContentStatusAvailable:
+		*s = MessageDetailContentStatusAvailable
+		return nil
+	case MessageDetailContentStatusNotPresent:
+		*s = MessageDetailContentStatusNotPresent
+		return nil
+	case MessageDetailContentStatusUnavailable:
+		*s = MessageDetailContentStatusUnavailable
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type MessageDetailStream string
+
+const (
+	MessageDetailStreamTransactional MessageDetailStream = "transactional"
+	MessageDetailStreamMarketing     MessageDetailStream = "marketing"
+)
+
+// AllValues returns all MessageDetailStream values.
+func (MessageDetailStream) AllValues() []MessageDetailStream {
+	return []MessageDetailStream{
+		MessageDetailStreamTransactional,
+		MessageDetailStreamMarketing,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s MessageDetailStream) MarshalText() ([]byte, error) {
+	switch s {
+	case MessageDetailStreamTransactional:
+		return []byte(s), nil
+	case MessageDetailStreamMarketing:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *MessageDetailStream) UnmarshalText(data []byte) error {
+	switch MessageDetailStream(data) {
+	case MessageDetailStreamTransactional:
+		*s = MessageDetailStreamTransactional
+		return nil
+	case MessageDetailStreamMarketing:
+		*s = MessageDetailStreamMarketing
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
 
 // Ref: #/components/schemas/MessageEvent
 type MessageEvent struct {
@@ -3807,6 +5117,25 @@ func (s *MessageList) SetMessages(val []Message) {
 }
 
 func (*MessageList) getMessagesRes() {}
+
+// Ref: #/components/schemas/MessageResponse
+type MessageResponse struct {
+	Message string `json:"message"`
+}
+
+// GetMessage returns the value of Message.
+func (s *MessageResponse) GetMessage() string {
+	return s.Message
+}
+
+// SetMessage sets the value of Message.
+func (s *MessageResponse) SetMessage(val string) {
+	s.Message = val
+}
+
+func (*MessageResponse) postStatusSubscriptionsConfirmRes()     {}
+func (*MessageResponse) postStatusSubscriptionsRes()            {}
+func (*MessageResponse) postStatusSubscriptionsUnsubscribeRes() {}
 
 type MessageStream string
 
@@ -4247,6 +5576,51 @@ func (s *MonthlyUsage) SetUnlimited(val bool) {
 
 func (*MonthlyUsage) getUsageRes() {}
 
+// NewNilInt returns new NilInt with value set to v.
+func NewNilInt(v int) NilInt {
+	return NilInt{
+		Value: v,
+	}
+}
+
+// NilInt is nullable int.
+type NilInt struct {
+	Value int
+	Null  bool
+}
+
+// SetTo sets value to v.
+func (o *NilInt) SetTo(v int) {
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o NilInt) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *NilInt) SetToNull() {
+	o.Null = true
+	var v int
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o NilInt) Get() (v int, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o NilInt) Or(d int) int {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewNilInt64 returns new NilInt64 with value set to v.
 func NewNilInt64(v int64) NilInt64 {
 	return NilInt64{
@@ -4286,6 +5660,96 @@ func (o NilInt64) Get() (v int64, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o NilInt64) Or(d int64) int64 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewNilTimestamp returns new NilTimestamp with value set to v.
+func NewNilTimestamp(v Timestamp) NilTimestamp {
+	return NilTimestamp{
+		Value: v,
+	}
+}
+
+// NilTimestamp is nullable Timestamp.
+type NilTimestamp struct {
+	Value Timestamp
+	Null  bool
+}
+
+// SetTo sets value to v.
+func (o *NilTimestamp) SetTo(v Timestamp) {
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o NilTimestamp) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *NilTimestamp) SetToNull() {
+	o.Null = true
+	var v Timestamp
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o NilTimestamp) Get() (v Timestamp, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o NilTimestamp) Or(d Timestamp) Timestamp {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewNilUUID returns new NilUUID with value set to v.
+func NewNilUUID(v UUID) NilUUID {
+	return NilUUID{
+		Value: v,
+	}
+}
+
+// NilUUID is nullable UUID.
+type NilUUID struct {
+	Value UUID
+	Null  bool
+}
+
+// SetTo sets value to v.
+func (o *NilUUID) SetTo(v UUID) {
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o NilUUID) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *NilUUID) SetToNull() {
+	o.Null = true
+	var v UUID
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o NilUUID) Get() (v UUID, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o NilUUID) Or(d UUID) UUID {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -4424,6 +5888,98 @@ func (o OptCreateCustomEventRequestSchema) Get() (v CreateCustomEventRequestSche
 
 // Or returns value if set, or given parameter if does not.
 func (o OptCreateCustomEventRequestSchema) Or(d CreateCustomEventRequestSchema) CreateCustomEventRequestSchema {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptDKIMAuthenticationResult returns new OptDKIMAuthenticationResult with value set to v.
+func NewOptDKIMAuthenticationResult(v DKIMAuthenticationResult) OptDKIMAuthenticationResult {
+	return OptDKIMAuthenticationResult{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptDKIMAuthenticationResult is optional DKIMAuthenticationResult.
+type OptDKIMAuthenticationResult struct {
+	Value DKIMAuthenticationResult
+	Set   bool
+}
+
+// IsSet returns true if OptDKIMAuthenticationResult was set.
+func (o OptDKIMAuthenticationResult) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptDKIMAuthenticationResult) Reset() {
+	var v DKIMAuthenticationResult
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptDKIMAuthenticationResult) SetTo(v DKIMAuthenticationResult) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptDKIMAuthenticationResult) Get() (v DKIMAuthenticationResult, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptDKIMAuthenticationResult) Or(d DKIMAuthenticationResult) DKIMAuthenticationResult {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptDMARCAuthenticationResult returns new OptDMARCAuthenticationResult with value set to v.
+func NewOptDMARCAuthenticationResult(v DMARCAuthenticationResult) OptDMARCAuthenticationResult {
+	return OptDMARCAuthenticationResult{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptDMARCAuthenticationResult is optional DMARCAuthenticationResult.
+type OptDMARCAuthenticationResult struct {
+	Value DMARCAuthenticationResult
+	Set   bool
+}
+
+// IsSet returns true if OptDMARCAuthenticationResult was set.
+func (o OptDMARCAuthenticationResult) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptDMARCAuthenticationResult) Reset() {
+	var v DMARCAuthenticationResult
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptDMARCAuthenticationResult) SetTo(v DMARCAuthenticationResult) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptDMARCAuthenticationResult) Get() (v DMARCAuthenticationResult, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptDMARCAuthenticationResult) Or(d DMARCAuthenticationResult) DMARCAuthenticationResult {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -4660,6 +6216,98 @@ func (o OptGetMessagesPeriod) Or(d GetMessagesPeriod) GetMessagesPeriod {
 	return d
 }
 
+// NewOptGetSuppressionsExportState returns new OptGetSuppressionsExportState with value set to v.
+func NewOptGetSuppressionsExportState(v GetSuppressionsExportState) OptGetSuppressionsExportState {
+	return OptGetSuppressionsExportState{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptGetSuppressionsExportState is optional GetSuppressionsExportState.
+type OptGetSuppressionsExportState struct {
+	Value GetSuppressionsExportState
+	Set   bool
+}
+
+// IsSet returns true if OptGetSuppressionsExportState was set.
+func (o OptGetSuppressionsExportState) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptGetSuppressionsExportState) Reset() {
+	var v GetSuppressionsExportState
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptGetSuppressionsExportState) SetTo(v GetSuppressionsExportState) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptGetSuppressionsExportState) Get() (v GetSuppressionsExportState, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptGetSuppressionsExportState) Or(d GetSuppressionsExportState) GetSuppressionsExportState {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptGetSuppressionsState returns new OptGetSuppressionsState with value set to v.
+func NewOptGetSuppressionsState(v GetSuppressionsState) OptGetSuppressionsState {
+	return OptGetSuppressionsState{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptGetSuppressionsState is optional GetSuppressionsState.
+type OptGetSuppressionsState struct {
+	Value GetSuppressionsState
+	Set   bool
+}
+
+// IsSet returns true if OptGetSuppressionsState was set.
+func (o OptGetSuppressionsState) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptGetSuppressionsState) Reset() {
+	var v GetSuppressionsState
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptGetSuppressionsState) SetTo(v GetSuppressionsState) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptGetSuppressionsState) Get() (v GetSuppressionsState, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptGetSuppressionsState) Or(d GetSuppressionsState) GetSuppressionsState {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptInt returns new OptInt with value set to v.
 func NewOptInt(v int) OptInt {
 	return OptInt{
@@ -4700,6 +6348,120 @@ func (o OptInt) Get() (v int, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptInt) Or(d int) int {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptMessageDetailContentStatus returns new OptMessageDetailContentStatus with value set to v.
+func NewOptMessageDetailContentStatus(v MessageDetailContentStatus) OptMessageDetailContentStatus {
+	return OptMessageDetailContentStatus{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptMessageDetailContentStatus is optional MessageDetailContentStatus.
+type OptMessageDetailContentStatus struct {
+	Value MessageDetailContentStatus
+	Set   bool
+}
+
+// IsSet returns true if OptMessageDetailContentStatus was set.
+func (o OptMessageDetailContentStatus) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptMessageDetailContentStatus) Reset() {
+	var v MessageDetailContentStatus
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptMessageDetailContentStatus) SetTo(v MessageDetailContentStatus) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptMessageDetailContentStatus) Get() (v MessageDetailContentStatus, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptMessageDetailContentStatus) Or(d MessageDetailContentStatus) MessageDetailContentStatus {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilBool returns new OptNilBool with value set to v.
+func NewOptNilBool(v bool) OptNilBool {
+	return OptNilBool{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilBool is optional nullable bool.
+type OptNilBool struct {
+	Value bool
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilBool was set.
+func (o OptNilBool) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilBool) Reset() {
+	var v bool
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilBool) SetTo(v bool) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilBool) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilBool) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v bool
+	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilBool) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilBool) Get() (v bool, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilBool) Or(d bool) bool {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -4768,6 +6530,142 @@ func (o OptNilCustomEventSchema) Get() (v CustomEventSchema, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptNilCustomEventSchema) Or(d CustomEventSchema) CustomEventSchema {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilInboundMessageDetailDmarcDisposition returns new OptNilInboundMessageDetailDmarcDisposition with value set to v.
+func NewOptNilInboundMessageDetailDmarcDisposition(v InboundMessageDetailDmarcDisposition) OptNilInboundMessageDetailDmarcDisposition {
+	return OptNilInboundMessageDetailDmarcDisposition{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilInboundMessageDetailDmarcDisposition is optional nullable InboundMessageDetailDmarcDisposition.
+type OptNilInboundMessageDetailDmarcDisposition struct {
+	Value InboundMessageDetailDmarcDisposition
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilInboundMessageDetailDmarcDisposition was set.
+func (o OptNilInboundMessageDetailDmarcDisposition) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilInboundMessageDetailDmarcDisposition) Reset() {
+	var v InboundMessageDetailDmarcDisposition
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilInboundMessageDetailDmarcDisposition) SetTo(v InboundMessageDetailDmarcDisposition) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilInboundMessageDetailDmarcDisposition) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilInboundMessageDetailDmarcDisposition) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v InboundMessageDetailDmarcDisposition
+	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilInboundMessageDetailDmarcDisposition) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilInboundMessageDetailDmarcDisposition) Get() (v InboundMessageDetailDmarcDisposition, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilInboundMessageDetailDmarcDisposition) Or(d InboundMessageDetailDmarcDisposition) InboundMessageDetailDmarcDisposition {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilInt returns new OptNilInt with value set to v.
+func NewOptNilInt(v int) OptNilInt {
+	return OptNilInt{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilInt is optional nullable int.
+type OptNilInt struct {
+	Value int
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilInt was set.
+func (o OptNilInt) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilInt) Reset() {
+	var v int
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilInt) SetTo(v int) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilInt) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilInt) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v int
+	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilInt) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilInt) Get() (v int, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilInt) Or(d int) int {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -5024,6 +6922,52 @@ func (o OptPreviewTemplateRequestVariables) Or(d PreviewTemplateRequestVariables
 	return d
 }
 
+// NewOptSPFAuthenticationResult returns new OptSPFAuthenticationResult with value set to v.
+func NewOptSPFAuthenticationResult(v SPFAuthenticationResult) OptSPFAuthenticationResult {
+	return OptSPFAuthenticationResult{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptSPFAuthenticationResult is optional SPFAuthenticationResult.
+type OptSPFAuthenticationResult struct {
+	Value SPFAuthenticationResult
+	Set   bool
+}
+
+// IsSet returns true if OptSPFAuthenticationResult was set.
+func (o OptSPFAuthenticationResult) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptSPFAuthenticationResult) Reset() {
+	var v SPFAuthenticationResult
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptSPFAuthenticationResult) SetTo(v SPFAuthenticationResult) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptSPFAuthenticationResult) Get() (v SPFAuthenticationResult, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptSPFAuthenticationResult) Or(d SPFAuthenticationResult) SPFAuthenticationResult {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptSendCustomEventRequestProperties returns new OptSendCustomEventRequestProperties with value set to v.
 func NewOptSendCustomEventRequestProperties(v SendCustomEventRequestProperties) OptSendCustomEventRequestProperties {
 	return OptSendCustomEventRequestProperties{
@@ -5248,6 +7192,98 @@ func (o OptString) Get() (v string, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptString) Or(d string) string {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptSuppressionOrigin returns new OptSuppressionOrigin with value set to v.
+func NewOptSuppressionOrigin(v SuppressionOrigin) OptSuppressionOrigin {
+	return OptSuppressionOrigin{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptSuppressionOrigin is optional SuppressionOrigin.
+type OptSuppressionOrigin struct {
+	Value SuppressionOrigin
+	Set   bool
+}
+
+// IsSet returns true if OptSuppressionOrigin was set.
+func (o OptSuppressionOrigin) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptSuppressionOrigin) Reset() {
+	var v SuppressionOrigin
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptSuppressionOrigin) SetTo(v SuppressionOrigin) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptSuppressionOrigin) Get() (v SuppressionOrigin, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptSuppressionOrigin) Or(d SuppressionOrigin) SuppressionOrigin {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptSuppressionReason returns new OptSuppressionReason with value set to v.
+func NewOptSuppressionReason(v SuppressionReason) OptSuppressionReason {
+	return OptSuppressionReason{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptSuppressionReason is optional SuppressionReason.
+type OptSuppressionReason struct {
+	Value SuppressionReason
+	Set   bool
+}
+
+// IsSet returns true if OptSuppressionReason was set.
+func (o OptSuppressionReason) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptSuppressionReason) Reset() {
+	var v SuppressionReason
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptSuppressionReason) SetTo(v SuppressionReason) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptSuppressionReason) Get() (v SuppressionReason, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptSuppressionReason) Or(d SuppressionReason) SuppressionReason {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -5484,6 +7520,98 @@ func (o OptUpdateContactRequestProperties) Or(d UpdateContactRequestProperties) 
 	return d
 }
 
+// NewOptWebhookDeliveryEventType returns new OptWebhookDeliveryEventType with value set to v.
+func NewOptWebhookDeliveryEventType(v WebhookDeliveryEventType) OptWebhookDeliveryEventType {
+	return OptWebhookDeliveryEventType{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptWebhookDeliveryEventType is optional WebhookDeliveryEventType.
+type OptWebhookDeliveryEventType struct {
+	Value WebhookDeliveryEventType
+	Set   bool
+}
+
+// IsSet returns true if OptWebhookDeliveryEventType was set.
+func (o OptWebhookDeliveryEventType) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptWebhookDeliveryEventType) Reset() {
+	var v WebhookDeliveryEventType
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptWebhookDeliveryEventType) SetTo(v WebhookDeliveryEventType) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptWebhookDeliveryEventType) Get() (v WebhookDeliveryEventType, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptWebhookDeliveryEventType) Or(d WebhookDeliveryEventType) WebhookDeliveryEventType {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptWebhookDeliveryStatus returns new OptWebhookDeliveryStatus with value set to v.
+func NewOptWebhookDeliveryStatus(v WebhookDeliveryStatus) OptWebhookDeliveryStatus {
+	return OptWebhookDeliveryStatus{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptWebhookDeliveryStatus is optional WebhookDeliveryStatus.
+type OptWebhookDeliveryStatus struct {
+	Value WebhookDeliveryStatus
+	Set   bool
+}
+
+// IsSet returns true if OptWebhookDeliveryStatus was set.
+func (o OptWebhookDeliveryStatus) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptWebhookDeliveryStatus) Reset() {
+	var v WebhookDeliveryStatus
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptWebhookDeliveryStatus) SetTo(v WebhookDeliveryStatus) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptWebhookDeliveryStatus) Get() (v WebhookDeliveryStatus, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptWebhookDeliveryStatus) Or(d WebhookDeliveryStatus) WebhookDeliveryStatus {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 type PatchAutomationsIDBadRequest Error
 
 func (*PatchAutomationsIDBadRequest) patchAutomationsIDRes() {}
@@ -5627,6 +7755,30 @@ func (*PatchTemplatesIDDraftNotFound) patchTemplatesIDDraftRes() {}
 type PatchTemplatesIDDraftUnauthorized Error
 
 func (*PatchTemplatesIDDraftUnauthorized) patchTemplatesIDDraftRes() {}
+
+type PatchWebhooksIDBadRequest Error
+
+func (*PatchWebhooksIDBadRequest) patchWebhooksIDRes() {}
+
+type PatchWebhooksIDConflict Error
+
+func (*PatchWebhooksIDConflict) patchWebhooksIDRes() {}
+
+type PatchWebhooksIDForbidden Error
+
+func (*PatchWebhooksIDForbidden) patchWebhooksIDRes() {}
+
+type PatchWebhooksIDInternalServerError Error
+
+func (*PatchWebhooksIDInternalServerError) patchWebhooksIDRes() {}
+
+type PatchWebhooksIDNotFound Error
+
+func (*PatchWebhooksIDNotFound) patchWebhooksIDRes() {}
+
+type PatchWebhooksIDUnauthorized Error
+
+func (*PatchWebhooksIDUnauthorized) patchWebhooksIDRes() {}
 
 type PostAutomationsBadRequest Error
 
@@ -5974,6 +8126,128 @@ type PostSendUnauthorized Error
 
 func (*PostSendUnauthorized) postSendRes() {}
 
+type PostStatusSubscriptionsBadRequest Error
+
+func (*PostStatusSubscriptionsBadRequest) postStatusSubscriptionsRes() {}
+
+type PostStatusSubscriptionsConfirmBadRequest Error
+
+func (*PostStatusSubscriptionsConfirmBadRequest) postStatusSubscriptionsConfirmRes() {}
+
+type PostStatusSubscriptionsConfirmInternalServerError Error
+
+func (*PostStatusSubscriptionsConfirmInternalServerError) postStatusSubscriptionsConfirmRes() {}
+
+// PostStatusSubscriptionsConfirmNotFound is response for PostStatusSubscriptionsConfirm operation.
+type PostStatusSubscriptionsConfirmNotFound struct{}
+
+func (*PostStatusSubscriptionsConfirmNotFound) postStatusSubscriptionsConfirmRes() {}
+
+type PostStatusSubscriptionsInternalServerError Error
+
+func (*PostStatusSubscriptionsInternalServerError) postStatusSubscriptionsRes() {}
+
+// PostStatusSubscriptionsNotFound is response for PostStatusSubscriptions operation.
+type PostStatusSubscriptionsNotFound struct{}
+
+func (*PostStatusSubscriptionsNotFound) postStatusSubscriptionsRes() {}
+
+type PostStatusSubscriptionsUnsubscribeBadRequest Error
+
+func (*PostStatusSubscriptionsUnsubscribeBadRequest) postStatusSubscriptionsUnsubscribeRes() {}
+
+type PostStatusSubscriptionsUnsubscribeInternalServerError Error
+
+func (*PostStatusSubscriptionsUnsubscribeInternalServerError) postStatusSubscriptionsUnsubscribeRes() {
+}
+
+// PostStatusSubscriptionsUnsubscribeNotFound is response for PostStatusSubscriptionsUnsubscribe operation.
+type PostStatusSubscriptionsUnsubscribeNotFound struct{}
+
+func (*PostStatusSubscriptionsUnsubscribeNotFound) postStatusSubscriptionsUnsubscribeRes() {}
+
+type PostSuppressionsBadRequest Error
+
+func (*PostSuppressionsBadRequest) postSuppressionsRes() {}
+
+type PostSuppressionsConflict Error
+
+func (*PostSuppressionsConflict) postSuppressionsRes() {}
+
+type PostSuppressionsForbidden Error
+
+func (*PostSuppressionsForbidden) postSuppressionsRes() {}
+
+type PostSuppressionsIDReleaseBadRequest Error
+
+func (*PostSuppressionsIDReleaseBadRequest) postSuppressionsIDReleaseRes() {}
+
+type PostSuppressionsIDReleaseConflict Error
+
+func (*PostSuppressionsIDReleaseConflict) postSuppressionsIDReleaseRes() {}
+
+type PostSuppressionsIDReleaseForbidden Error
+
+func (*PostSuppressionsIDReleaseForbidden) postSuppressionsIDReleaseRes() {}
+
+type PostSuppressionsIDReleaseInternalServerError Error
+
+func (*PostSuppressionsIDReleaseInternalServerError) postSuppressionsIDReleaseRes() {}
+
+type PostSuppressionsIDReleaseNotFound Error
+
+func (*PostSuppressionsIDReleaseNotFound) postSuppressionsIDReleaseRes() {}
+
+type PostSuppressionsIDReleaseUnauthorized Error
+
+func (*PostSuppressionsIDReleaseUnauthorized) postSuppressionsIDReleaseRes() {}
+
+type PostSuppressionsImportBadRequest Error
+
+func (*PostSuppressionsImportBadRequest) postSuppressionsImportRes() {}
+
+type PostSuppressionsImportConflict Error
+
+func (*PostSuppressionsImportConflict) postSuppressionsImportRes() {}
+
+type PostSuppressionsImportForbidden Error
+
+func (*PostSuppressionsImportForbidden) postSuppressionsImportRes() {}
+
+type PostSuppressionsImportInternalServerError Error
+
+func (*PostSuppressionsImportInternalServerError) postSuppressionsImportRes() {}
+
+type PostSuppressionsImportReq struct {
+	Data io.Reader
+}
+
+// Read reads data from the Data reader.
+//
+// Kept to satisfy the io.Reader interface.
+func (s PostSuppressionsImportReq) Read(p []byte) (n int, err error) {
+	if s.Data == nil {
+		return 0, io.EOF
+	}
+	return s.Data.Read(p)
+}
+
+type PostSuppressionsImportRequestEntityTooLarge Error
+
+func (*PostSuppressionsImportRequestEntityTooLarge) postSuppressionsImportRes() {}
+
+type PostSuppressionsImportUnauthorized Error
+
+func (*PostSuppressionsImportUnauthorized) postSuppressionsImportRes() {}
+
+type PostSuppressionsInternalServerError Error
+
+func (*PostSuppressionsInternalServerError) postSuppressionsRes() {}
+
+type PostSuppressionsUnauthorized Error
+
+func (*PostSuppressionsUnauthorized) postSuppressionsRes() {}
+
 type PostTemplatesBadRequest Error
 
 func (*PostTemplatesBadRequest) postTemplatesRes() {}
@@ -6185,6 +8459,84 @@ func (*PostWebhooksConflict) postWebhooksRes() {}
 type PostWebhooksForbidden Error
 
 func (*PostWebhooksForbidden) postWebhooksRes() {}
+
+type PostWebhooksIDDeliveriesDeliveryIDReplayBadRequest Error
+
+func (*PostWebhooksIDDeliveriesDeliveryIDReplayBadRequest) postWebhooksIDDeliveriesDeliveryIDReplayRes() {
+}
+
+type PostWebhooksIDDeliveriesDeliveryIDReplayConflict Error
+
+func (*PostWebhooksIDDeliveriesDeliveryIDReplayConflict) postWebhooksIDDeliveriesDeliveryIDReplayRes() {
+}
+
+type PostWebhooksIDDeliveriesDeliveryIDReplayForbidden Error
+
+func (*PostWebhooksIDDeliveriesDeliveryIDReplayForbidden) postWebhooksIDDeliveriesDeliveryIDReplayRes() {
+}
+
+type PostWebhooksIDDeliveriesDeliveryIDReplayInternalServerError Error
+
+func (*PostWebhooksIDDeliveriesDeliveryIDReplayInternalServerError) postWebhooksIDDeliveriesDeliveryIDReplayRes() {
+}
+
+type PostWebhooksIDDeliveriesDeliveryIDReplayNotFound Error
+
+func (*PostWebhooksIDDeliveriesDeliveryIDReplayNotFound) postWebhooksIDDeliveriesDeliveryIDReplayRes() {
+}
+
+type PostWebhooksIDDeliveriesDeliveryIDReplayUnauthorized Error
+
+func (*PostWebhooksIDDeliveriesDeliveryIDReplayUnauthorized) postWebhooksIDDeliveriesDeliveryIDReplayRes() {
+}
+
+type PostWebhooksIDSecretRotateBadRequest Error
+
+func (*PostWebhooksIDSecretRotateBadRequest) postWebhooksIDSecretRotateRes() {}
+
+type PostWebhooksIDSecretRotateConflict Error
+
+func (*PostWebhooksIDSecretRotateConflict) postWebhooksIDSecretRotateRes() {}
+
+type PostWebhooksIDSecretRotateForbidden Error
+
+func (*PostWebhooksIDSecretRotateForbidden) postWebhooksIDSecretRotateRes() {}
+
+type PostWebhooksIDSecretRotateInternalServerError Error
+
+func (*PostWebhooksIDSecretRotateInternalServerError) postWebhooksIDSecretRotateRes() {}
+
+type PostWebhooksIDSecretRotateNotFound Error
+
+func (*PostWebhooksIDSecretRotateNotFound) postWebhooksIDSecretRotateRes() {}
+
+type PostWebhooksIDSecretRotateUnauthorized Error
+
+func (*PostWebhooksIDSecretRotateUnauthorized) postWebhooksIDSecretRotateRes() {}
+
+type PostWebhooksIDTestBadRequest Error
+
+func (*PostWebhooksIDTestBadRequest) postWebhooksIDTestRes() {}
+
+type PostWebhooksIDTestConflict Error
+
+func (*PostWebhooksIDTestConflict) postWebhooksIDTestRes() {}
+
+type PostWebhooksIDTestForbidden Error
+
+func (*PostWebhooksIDTestForbidden) postWebhooksIDTestRes() {}
+
+type PostWebhooksIDTestInternalServerError Error
+
+func (*PostWebhooksIDTestInternalServerError) postWebhooksIDTestRes() {}
+
+type PostWebhooksIDTestNotFound Error
+
+func (*PostWebhooksIDTestNotFound) postWebhooksIDTestRes() {}
+
+type PostWebhooksIDTestUnauthorized Error
+
+func (*PostWebhooksIDTestUnauthorized) postWebhooksIDTestRes() {}
 
 type PostWebhooksInternalServerError Error
 
@@ -6908,6 +9260,43 @@ func (s *RejectedMessageReason) UnmarshalText(data []byte) error {
 	}
 }
 
+// Ref: #/components/schemas/ReleaseSuppressionRequest
+type ReleaseSuppressionRequest struct {
+	ExpectedVersion int    `json:"expected_version"`
+	Acknowledge     bool   `json:"acknowledge"`
+	Justification   string `json:"justification"`
+}
+
+// GetExpectedVersion returns the value of ExpectedVersion.
+func (s *ReleaseSuppressionRequest) GetExpectedVersion() int {
+	return s.ExpectedVersion
+}
+
+// GetAcknowledge returns the value of Acknowledge.
+func (s *ReleaseSuppressionRequest) GetAcknowledge() bool {
+	return s.Acknowledge
+}
+
+// GetJustification returns the value of Justification.
+func (s *ReleaseSuppressionRequest) GetJustification() string {
+	return s.Justification
+}
+
+// SetExpectedVersion sets the value of ExpectedVersion.
+func (s *ReleaseSuppressionRequest) SetExpectedVersion(val int) {
+	s.ExpectedVersion = val
+}
+
+// SetAcknowledge sets the value of Acknowledge.
+func (s *ReleaseSuppressionRequest) SetAcknowledge(val bool) {
+	s.Acknowledge = val
+}
+
+// SetJustification sets the value of Justification.
+func (s *ReleaseSuppressionRequest) SetJustification(val string) {
+	s.Justification = val
+}
+
 // Ref: #/components/schemas/RenameAutomationRequest
 type RenameAutomationRequest struct {
 	Name string `json:"name"`
@@ -6961,6 +9350,156 @@ func (s *RotateDKIMResponse) SetStatus(val string) {
 }
 
 func (*RotateDKIMResponse) postDomainsIDDkimRotateRes() {}
+
+// Ref: #/components/schemas/RotateWebhookSecretResponse
+type RotateWebhookSecretResponse struct {
+	Endpoint WebhookEndpoint `json:"endpoint"`
+	// Novo secret; presente somente na primeira resposta da rotação.
+	Secret    OptString `json:"secret"`
+	RotatedAt Timestamp `json:"rotated_at"`
+}
+
+// GetEndpoint returns the value of Endpoint.
+func (s *RotateWebhookSecretResponse) GetEndpoint() WebhookEndpoint {
+	return s.Endpoint
+}
+
+// GetSecret returns the value of Secret.
+func (s *RotateWebhookSecretResponse) GetSecret() OptString {
+	return s.Secret
+}
+
+// GetRotatedAt returns the value of RotatedAt.
+func (s *RotateWebhookSecretResponse) GetRotatedAt() Timestamp {
+	return s.RotatedAt
+}
+
+// SetEndpoint sets the value of Endpoint.
+func (s *RotateWebhookSecretResponse) SetEndpoint(val WebhookEndpoint) {
+	s.Endpoint = val
+}
+
+// SetSecret sets the value of Secret.
+func (s *RotateWebhookSecretResponse) SetSecret(val OptString) {
+	s.Secret = val
+}
+
+// SetRotatedAt sets the value of RotatedAt.
+func (s *RotateWebhookSecretResponse) SetRotatedAt(val Timestamp) {
+	s.RotatedAt = val
+}
+
+// RotateWebhookSecretResponseHeaders wraps RotateWebhookSecretResponse with response headers.
+type RotateWebhookSecretResponseHeaders struct {
+	CacheControl OptString
+	Response     RotateWebhookSecretResponse
+}
+
+// GetCacheControl returns the value of CacheControl.
+func (s *RotateWebhookSecretResponseHeaders) GetCacheControl() OptString {
+	return s.CacheControl
+}
+
+// GetResponse returns the value of Response.
+func (s *RotateWebhookSecretResponseHeaders) GetResponse() RotateWebhookSecretResponse {
+	return s.Response
+}
+
+// SetCacheControl sets the value of CacheControl.
+func (s *RotateWebhookSecretResponseHeaders) SetCacheControl(val OptString) {
+	s.CacheControl = val
+}
+
+// SetResponse sets the value of Response.
+func (s *RotateWebhookSecretResponseHeaders) SetResponse(val RotateWebhookSecretResponse) {
+	s.Response = val
+}
+
+func (*RotateWebhookSecretResponseHeaders) postWebhooksIDSecretRotateRes() {}
+
+// Ref: #/components/schemas/SPFAuthenticationResult
+type SPFAuthenticationResult string
+
+const (
+	SPFAuthenticationResultPass         SPFAuthenticationResult = "pass"
+	SPFAuthenticationResultFail         SPFAuthenticationResult = "fail"
+	SPFAuthenticationResultSoftfail     SPFAuthenticationResult = "softfail"
+	SPFAuthenticationResultNeutral      SPFAuthenticationResult = "neutral"
+	SPFAuthenticationResultNone         SPFAuthenticationResult = "none"
+	SPFAuthenticationResultTemperror    SPFAuthenticationResult = "temperror"
+	SPFAuthenticationResultPermerror    SPFAuthenticationResult = "permerror"
+	SPFAuthenticationResultNotEvaluated SPFAuthenticationResult = "not_evaluated"
+)
+
+// AllValues returns all SPFAuthenticationResult values.
+func (SPFAuthenticationResult) AllValues() []SPFAuthenticationResult {
+	return []SPFAuthenticationResult{
+		SPFAuthenticationResultPass,
+		SPFAuthenticationResultFail,
+		SPFAuthenticationResultSoftfail,
+		SPFAuthenticationResultNeutral,
+		SPFAuthenticationResultNone,
+		SPFAuthenticationResultTemperror,
+		SPFAuthenticationResultPermerror,
+		SPFAuthenticationResultNotEvaluated,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s SPFAuthenticationResult) MarshalText() ([]byte, error) {
+	switch s {
+	case SPFAuthenticationResultPass:
+		return []byte(s), nil
+	case SPFAuthenticationResultFail:
+		return []byte(s), nil
+	case SPFAuthenticationResultSoftfail:
+		return []byte(s), nil
+	case SPFAuthenticationResultNeutral:
+		return []byte(s), nil
+	case SPFAuthenticationResultNone:
+		return []byte(s), nil
+	case SPFAuthenticationResultTemperror:
+		return []byte(s), nil
+	case SPFAuthenticationResultPermerror:
+		return []byte(s), nil
+	case SPFAuthenticationResultNotEvaluated:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *SPFAuthenticationResult) UnmarshalText(data []byte) error {
+	switch SPFAuthenticationResult(data) {
+	case SPFAuthenticationResultPass:
+		*s = SPFAuthenticationResultPass
+		return nil
+	case SPFAuthenticationResultFail:
+		*s = SPFAuthenticationResultFail
+		return nil
+	case SPFAuthenticationResultSoftfail:
+		*s = SPFAuthenticationResultSoftfail
+		return nil
+	case SPFAuthenticationResultNeutral:
+		*s = SPFAuthenticationResultNeutral
+		return nil
+	case SPFAuthenticationResultNone:
+		*s = SPFAuthenticationResultNone
+		return nil
+	case SPFAuthenticationResultTemperror:
+		*s = SPFAuthenticationResultTemperror
+		return nil
+	case SPFAuthenticationResultPermerror:
+		*s = SPFAuthenticationResultPermerror
+		return nil
+	case SPFAuthenticationResultNotEvaluated:
+		*s = SPFAuthenticationResultNotEvaluated
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
 
 // Ref: #/components/schemas/Segment
 type Segment struct {
@@ -7387,6 +9926,802 @@ func (s *SendResult) SetRejected(val []RejectedMessage) {
 
 func (*SendResult) postSendRes() {}
 
+// Ref: #/components/schemas/StatusSubscriptionRequest
+type StatusSubscriptionRequest struct {
+	Email        string                                      `json:"email"`
+	ComponentIds []StatusSubscriptionRequestComponentIdsItem `json:"component_ids"`
+}
+
+// GetEmail returns the value of Email.
+func (s *StatusSubscriptionRequest) GetEmail() string {
+	return s.Email
+}
+
+// GetComponentIds returns the value of ComponentIds.
+func (s *StatusSubscriptionRequest) GetComponentIds() []StatusSubscriptionRequestComponentIdsItem {
+	return s.ComponentIds
+}
+
+// SetEmail sets the value of Email.
+func (s *StatusSubscriptionRequest) SetEmail(val string) {
+	s.Email = val
+}
+
+// SetComponentIds sets the value of ComponentIds.
+func (s *StatusSubscriptionRequest) SetComponentIds(val []StatusSubscriptionRequestComponentIdsItem) {
+	s.ComponentIds = val
+}
+
+type StatusSubscriptionRequestComponentIdsItem string
+
+const (
+	StatusSubscriptionRequestComponentIdsItemAPI         StatusSubscriptionRequestComponentIdsItem = "api"
+	StatusSubscriptionRequestComponentIdsItemApp         StatusSubscriptionRequestComponentIdsItem = "app"
+	StatusSubscriptionRequestComponentIdsItemInbound     StatusSubscriptionRequestComponentIdsItem = "inbound"
+	StatusSubscriptionRequestComponentIdsItemAutomations StatusSubscriptionRequestComponentIdsItem = "automations"
+	StatusSubscriptionRequestComponentIdsItemWebhooks    StatusSubscriptionRequestComponentIdsItem = "webhooks"
+	StatusSubscriptionRequestComponentIdsItemTracking    StatusSubscriptionRequestComponentIdsItem = "tracking"
+)
+
+// AllValues returns all StatusSubscriptionRequestComponentIdsItem values.
+func (StatusSubscriptionRequestComponentIdsItem) AllValues() []StatusSubscriptionRequestComponentIdsItem {
+	return []StatusSubscriptionRequestComponentIdsItem{
+		StatusSubscriptionRequestComponentIdsItemAPI,
+		StatusSubscriptionRequestComponentIdsItemApp,
+		StatusSubscriptionRequestComponentIdsItemInbound,
+		StatusSubscriptionRequestComponentIdsItemAutomations,
+		StatusSubscriptionRequestComponentIdsItemWebhooks,
+		StatusSubscriptionRequestComponentIdsItemTracking,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s StatusSubscriptionRequestComponentIdsItem) MarshalText() ([]byte, error) {
+	switch s {
+	case StatusSubscriptionRequestComponentIdsItemAPI:
+		return []byte(s), nil
+	case StatusSubscriptionRequestComponentIdsItemApp:
+		return []byte(s), nil
+	case StatusSubscriptionRequestComponentIdsItemInbound:
+		return []byte(s), nil
+	case StatusSubscriptionRequestComponentIdsItemAutomations:
+		return []byte(s), nil
+	case StatusSubscriptionRequestComponentIdsItemWebhooks:
+		return []byte(s), nil
+	case StatusSubscriptionRequestComponentIdsItemTracking:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *StatusSubscriptionRequestComponentIdsItem) UnmarshalText(data []byte) error {
+	switch StatusSubscriptionRequestComponentIdsItem(data) {
+	case StatusSubscriptionRequestComponentIdsItemAPI:
+		*s = StatusSubscriptionRequestComponentIdsItemAPI
+		return nil
+	case StatusSubscriptionRequestComponentIdsItemApp:
+		*s = StatusSubscriptionRequestComponentIdsItemApp
+		return nil
+	case StatusSubscriptionRequestComponentIdsItemInbound:
+		*s = StatusSubscriptionRequestComponentIdsItemInbound
+		return nil
+	case StatusSubscriptionRequestComponentIdsItemAutomations:
+		*s = StatusSubscriptionRequestComponentIdsItemAutomations
+		return nil
+	case StatusSubscriptionRequestComponentIdsItemWebhooks:
+		*s = StatusSubscriptionRequestComponentIdsItemWebhooks
+		return nil
+	case StatusSubscriptionRequestComponentIdsItemTracking:
+		*s = StatusSubscriptionRequestComponentIdsItemTracking
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/StatusSubscriptionTokenRequest
+type StatusSubscriptionTokenRequest struct {
+	Token string `json:"token"`
+}
+
+// GetToken returns the value of Token.
+func (s *StatusSubscriptionTokenRequest) GetToken() string {
+	return s.Token
+}
+
+// SetToken sets the value of Token.
+func (s *StatusSubscriptionTokenRequest) SetToken(val string) {
+	s.Token = val
+}
+
+// Ref: #/components/schemas/Suppression
+type Suppression struct {
+	ID     UUID              `json:"id"`
+	Email  string            `json:"email"`
+	Reason SuppressionReason `json:"reason"`
+	Origin SuppressionOrigin `json:"origin"`
+	State  SuppressionState  `json:"state"`
+	Scope  string            `json:"scope"`
+	// Observação segura fornecida pelo tenant; nunca contém o diagnóstico SMTP bruto.
+	Note            OptNilString    `json:"note"`
+	DomainID        OptNilUUID      `json:"domain_id"`
+	SourceMessageID OptNilUUID      `json:"source_message_id"`
+	SMTPCode        OptNilInt       `json:"smtp_code"`
+	ExpiresAt       OptNilTimestamp `json:"expires_at"`
+	ReleasedAt      OptNilTimestamp `json:"released_at"`
+	ReleaseReason   OptNilString    `json:"release_reason"`
+	Version         int             `json:"version"`
+	CreatedAt       Timestamp       `json:"created_at"`
+	UpdatedAt       Timestamp       `json:"updated_at"`
+}
+
+// GetID returns the value of ID.
+func (s *Suppression) GetID() UUID {
+	return s.ID
+}
+
+// GetEmail returns the value of Email.
+func (s *Suppression) GetEmail() string {
+	return s.Email
+}
+
+// GetReason returns the value of Reason.
+func (s *Suppression) GetReason() SuppressionReason {
+	return s.Reason
+}
+
+// GetOrigin returns the value of Origin.
+func (s *Suppression) GetOrigin() SuppressionOrigin {
+	return s.Origin
+}
+
+// GetState returns the value of State.
+func (s *Suppression) GetState() SuppressionState {
+	return s.State
+}
+
+// GetScope returns the value of Scope.
+func (s *Suppression) GetScope() string {
+	return s.Scope
+}
+
+// GetNote returns the value of Note.
+func (s *Suppression) GetNote() OptNilString {
+	return s.Note
+}
+
+// GetDomainID returns the value of DomainID.
+func (s *Suppression) GetDomainID() OptNilUUID {
+	return s.DomainID
+}
+
+// GetSourceMessageID returns the value of SourceMessageID.
+func (s *Suppression) GetSourceMessageID() OptNilUUID {
+	return s.SourceMessageID
+}
+
+// GetSMTPCode returns the value of SMTPCode.
+func (s *Suppression) GetSMTPCode() OptNilInt {
+	return s.SMTPCode
+}
+
+// GetExpiresAt returns the value of ExpiresAt.
+func (s *Suppression) GetExpiresAt() OptNilTimestamp {
+	return s.ExpiresAt
+}
+
+// GetReleasedAt returns the value of ReleasedAt.
+func (s *Suppression) GetReleasedAt() OptNilTimestamp {
+	return s.ReleasedAt
+}
+
+// GetReleaseReason returns the value of ReleaseReason.
+func (s *Suppression) GetReleaseReason() OptNilString {
+	return s.ReleaseReason
+}
+
+// GetVersion returns the value of Version.
+func (s *Suppression) GetVersion() int {
+	return s.Version
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *Suppression) GetCreatedAt() Timestamp {
+	return s.CreatedAt
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *Suppression) GetUpdatedAt() Timestamp {
+	return s.UpdatedAt
+}
+
+// SetID sets the value of ID.
+func (s *Suppression) SetID(val UUID) {
+	s.ID = val
+}
+
+// SetEmail sets the value of Email.
+func (s *Suppression) SetEmail(val string) {
+	s.Email = val
+}
+
+// SetReason sets the value of Reason.
+func (s *Suppression) SetReason(val SuppressionReason) {
+	s.Reason = val
+}
+
+// SetOrigin sets the value of Origin.
+func (s *Suppression) SetOrigin(val SuppressionOrigin) {
+	s.Origin = val
+}
+
+// SetState sets the value of State.
+func (s *Suppression) SetState(val SuppressionState) {
+	s.State = val
+}
+
+// SetScope sets the value of Scope.
+func (s *Suppression) SetScope(val string) {
+	s.Scope = val
+}
+
+// SetNote sets the value of Note.
+func (s *Suppression) SetNote(val OptNilString) {
+	s.Note = val
+}
+
+// SetDomainID sets the value of DomainID.
+func (s *Suppression) SetDomainID(val OptNilUUID) {
+	s.DomainID = val
+}
+
+// SetSourceMessageID sets the value of SourceMessageID.
+func (s *Suppression) SetSourceMessageID(val OptNilUUID) {
+	s.SourceMessageID = val
+}
+
+// SetSMTPCode sets the value of SMTPCode.
+func (s *Suppression) SetSMTPCode(val OptNilInt) {
+	s.SMTPCode = val
+}
+
+// SetExpiresAt sets the value of ExpiresAt.
+func (s *Suppression) SetExpiresAt(val OptNilTimestamp) {
+	s.ExpiresAt = val
+}
+
+// SetReleasedAt sets the value of ReleasedAt.
+func (s *Suppression) SetReleasedAt(val OptNilTimestamp) {
+	s.ReleasedAt = val
+}
+
+// SetReleaseReason sets the value of ReleaseReason.
+func (s *Suppression) SetReleaseReason(val OptNilString) {
+	s.ReleaseReason = val
+}
+
+// SetVersion sets the value of Version.
+func (s *Suppression) SetVersion(val int) {
+	s.Version = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *Suppression) SetCreatedAt(val Timestamp) {
+	s.CreatedAt = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *Suppression) SetUpdatedAt(val Timestamp) {
+	s.UpdatedAt = val
+}
+
+func (*Suppression) postSuppressionsIDReleaseRes() {}
+func (*Suppression) postSuppressionsRes()          {}
+
+// Ref: #/components/schemas/SuppressionDetail
+type SuppressionDetail struct {
+	Suppression       Suppression               `json:"suppression"`
+	History           []SuppressionHistoryEvent `json:"history"`
+	NextHistoryCursor OptString                 `json:"next_history_cursor"`
+}
+
+// GetSuppression returns the value of Suppression.
+func (s *SuppressionDetail) GetSuppression() Suppression {
+	return s.Suppression
+}
+
+// GetHistory returns the value of History.
+func (s *SuppressionDetail) GetHistory() []SuppressionHistoryEvent {
+	return s.History
+}
+
+// GetNextHistoryCursor returns the value of NextHistoryCursor.
+func (s *SuppressionDetail) GetNextHistoryCursor() OptString {
+	return s.NextHistoryCursor
+}
+
+// SetSuppression sets the value of Suppression.
+func (s *SuppressionDetail) SetSuppression(val Suppression) {
+	s.Suppression = val
+}
+
+// SetHistory sets the value of History.
+func (s *SuppressionDetail) SetHistory(val []SuppressionHistoryEvent) {
+	s.History = val
+}
+
+// SetNextHistoryCursor sets the value of NextHistoryCursor.
+func (s *SuppressionDetail) SetNextHistoryCursor(val OptString) {
+	s.NextHistoryCursor = val
+}
+
+func (*SuppressionDetail) getSuppressionsIDRes() {}
+
+// Ref: #/components/schemas/SuppressionHistoryEvent
+type SuppressionHistoryEvent struct {
+	ID                 UUID                             `json:"id"`
+	Action             SuppressionHistoryEventAction    `json:"action"`
+	Origin             SuppressionOrigin                `json:"origin"`
+	Reason             SuppressionReason                `json:"reason"`
+	ActorType          SuppressionHistoryEventActorType `json:"actor_type"`
+	ActorID            OptNilUUID                       `json:"actor_id"`
+	Justification      OptNilString                     `json:"justification"`
+	SuppressionVersion int                              `json:"suppression_version"`
+	OccurredAt         Timestamp                        `json:"occurred_at"`
+}
+
+// GetID returns the value of ID.
+func (s *SuppressionHistoryEvent) GetID() UUID {
+	return s.ID
+}
+
+// GetAction returns the value of Action.
+func (s *SuppressionHistoryEvent) GetAction() SuppressionHistoryEventAction {
+	return s.Action
+}
+
+// GetOrigin returns the value of Origin.
+func (s *SuppressionHistoryEvent) GetOrigin() SuppressionOrigin {
+	return s.Origin
+}
+
+// GetReason returns the value of Reason.
+func (s *SuppressionHistoryEvent) GetReason() SuppressionReason {
+	return s.Reason
+}
+
+// GetActorType returns the value of ActorType.
+func (s *SuppressionHistoryEvent) GetActorType() SuppressionHistoryEventActorType {
+	return s.ActorType
+}
+
+// GetActorID returns the value of ActorID.
+func (s *SuppressionHistoryEvent) GetActorID() OptNilUUID {
+	return s.ActorID
+}
+
+// GetJustification returns the value of Justification.
+func (s *SuppressionHistoryEvent) GetJustification() OptNilString {
+	return s.Justification
+}
+
+// GetSuppressionVersion returns the value of SuppressionVersion.
+func (s *SuppressionHistoryEvent) GetSuppressionVersion() int {
+	return s.SuppressionVersion
+}
+
+// GetOccurredAt returns the value of OccurredAt.
+func (s *SuppressionHistoryEvent) GetOccurredAt() Timestamp {
+	return s.OccurredAt
+}
+
+// SetID sets the value of ID.
+func (s *SuppressionHistoryEvent) SetID(val UUID) {
+	s.ID = val
+}
+
+// SetAction sets the value of Action.
+func (s *SuppressionHistoryEvent) SetAction(val SuppressionHistoryEventAction) {
+	s.Action = val
+}
+
+// SetOrigin sets the value of Origin.
+func (s *SuppressionHistoryEvent) SetOrigin(val SuppressionOrigin) {
+	s.Origin = val
+}
+
+// SetReason sets the value of Reason.
+func (s *SuppressionHistoryEvent) SetReason(val SuppressionReason) {
+	s.Reason = val
+}
+
+// SetActorType sets the value of ActorType.
+func (s *SuppressionHistoryEvent) SetActorType(val SuppressionHistoryEventActorType) {
+	s.ActorType = val
+}
+
+// SetActorID sets the value of ActorID.
+func (s *SuppressionHistoryEvent) SetActorID(val OptNilUUID) {
+	s.ActorID = val
+}
+
+// SetJustification sets the value of Justification.
+func (s *SuppressionHistoryEvent) SetJustification(val OptNilString) {
+	s.Justification = val
+}
+
+// SetSuppressionVersion sets the value of SuppressionVersion.
+func (s *SuppressionHistoryEvent) SetSuppressionVersion(val int) {
+	s.SuppressionVersion = val
+}
+
+// SetOccurredAt sets the value of OccurredAt.
+func (s *SuppressionHistoryEvent) SetOccurredAt(val Timestamp) {
+	s.OccurredAt = val
+}
+
+type SuppressionHistoryEventAction string
+
+const (
+	SuppressionHistoryEventActionCreated     SuppressionHistoryEventAction = "created"
+	SuppressionHistoryEventActionUpdated     SuppressionHistoryEventAction = "updated"
+	SuppressionHistoryEventActionReleased    SuppressionHistoryEventAction = "released"
+	SuppressionHistoryEventActionReactivated SuppressionHistoryEventAction = "reactivated"
+)
+
+// AllValues returns all SuppressionHistoryEventAction values.
+func (SuppressionHistoryEventAction) AllValues() []SuppressionHistoryEventAction {
+	return []SuppressionHistoryEventAction{
+		SuppressionHistoryEventActionCreated,
+		SuppressionHistoryEventActionUpdated,
+		SuppressionHistoryEventActionReleased,
+		SuppressionHistoryEventActionReactivated,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s SuppressionHistoryEventAction) MarshalText() ([]byte, error) {
+	switch s {
+	case SuppressionHistoryEventActionCreated:
+		return []byte(s), nil
+	case SuppressionHistoryEventActionUpdated:
+		return []byte(s), nil
+	case SuppressionHistoryEventActionReleased:
+		return []byte(s), nil
+	case SuppressionHistoryEventActionReactivated:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *SuppressionHistoryEventAction) UnmarshalText(data []byte) error {
+	switch SuppressionHistoryEventAction(data) {
+	case SuppressionHistoryEventActionCreated:
+		*s = SuppressionHistoryEventActionCreated
+		return nil
+	case SuppressionHistoryEventActionUpdated:
+		*s = SuppressionHistoryEventActionUpdated
+		return nil
+	case SuppressionHistoryEventActionReleased:
+		*s = SuppressionHistoryEventActionReleased
+		return nil
+	case SuppressionHistoryEventActionReactivated:
+		*s = SuppressionHistoryEventActionReactivated
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type SuppressionHistoryEventActorType string
+
+const (
+	SuppressionHistoryEventActorTypeSystem SuppressionHistoryEventActorType = "system"
+	SuppressionHistoryEventActorTypeUser   SuppressionHistoryEventActorType = "user"
+	SuppressionHistoryEventActorTypeAPIKey SuppressionHistoryEventActorType = "api_key"
+)
+
+// AllValues returns all SuppressionHistoryEventActorType values.
+func (SuppressionHistoryEventActorType) AllValues() []SuppressionHistoryEventActorType {
+	return []SuppressionHistoryEventActorType{
+		SuppressionHistoryEventActorTypeSystem,
+		SuppressionHistoryEventActorTypeUser,
+		SuppressionHistoryEventActorTypeAPIKey,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s SuppressionHistoryEventActorType) MarshalText() ([]byte, error) {
+	switch s {
+	case SuppressionHistoryEventActorTypeSystem:
+		return []byte(s), nil
+	case SuppressionHistoryEventActorTypeUser:
+		return []byte(s), nil
+	case SuppressionHistoryEventActorTypeAPIKey:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *SuppressionHistoryEventActorType) UnmarshalText(data []byte) error {
+	switch SuppressionHistoryEventActorType(data) {
+	case SuppressionHistoryEventActorTypeSystem:
+		*s = SuppressionHistoryEventActorTypeSystem
+		return nil
+	case SuppressionHistoryEventActorTypeUser:
+		*s = SuppressionHistoryEventActorTypeUser
+		return nil
+	case SuppressionHistoryEventActorTypeAPIKey:
+		*s = SuppressionHistoryEventActorTypeAPIKey
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/SuppressionImportResult
+type SuppressionImportResult struct {
+	Total       int `json:"total"`
+	Created     int `json:"created"`
+	Reactivated int `json:"reactivated"`
+	Skipped     int `json:"skipped"`
+	Duplicates  int `json:"duplicates"`
+}
+
+// GetTotal returns the value of Total.
+func (s *SuppressionImportResult) GetTotal() int {
+	return s.Total
+}
+
+// GetCreated returns the value of Created.
+func (s *SuppressionImportResult) GetCreated() int {
+	return s.Created
+}
+
+// GetReactivated returns the value of Reactivated.
+func (s *SuppressionImportResult) GetReactivated() int {
+	return s.Reactivated
+}
+
+// GetSkipped returns the value of Skipped.
+func (s *SuppressionImportResult) GetSkipped() int {
+	return s.Skipped
+}
+
+// GetDuplicates returns the value of Duplicates.
+func (s *SuppressionImportResult) GetDuplicates() int {
+	return s.Duplicates
+}
+
+// SetTotal sets the value of Total.
+func (s *SuppressionImportResult) SetTotal(val int) {
+	s.Total = val
+}
+
+// SetCreated sets the value of Created.
+func (s *SuppressionImportResult) SetCreated(val int) {
+	s.Created = val
+}
+
+// SetReactivated sets the value of Reactivated.
+func (s *SuppressionImportResult) SetReactivated(val int) {
+	s.Reactivated = val
+}
+
+// SetSkipped sets the value of Skipped.
+func (s *SuppressionImportResult) SetSkipped(val int) {
+	s.Skipped = val
+}
+
+// SetDuplicates sets the value of Duplicates.
+func (s *SuppressionImportResult) SetDuplicates(val int) {
+	s.Duplicates = val
+}
+
+func (*SuppressionImportResult) postSuppressionsImportRes() {}
+
+// Ref: #/components/schemas/SuppressionList
+type SuppressionList struct {
+	Data       []Suppression `json:"data"`
+	NextCursor OptString     `json:"next_cursor"`
+}
+
+// GetData returns the value of Data.
+func (s *SuppressionList) GetData() []Suppression {
+	return s.Data
+}
+
+// GetNextCursor returns the value of NextCursor.
+func (s *SuppressionList) GetNextCursor() OptString {
+	return s.NextCursor
+}
+
+// SetData sets the value of Data.
+func (s *SuppressionList) SetData(val []Suppression) {
+	s.Data = val
+}
+
+// SetNextCursor sets the value of NextCursor.
+func (s *SuppressionList) SetNextCursor(val OptString) {
+	s.NextCursor = val
+}
+
+func (*SuppressionList) getSuppressionsRes() {}
+
+// Ref: #/components/schemas/SuppressionOrigin
+type SuppressionOrigin string
+
+const (
+	SuppressionOriginManual    SuppressionOrigin = "manual"
+	SuppressionOriginImport    SuppressionOrigin = "import"
+	SuppressionOriginAutomatic SuppressionOrigin = "automatic"
+)
+
+// AllValues returns all SuppressionOrigin values.
+func (SuppressionOrigin) AllValues() []SuppressionOrigin {
+	return []SuppressionOrigin{
+		SuppressionOriginManual,
+		SuppressionOriginImport,
+		SuppressionOriginAutomatic,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s SuppressionOrigin) MarshalText() ([]byte, error) {
+	switch s {
+	case SuppressionOriginManual:
+		return []byte(s), nil
+	case SuppressionOriginImport:
+		return []byte(s), nil
+	case SuppressionOriginAutomatic:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *SuppressionOrigin) UnmarshalText(data []byte) error {
+	switch SuppressionOrigin(data) {
+	case SuppressionOriginManual:
+		*s = SuppressionOriginManual
+		return nil
+	case SuppressionOriginImport:
+		*s = SuppressionOriginImport
+		return nil
+	case SuppressionOriginAutomatic:
+		*s = SuppressionOriginAutomatic
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/SuppressionReason
+type SuppressionReason string
+
+const (
+	SuppressionReasonHardBounce     SuppressionReason = "hard_bounce"
+	SuppressionReasonComplaint      SuppressionReason = "complaint"
+	SuppressionReasonUnsubscribe    SuppressionReason = "unsubscribe"
+	SuppressionReasonManual         SuppressionReason = "manual"
+	SuppressionReasonInvalidAddress SuppressionReason = "invalid_address"
+	SuppressionReasonSpamTrap       SuppressionReason = "spam_trap"
+)
+
+// AllValues returns all SuppressionReason values.
+func (SuppressionReason) AllValues() []SuppressionReason {
+	return []SuppressionReason{
+		SuppressionReasonHardBounce,
+		SuppressionReasonComplaint,
+		SuppressionReasonUnsubscribe,
+		SuppressionReasonManual,
+		SuppressionReasonInvalidAddress,
+		SuppressionReasonSpamTrap,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s SuppressionReason) MarshalText() ([]byte, error) {
+	switch s {
+	case SuppressionReasonHardBounce:
+		return []byte(s), nil
+	case SuppressionReasonComplaint:
+		return []byte(s), nil
+	case SuppressionReasonUnsubscribe:
+		return []byte(s), nil
+	case SuppressionReasonManual:
+		return []byte(s), nil
+	case SuppressionReasonInvalidAddress:
+		return []byte(s), nil
+	case SuppressionReasonSpamTrap:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *SuppressionReason) UnmarshalText(data []byte) error {
+	switch SuppressionReason(data) {
+	case SuppressionReasonHardBounce:
+		*s = SuppressionReasonHardBounce
+		return nil
+	case SuppressionReasonComplaint:
+		*s = SuppressionReasonComplaint
+		return nil
+	case SuppressionReasonUnsubscribe:
+		*s = SuppressionReasonUnsubscribe
+		return nil
+	case SuppressionReasonManual:
+		*s = SuppressionReasonManual
+		return nil
+	case SuppressionReasonInvalidAddress:
+		*s = SuppressionReasonInvalidAddress
+		return nil
+	case SuppressionReasonSpamTrap:
+		*s = SuppressionReasonSpamTrap
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/SuppressionState
+type SuppressionState string
+
+const (
+	SuppressionStateActive   SuppressionState = "active"
+	SuppressionStateExpired  SuppressionState = "expired"
+	SuppressionStateReleased SuppressionState = "released"
+)
+
+// AllValues returns all SuppressionState values.
+func (SuppressionState) AllValues() []SuppressionState {
+	return []SuppressionState{
+		SuppressionStateActive,
+		SuppressionStateExpired,
+		SuppressionStateReleased,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s SuppressionState) MarshalText() ([]byte, error) {
+	switch s {
+	case SuppressionStateActive:
+		return []byte(s), nil
+	case SuppressionStateExpired:
+		return []byte(s), nil
+	case SuppressionStateReleased:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *SuppressionState) UnmarshalText(data []byte) error {
+	switch SuppressionState(data) {
+	case SuppressionStateActive:
+		*s = SuppressionStateActive
+		return nil
+	case SuppressionStateExpired:
+		*s = SuppressionStateExpired
+		return nil
+	case SuppressionStateReleased:
+		*s = SuppressionStateReleased
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Ref: #/components/schemas/TemplateAssetPolicy
 type TemplateAssetPolicy struct {
 	UploadURL    url.URL                         `json:"upload_url"`
@@ -7720,74 +11055,91 @@ func (s *TooManyRequestsHeaders) SetResponse(val Error) {
 	s.Response = val
 }
 
-func (*TooManyRequestsHeaders) deleteAutomationsIDRes()                    {}
-func (*TooManyRequestsHeaders) deleteContactsIDRes()                       {}
-func (*TooManyRequestsHeaders) deleteDomainsIDRes()                        {}
-func (*TooManyRequestsHeaders) deleteEventsIDRes()                         {}
-func (*TooManyRequestsHeaders) deleteSegmentsIDContactsContactIDRes()      {}
-func (*TooManyRequestsHeaders) deleteSegmentsIDRes()                       {}
-func (*TooManyRequestsHeaders) deleteTemplatesIDRes()                      {}
-func (*TooManyRequestsHeaders) deleteThemesIDRes()                         {}
-func (*TooManyRequestsHeaders) deleteWebhooksIDRes()                       {}
-func (*TooManyRequestsHeaders) getAutomationsIDRes()                       {}
-func (*TooManyRequestsHeaders) getAutomationsIDRunsRes()                   {}
-func (*TooManyRequestsHeaders) getAutomationsIDRunsRunIDRes()              {}
-func (*TooManyRequestsHeaders) getAutomationsRes()                         {}
-func (*TooManyRequestsHeaders) getContactsIDRes()                          {}
-func (*TooManyRequestsHeaders) getContactsRes()                            {}
-func (*TooManyRequestsHeaders) getDomainsIDDNSRes()                        {}
-func (*TooManyRequestsHeaders) getDomainsIDRes()                           {}
-func (*TooManyRequestsHeaders) getDomainsRes()                             {}
-func (*TooManyRequestsHeaders) getEventsRes()                              {}
-func (*TooManyRequestsHeaders) getHealthReadyRes()                         {}
-func (*TooManyRequestsHeaders) getHealthRes()                              {}
-func (*TooManyRequestsHeaders) getInboundMessagesIDRes()                   {}
-func (*TooManyRequestsHeaders) getInboundMessagesRes()                     {}
-func (*TooManyRequestsHeaders) getMessagesEngagementRes()                  {}
-func (*TooManyRequestsHeaders) getMessagesIDEventsRes()                    {}
-func (*TooManyRequestsHeaders) getMessagesIDRes()                          {}
-func (*TooManyRequestsHeaders) getMessagesMetricsRes()                     {}
-func (*TooManyRequestsHeaders) getMessagesRes()                            {}
-func (*TooManyRequestsHeaders) getMessagesTimeseriesRes()                  {}
-func (*TooManyRequestsHeaders) getSegmentsIDContactsRes()                  {}
-func (*TooManyRequestsHeaders) getSegmentsIDRes()                          {}
-func (*TooManyRequestsHeaders) getSegmentsRes()                            {}
-func (*TooManyRequestsHeaders) getTemplatesIDRes()                         {}
-func (*TooManyRequestsHeaders) getTemplatesIDVersionsRes()                 {}
-func (*TooManyRequestsHeaders) getTemplatesIDVersionsVersionIDRes()        {}
-func (*TooManyRequestsHeaders) getTemplatesRes()                           {}
-func (*TooManyRequestsHeaders) getThemesRes()                              {}
-func (*TooManyRequestsHeaders) getUsageRes()                               {}
-func (*TooManyRequestsHeaders) getWebhooksRes()                            {}
-func (*TooManyRequestsHeaders) patchAutomationsIDDraftRes()                {}
-func (*TooManyRequestsHeaders) patchAutomationsIDRes()                     {}
-func (*TooManyRequestsHeaders) patchContactsIDRes()                        {}
-func (*TooManyRequestsHeaders) patchEventsIDRes()                          {}
-func (*TooManyRequestsHeaders) patchSegmentsIDRes()                        {}
-func (*TooManyRequestsHeaders) patchTemplatesIDDraftRes()                  {}
-func (*TooManyRequestsHeaders) postAutomationsIDActivateRes()              {}
-func (*TooManyRequestsHeaders) postAutomationsIDDisableRes()               {}
-func (*TooManyRequestsHeaders) postAutomationsIDDuplicateRes()             {}
-func (*TooManyRequestsHeaders) postAutomationsIDRunsRunIDCancelRes()       {}
-func (*TooManyRequestsHeaders) postAutomationsRes()                        {}
-func (*TooManyRequestsHeaders) postContactsRes()                           {}
-func (*TooManyRequestsHeaders) postDomainsIDDkimRotateRes()                {}
-func (*TooManyRequestsHeaders) postDomainsIDVerifyRes()                    {}
-func (*TooManyRequestsHeaders) postDomainsRes()                            {}
-func (*TooManyRequestsHeaders) postEventsRes()                             {}
-func (*TooManyRequestsHeaders) postEventsSendRes()                         {}
-func (*TooManyRequestsHeaders) postSegmentsIDContactsRes()                 {}
-func (*TooManyRequestsHeaders) postSegmentsRes()                           {}
-func (*TooManyRequestsHeaders) postSendRes()                               {}
-func (*TooManyRequestsHeaders) postTemplatesIDArchiveRes()                 {}
-func (*TooManyRequestsHeaders) postTemplatesIDAssetsRes()                  {}
-func (*TooManyRequestsHeaders) postTemplatesIDDuplicateRes()               {}
-func (*TooManyRequestsHeaders) postTemplatesIDPreviewRes()                 {}
-func (*TooManyRequestsHeaders) postTemplatesIDPublishRes()                 {}
-func (*TooManyRequestsHeaders) postTemplatesIDVersionsVersionIDRevertRes() {}
-func (*TooManyRequestsHeaders) postTemplatesRes()                          {}
-func (*TooManyRequestsHeaders) postThemesRes()                             {}
-func (*TooManyRequestsHeaders) postWebhooksRes()                           {}
+func (*TooManyRequestsHeaders) deleteAutomationsIDRes()                      {}
+func (*TooManyRequestsHeaders) deleteContactsIDRes()                         {}
+func (*TooManyRequestsHeaders) deleteDomainsIDRes()                          {}
+func (*TooManyRequestsHeaders) deleteEventsIDRes()                           {}
+func (*TooManyRequestsHeaders) deleteSegmentsIDContactsContactIDRes()        {}
+func (*TooManyRequestsHeaders) deleteSegmentsIDRes()                         {}
+func (*TooManyRequestsHeaders) deleteTemplatesIDRes()                        {}
+func (*TooManyRequestsHeaders) deleteThemesIDRes()                           {}
+func (*TooManyRequestsHeaders) deleteWebhooksIDRes()                         {}
+func (*TooManyRequestsHeaders) getAutomationsIDRes()                         {}
+func (*TooManyRequestsHeaders) getAutomationsIDRunsRes()                     {}
+func (*TooManyRequestsHeaders) getAutomationsIDRunsRunIDRes()                {}
+func (*TooManyRequestsHeaders) getAutomationsRes()                           {}
+func (*TooManyRequestsHeaders) getContactsIDRes()                            {}
+func (*TooManyRequestsHeaders) getContactsRes()                              {}
+func (*TooManyRequestsHeaders) getDomainsIDDNSRes()                          {}
+func (*TooManyRequestsHeaders) getDomainsIDRes()                             {}
+func (*TooManyRequestsHeaders) getDomainsRes()                               {}
+func (*TooManyRequestsHeaders) getEventsRes()                                {}
+func (*TooManyRequestsHeaders) getHealthReadyRes()                           {}
+func (*TooManyRequestsHeaders) getHealthRes()                                {}
+func (*TooManyRequestsHeaders) getInboundMessagesIDRawRes()                  {}
+func (*TooManyRequestsHeaders) getInboundMessagesIDRes()                     {}
+func (*TooManyRequestsHeaders) getInboundMessagesRes()                       {}
+func (*TooManyRequestsHeaders) getMessagesEngagementRes()                    {}
+func (*TooManyRequestsHeaders) getMessagesIDEventsRes()                      {}
+func (*TooManyRequestsHeaders) getMessagesIDRawRes()                         {}
+func (*TooManyRequestsHeaders) getMessagesIDRes()                            {}
+func (*TooManyRequestsHeaders) getMessagesMetricsRes()                       {}
+func (*TooManyRequestsHeaders) getMessagesRes()                              {}
+func (*TooManyRequestsHeaders) getMessagesTimeseriesRes()                    {}
+func (*TooManyRequestsHeaders) getSegmentsIDContactsRes()                    {}
+func (*TooManyRequestsHeaders) getSegmentsIDRes()                            {}
+func (*TooManyRequestsHeaders) getSegmentsRes()                              {}
+func (*TooManyRequestsHeaders) getSuppressionsExportRes()                    {}
+func (*TooManyRequestsHeaders) getSuppressionsIDRes()                        {}
+func (*TooManyRequestsHeaders) getSuppressionsRes()                          {}
+func (*TooManyRequestsHeaders) getTemplatesIDRes()                           {}
+func (*TooManyRequestsHeaders) getTemplatesIDVersionsRes()                   {}
+func (*TooManyRequestsHeaders) getTemplatesIDVersionsVersionIDRes()          {}
+func (*TooManyRequestsHeaders) getTemplatesRes()                             {}
+func (*TooManyRequestsHeaders) getThemesRes()                                {}
+func (*TooManyRequestsHeaders) getUsageRes()                                 {}
+func (*TooManyRequestsHeaders) getWebhooksIDDeliveriesDeliveryIDRes()        {}
+func (*TooManyRequestsHeaders) getWebhooksIDDeliveriesRes()                  {}
+func (*TooManyRequestsHeaders) getWebhooksRes()                              {}
+func (*TooManyRequestsHeaders) patchAutomationsIDDraftRes()                  {}
+func (*TooManyRequestsHeaders) patchAutomationsIDRes()                       {}
+func (*TooManyRequestsHeaders) patchContactsIDRes()                          {}
+func (*TooManyRequestsHeaders) patchEventsIDRes()                            {}
+func (*TooManyRequestsHeaders) patchSegmentsIDRes()                          {}
+func (*TooManyRequestsHeaders) patchTemplatesIDDraftRes()                    {}
+func (*TooManyRequestsHeaders) patchWebhooksIDRes()                          {}
+func (*TooManyRequestsHeaders) postAutomationsIDActivateRes()                {}
+func (*TooManyRequestsHeaders) postAutomationsIDDisableRes()                 {}
+func (*TooManyRequestsHeaders) postAutomationsIDDuplicateRes()               {}
+func (*TooManyRequestsHeaders) postAutomationsIDRunsRunIDCancelRes()         {}
+func (*TooManyRequestsHeaders) postAutomationsRes()                          {}
+func (*TooManyRequestsHeaders) postContactsRes()                             {}
+func (*TooManyRequestsHeaders) postDomainsIDDkimRotateRes()                  {}
+func (*TooManyRequestsHeaders) postDomainsIDVerifyRes()                      {}
+func (*TooManyRequestsHeaders) postDomainsRes()                              {}
+func (*TooManyRequestsHeaders) postEventsRes()                               {}
+func (*TooManyRequestsHeaders) postEventsSendRes()                           {}
+func (*TooManyRequestsHeaders) postSegmentsIDContactsRes()                   {}
+func (*TooManyRequestsHeaders) postSegmentsRes()                             {}
+func (*TooManyRequestsHeaders) postSendRes()                                 {}
+func (*TooManyRequestsHeaders) postStatusSubscriptionsConfirmRes()           {}
+func (*TooManyRequestsHeaders) postStatusSubscriptionsRes()                  {}
+func (*TooManyRequestsHeaders) postStatusSubscriptionsUnsubscribeRes()       {}
+func (*TooManyRequestsHeaders) postSuppressionsIDReleaseRes()                {}
+func (*TooManyRequestsHeaders) postSuppressionsImportRes()                   {}
+func (*TooManyRequestsHeaders) postSuppressionsRes()                         {}
+func (*TooManyRequestsHeaders) postTemplatesIDArchiveRes()                   {}
+func (*TooManyRequestsHeaders) postTemplatesIDAssetsRes()                    {}
+func (*TooManyRequestsHeaders) postTemplatesIDDuplicateRes()                 {}
+func (*TooManyRequestsHeaders) postTemplatesIDPreviewRes()                   {}
+func (*TooManyRequestsHeaders) postTemplatesIDPublishRes()                   {}
+func (*TooManyRequestsHeaders) postTemplatesIDVersionsVersionIDRevertRes()   {}
+func (*TooManyRequestsHeaders) postTemplatesRes()                            {}
+func (*TooManyRequestsHeaders) postThemesRes()                               {}
+func (*TooManyRequestsHeaders) postWebhooksIDDeliveriesDeliveryIDReplayRes() {}
+func (*TooManyRequestsHeaders) postWebhooksIDSecretRotateRes()               {}
+func (*TooManyRequestsHeaders) postWebhooksIDTestRes()                       {}
+func (*TooManyRequestsHeaders) postWebhooksRes()                             {}
 
 type UUID uuid.UUID
 
@@ -8060,6 +11412,54 @@ func (s *UpdateTemplateDraftResponse) SetPreviewText(val string) {
 
 func (*UpdateTemplateDraftResponse) patchTemplatesIDDraftRes() {}
 
+// Ref: #/components/schemas/UpdateWebhookRequest
+type UpdateWebhookRequest struct {
+	ExpectedVersion int64                          `json:"expected_version"`
+	Enabled         OptBool                        `json:"enabled"`
+	EventTypes      []WebhookSubscribableEventType `json:"event_types"`
+	MaxAttempts     OptInt                         `json:"max_attempts"`
+}
+
+// GetExpectedVersion returns the value of ExpectedVersion.
+func (s *UpdateWebhookRequest) GetExpectedVersion() int64 {
+	return s.ExpectedVersion
+}
+
+// GetEnabled returns the value of Enabled.
+func (s *UpdateWebhookRequest) GetEnabled() OptBool {
+	return s.Enabled
+}
+
+// GetEventTypes returns the value of EventTypes.
+func (s *UpdateWebhookRequest) GetEventTypes() []WebhookSubscribableEventType {
+	return s.EventTypes
+}
+
+// GetMaxAttempts returns the value of MaxAttempts.
+func (s *UpdateWebhookRequest) GetMaxAttempts() OptInt {
+	return s.MaxAttempts
+}
+
+// SetExpectedVersion sets the value of ExpectedVersion.
+func (s *UpdateWebhookRequest) SetExpectedVersion(val int64) {
+	s.ExpectedVersion = val
+}
+
+// SetEnabled sets the value of Enabled.
+func (s *UpdateWebhookRequest) SetEnabled(val OptBool) {
+	s.Enabled = val
+}
+
+// SetEventTypes sets the value of EventTypes.
+func (s *UpdateWebhookRequest) SetEventTypes(val []WebhookSubscribableEventType) {
+	s.EventTypes = val
+}
+
+// SetMaxAttempts sets the value of MaxAttempts.
+func (s *UpdateWebhookRequest) SetMaxAttempts(val OptInt) {
+	s.MaxAttempts = val
+}
+
 // Ref: #/components/schemas/UsagePeriod
 type UsagePeriod struct {
 	Start    Timestamp `json:"start"`
@@ -8097,14 +11497,470 @@ func (s *UsagePeriod) SetTimezone(val string) {
 	s.Timezone = val
 }
 
+// Ref: #/components/schemas/WebhookDeliveryAttempt
+type WebhookDeliveryAttempt struct {
+	Attempt int `json:"attempt"`
+	// Estado persistido da tentativa; consumidores não devem inferir o estado agregado por este campo.
+	Status       string       `json:"status"`
+	ResponseCode NilInt       `json:"response_code"`
+	DurationMs   NilInt       `json:"duration_ms"`
+	AttemptedAt  Timestamp    `json:"attempted_at"`
+	NextRetryAt  NilTimestamp `json:"next_retry_at"`
+}
+
+// GetAttempt returns the value of Attempt.
+func (s *WebhookDeliveryAttempt) GetAttempt() int {
+	return s.Attempt
+}
+
+// GetStatus returns the value of Status.
+func (s *WebhookDeliveryAttempt) GetStatus() string {
+	return s.Status
+}
+
+// GetResponseCode returns the value of ResponseCode.
+func (s *WebhookDeliveryAttempt) GetResponseCode() NilInt {
+	return s.ResponseCode
+}
+
+// GetDurationMs returns the value of DurationMs.
+func (s *WebhookDeliveryAttempt) GetDurationMs() NilInt {
+	return s.DurationMs
+}
+
+// GetAttemptedAt returns the value of AttemptedAt.
+func (s *WebhookDeliveryAttempt) GetAttemptedAt() Timestamp {
+	return s.AttemptedAt
+}
+
+// GetNextRetryAt returns the value of NextRetryAt.
+func (s *WebhookDeliveryAttempt) GetNextRetryAt() NilTimestamp {
+	return s.NextRetryAt
+}
+
+// SetAttempt sets the value of Attempt.
+func (s *WebhookDeliveryAttempt) SetAttempt(val int) {
+	s.Attempt = val
+}
+
+// SetStatus sets the value of Status.
+func (s *WebhookDeliveryAttempt) SetStatus(val string) {
+	s.Status = val
+}
+
+// SetResponseCode sets the value of ResponseCode.
+func (s *WebhookDeliveryAttempt) SetResponseCode(val NilInt) {
+	s.ResponseCode = val
+}
+
+// SetDurationMs sets the value of DurationMs.
+func (s *WebhookDeliveryAttempt) SetDurationMs(val NilInt) {
+	s.DurationMs = val
+}
+
+// SetAttemptedAt sets the value of AttemptedAt.
+func (s *WebhookDeliveryAttempt) SetAttemptedAt(val Timestamp) {
+	s.AttemptedAt = val
+}
+
+// SetNextRetryAt sets the value of NextRetryAt.
+func (s *WebhookDeliveryAttempt) SetNextRetryAt(val NilTimestamp) {
+	s.NextRetryAt = val
+}
+
+// Merged schema.
+// Ref: #/components/schemas/WebhookDeliveryDetail
+type WebhookDeliveryDetail struct {
+	DeliveryID         UUID                     `json:"delivery_id"`
+	EventType          WebhookDeliveryEventType `json:"event_type"`
+	Status             WebhookDeliveryStatus    `json:"status"`
+	AttemptCount       int                      `json:"attempt_count"`
+	CreatedAt          Timestamp                `json:"created_at"`
+	UpdatedAt          Timestamp                `json:"updated_at"`
+	NextRetryAt        NilTimestamp             `json:"next_retry_at"`
+	DeliveredAt        NilTimestamp             `json:"delivered_at"`
+	LastResponseCode   NilInt                   `json:"last_response_code"`
+	LastDurationMs     NilInt                   `json:"last_duration_ms"`
+	IsTest             bool                     `json:"is_test"`
+	ReplayOfDeliveryID NilUUID                  `json:"replay_of_delivery_id"`
+	PayloadRedacted    WebhookPayloadRedacted   `json:"payload_redacted"`
+	Attempts           []WebhookDeliveryAttempt `json:"attempts"`
+}
+
+// GetDeliveryID returns the value of DeliveryID.
+func (s *WebhookDeliveryDetail) GetDeliveryID() UUID {
+	return s.DeliveryID
+}
+
+// GetEventType returns the value of EventType.
+func (s *WebhookDeliveryDetail) GetEventType() WebhookDeliveryEventType {
+	return s.EventType
+}
+
+// GetStatus returns the value of Status.
+func (s *WebhookDeliveryDetail) GetStatus() WebhookDeliveryStatus {
+	return s.Status
+}
+
+// GetAttemptCount returns the value of AttemptCount.
+func (s *WebhookDeliveryDetail) GetAttemptCount() int {
+	return s.AttemptCount
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *WebhookDeliveryDetail) GetCreatedAt() Timestamp {
+	return s.CreatedAt
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *WebhookDeliveryDetail) GetUpdatedAt() Timestamp {
+	return s.UpdatedAt
+}
+
+// GetNextRetryAt returns the value of NextRetryAt.
+func (s *WebhookDeliveryDetail) GetNextRetryAt() NilTimestamp {
+	return s.NextRetryAt
+}
+
+// GetDeliveredAt returns the value of DeliveredAt.
+func (s *WebhookDeliveryDetail) GetDeliveredAt() NilTimestamp {
+	return s.DeliveredAt
+}
+
+// GetLastResponseCode returns the value of LastResponseCode.
+func (s *WebhookDeliveryDetail) GetLastResponseCode() NilInt {
+	return s.LastResponseCode
+}
+
+// GetLastDurationMs returns the value of LastDurationMs.
+func (s *WebhookDeliveryDetail) GetLastDurationMs() NilInt {
+	return s.LastDurationMs
+}
+
+// GetIsTest returns the value of IsTest.
+func (s *WebhookDeliveryDetail) GetIsTest() bool {
+	return s.IsTest
+}
+
+// GetReplayOfDeliveryID returns the value of ReplayOfDeliveryID.
+func (s *WebhookDeliveryDetail) GetReplayOfDeliveryID() NilUUID {
+	return s.ReplayOfDeliveryID
+}
+
+// GetPayloadRedacted returns the value of PayloadRedacted.
+func (s *WebhookDeliveryDetail) GetPayloadRedacted() WebhookPayloadRedacted {
+	return s.PayloadRedacted
+}
+
+// GetAttempts returns the value of Attempts.
+func (s *WebhookDeliveryDetail) GetAttempts() []WebhookDeliveryAttempt {
+	return s.Attempts
+}
+
+// SetDeliveryID sets the value of DeliveryID.
+func (s *WebhookDeliveryDetail) SetDeliveryID(val UUID) {
+	s.DeliveryID = val
+}
+
+// SetEventType sets the value of EventType.
+func (s *WebhookDeliveryDetail) SetEventType(val WebhookDeliveryEventType) {
+	s.EventType = val
+}
+
+// SetStatus sets the value of Status.
+func (s *WebhookDeliveryDetail) SetStatus(val WebhookDeliveryStatus) {
+	s.Status = val
+}
+
+// SetAttemptCount sets the value of AttemptCount.
+func (s *WebhookDeliveryDetail) SetAttemptCount(val int) {
+	s.AttemptCount = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *WebhookDeliveryDetail) SetCreatedAt(val Timestamp) {
+	s.CreatedAt = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *WebhookDeliveryDetail) SetUpdatedAt(val Timestamp) {
+	s.UpdatedAt = val
+}
+
+// SetNextRetryAt sets the value of NextRetryAt.
+func (s *WebhookDeliveryDetail) SetNextRetryAt(val NilTimestamp) {
+	s.NextRetryAt = val
+}
+
+// SetDeliveredAt sets the value of DeliveredAt.
+func (s *WebhookDeliveryDetail) SetDeliveredAt(val NilTimestamp) {
+	s.DeliveredAt = val
+}
+
+// SetLastResponseCode sets the value of LastResponseCode.
+func (s *WebhookDeliveryDetail) SetLastResponseCode(val NilInt) {
+	s.LastResponseCode = val
+}
+
+// SetLastDurationMs sets the value of LastDurationMs.
+func (s *WebhookDeliveryDetail) SetLastDurationMs(val NilInt) {
+	s.LastDurationMs = val
+}
+
+// SetIsTest sets the value of IsTest.
+func (s *WebhookDeliveryDetail) SetIsTest(val bool) {
+	s.IsTest = val
+}
+
+// SetReplayOfDeliveryID sets the value of ReplayOfDeliveryID.
+func (s *WebhookDeliveryDetail) SetReplayOfDeliveryID(val NilUUID) {
+	s.ReplayOfDeliveryID = val
+}
+
+// SetPayloadRedacted sets the value of PayloadRedacted.
+func (s *WebhookDeliveryDetail) SetPayloadRedacted(val WebhookPayloadRedacted) {
+	s.PayloadRedacted = val
+}
+
+// SetAttempts sets the value of Attempts.
+func (s *WebhookDeliveryDetail) SetAttempts(val []WebhookDeliveryAttempt) {
+	s.Attempts = val
+}
+
+func (*WebhookDeliveryDetail) getWebhooksIDDeliveriesDeliveryIDRes() {}
+
+type WebhookDeliveryEventType string
+
+// Ref: #/components/schemas/WebhookDeliveryPage
+type WebhookDeliveryPage struct {
+	Data []WebhookDeliverySummary `json:"data"`
+	// Cursor opaco para a página seguinte; ausente na última página.
+	NextCursor OptString `json:"next_cursor"`
+}
+
+// GetData returns the value of Data.
+func (s *WebhookDeliveryPage) GetData() []WebhookDeliverySummary {
+	return s.Data
+}
+
+// GetNextCursor returns the value of NextCursor.
+func (s *WebhookDeliveryPage) GetNextCursor() OptString {
+	return s.NextCursor
+}
+
+// SetData sets the value of Data.
+func (s *WebhookDeliveryPage) SetData(val []WebhookDeliverySummary) {
+	s.Data = val
+}
+
+// SetNextCursor sets the value of NextCursor.
+func (s *WebhookDeliveryPage) SetNextCursor(val OptString) {
+	s.NextCursor = val
+}
+
+func (*WebhookDeliveryPage) getWebhooksIDDeliveriesRes() {}
+
+// `pending` agrega os estados internos em fila, processamento e retry. `failed` também representa
+// entregas canceladas porque o endpoint deixou de estar disponível.
+// Ref: #/components/schemas/WebhookDeliveryStatus
+type WebhookDeliveryStatus string
+
+const (
+	WebhookDeliveryStatusPending   WebhookDeliveryStatus = "pending"
+	WebhookDeliveryStatusDelivered WebhookDeliveryStatus = "delivered"
+	WebhookDeliveryStatusFailed    WebhookDeliveryStatus = "failed"
+)
+
+// AllValues returns all WebhookDeliveryStatus values.
+func (WebhookDeliveryStatus) AllValues() []WebhookDeliveryStatus {
+	return []WebhookDeliveryStatus{
+		WebhookDeliveryStatusPending,
+		WebhookDeliveryStatusDelivered,
+		WebhookDeliveryStatusFailed,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s WebhookDeliveryStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case WebhookDeliveryStatusPending:
+		return []byte(s), nil
+	case WebhookDeliveryStatusDelivered:
+		return []byte(s), nil
+	case WebhookDeliveryStatusFailed:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *WebhookDeliveryStatus) UnmarshalText(data []byte) error {
+	switch WebhookDeliveryStatus(data) {
+	case WebhookDeliveryStatusPending:
+		*s = WebhookDeliveryStatusPending
+		return nil
+	case WebhookDeliveryStatusDelivered:
+		*s = WebhookDeliveryStatusDelivered
+		return nil
+	case WebhookDeliveryStatusFailed:
+		*s = WebhookDeliveryStatusFailed
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/WebhookDeliverySummary
+type WebhookDeliverySummary struct {
+	DeliveryID         UUID                     `json:"delivery_id"`
+	EventType          WebhookDeliveryEventType `json:"event_type"`
+	Status             WebhookDeliveryStatus    `json:"status"`
+	AttemptCount       int                      `json:"attempt_count"`
+	CreatedAt          Timestamp                `json:"created_at"`
+	UpdatedAt          Timestamp                `json:"updated_at"`
+	NextRetryAt        NilTimestamp             `json:"next_retry_at"`
+	DeliveredAt        NilTimestamp             `json:"delivered_at"`
+	LastResponseCode   NilInt                   `json:"last_response_code"`
+	LastDurationMs     NilInt                   `json:"last_duration_ms"`
+	IsTest             bool                     `json:"is_test"`
+	ReplayOfDeliveryID NilUUID                  `json:"replay_of_delivery_id"`
+}
+
+// GetDeliveryID returns the value of DeliveryID.
+func (s *WebhookDeliverySummary) GetDeliveryID() UUID {
+	return s.DeliveryID
+}
+
+// GetEventType returns the value of EventType.
+func (s *WebhookDeliverySummary) GetEventType() WebhookDeliveryEventType {
+	return s.EventType
+}
+
+// GetStatus returns the value of Status.
+func (s *WebhookDeliverySummary) GetStatus() WebhookDeliveryStatus {
+	return s.Status
+}
+
+// GetAttemptCount returns the value of AttemptCount.
+func (s *WebhookDeliverySummary) GetAttemptCount() int {
+	return s.AttemptCount
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *WebhookDeliverySummary) GetCreatedAt() Timestamp {
+	return s.CreatedAt
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *WebhookDeliverySummary) GetUpdatedAt() Timestamp {
+	return s.UpdatedAt
+}
+
+// GetNextRetryAt returns the value of NextRetryAt.
+func (s *WebhookDeliverySummary) GetNextRetryAt() NilTimestamp {
+	return s.NextRetryAt
+}
+
+// GetDeliveredAt returns the value of DeliveredAt.
+func (s *WebhookDeliverySummary) GetDeliveredAt() NilTimestamp {
+	return s.DeliveredAt
+}
+
+// GetLastResponseCode returns the value of LastResponseCode.
+func (s *WebhookDeliverySummary) GetLastResponseCode() NilInt {
+	return s.LastResponseCode
+}
+
+// GetLastDurationMs returns the value of LastDurationMs.
+func (s *WebhookDeliverySummary) GetLastDurationMs() NilInt {
+	return s.LastDurationMs
+}
+
+// GetIsTest returns the value of IsTest.
+func (s *WebhookDeliverySummary) GetIsTest() bool {
+	return s.IsTest
+}
+
+// GetReplayOfDeliveryID returns the value of ReplayOfDeliveryID.
+func (s *WebhookDeliverySummary) GetReplayOfDeliveryID() NilUUID {
+	return s.ReplayOfDeliveryID
+}
+
+// SetDeliveryID sets the value of DeliveryID.
+func (s *WebhookDeliverySummary) SetDeliveryID(val UUID) {
+	s.DeliveryID = val
+}
+
+// SetEventType sets the value of EventType.
+func (s *WebhookDeliverySummary) SetEventType(val WebhookDeliveryEventType) {
+	s.EventType = val
+}
+
+// SetStatus sets the value of Status.
+func (s *WebhookDeliverySummary) SetStatus(val WebhookDeliveryStatus) {
+	s.Status = val
+}
+
+// SetAttemptCount sets the value of AttemptCount.
+func (s *WebhookDeliverySummary) SetAttemptCount(val int) {
+	s.AttemptCount = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *WebhookDeliverySummary) SetCreatedAt(val Timestamp) {
+	s.CreatedAt = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *WebhookDeliverySummary) SetUpdatedAt(val Timestamp) {
+	s.UpdatedAt = val
+}
+
+// SetNextRetryAt sets the value of NextRetryAt.
+func (s *WebhookDeliverySummary) SetNextRetryAt(val NilTimestamp) {
+	s.NextRetryAt = val
+}
+
+// SetDeliveredAt sets the value of DeliveredAt.
+func (s *WebhookDeliverySummary) SetDeliveredAt(val NilTimestamp) {
+	s.DeliveredAt = val
+}
+
+// SetLastResponseCode sets the value of LastResponseCode.
+func (s *WebhookDeliverySummary) SetLastResponseCode(val NilInt) {
+	s.LastResponseCode = val
+}
+
+// SetLastDurationMs sets the value of LastDurationMs.
+func (s *WebhookDeliverySummary) SetLastDurationMs(val NilInt) {
+	s.LastDurationMs = val
+}
+
+// SetIsTest sets the value of IsTest.
+func (s *WebhookDeliverySummary) SetIsTest(val bool) {
+	s.IsTest = val
+}
+
+// SetReplayOfDeliveryID sets the value of ReplayOfDeliveryID.
+func (s *WebhookDeliverySummary) SetReplayOfDeliveryID(val NilUUID) {
+	s.ReplayOfDeliveryID = val
+}
+
 // Ref: #/components/schemas/WebhookEndpoint
 type WebhookEndpoint struct {
-	ID          UUID      `json:"id"`
-	URL         url.URL   `json:"url"`
-	EventTypes  []string  `json:"event_types"`
-	Enabled     bool      `json:"enabled"`
-	MaxAttempts int       `json:"max_attempts"`
-	CreatedAt   Timestamp `json:"created_at"`
+	ID UUID `json:"id"`
+	// URL HTTPS pública, sem credenciais ou fragmento; destinos privados são rejeitados.
+	URL                 url.URL                        `json:"url"`
+	EventTypes          []WebhookSubscribableEventType `json:"event_types"`
+	Enabled             bool                           `json:"enabled"`
+	MaxAttempts         int                            `json:"max_attempts"`
+	ConsecutiveFailures int                            `json:"consecutive_failures"`
+	DisabledAt          NilTimestamp                   `json:"disabled_at"`
+	SecretRotatedAt     NilTimestamp                   `json:"secret_rotated_at"`
+	Version             int64                          `json:"version"`
+	CreatedAt           Timestamp                      `json:"created_at"`
+	UpdatedAt           Timestamp                      `json:"updated_at"`
 }
 
 // GetID returns the value of ID.
@@ -8118,7 +11974,7 @@ func (s *WebhookEndpoint) GetURL() url.URL {
 }
 
 // GetEventTypes returns the value of EventTypes.
-func (s *WebhookEndpoint) GetEventTypes() []string {
+func (s *WebhookEndpoint) GetEventTypes() []WebhookSubscribableEventType {
 	return s.EventTypes
 }
 
@@ -8132,9 +11988,34 @@ func (s *WebhookEndpoint) GetMaxAttempts() int {
 	return s.MaxAttempts
 }
 
+// GetConsecutiveFailures returns the value of ConsecutiveFailures.
+func (s *WebhookEndpoint) GetConsecutiveFailures() int {
+	return s.ConsecutiveFailures
+}
+
+// GetDisabledAt returns the value of DisabledAt.
+func (s *WebhookEndpoint) GetDisabledAt() NilTimestamp {
+	return s.DisabledAt
+}
+
+// GetSecretRotatedAt returns the value of SecretRotatedAt.
+func (s *WebhookEndpoint) GetSecretRotatedAt() NilTimestamp {
+	return s.SecretRotatedAt
+}
+
+// GetVersion returns the value of Version.
+func (s *WebhookEndpoint) GetVersion() int64 {
+	return s.Version
+}
+
 // GetCreatedAt returns the value of CreatedAt.
 func (s *WebhookEndpoint) GetCreatedAt() Timestamp {
 	return s.CreatedAt
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *WebhookEndpoint) GetUpdatedAt() Timestamp {
+	return s.UpdatedAt
 }
 
 // SetID sets the value of ID.
@@ -8148,7 +12029,7 @@ func (s *WebhookEndpoint) SetURL(val url.URL) {
 }
 
 // SetEventTypes sets the value of EventTypes.
-func (s *WebhookEndpoint) SetEventTypes(val []string) {
+func (s *WebhookEndpoint) SetEventTypes(val []WebhookSubscribableEventType) {
 	s.EventTypes = val
 }
 
@@ -8162,10 +12043,37 @@ func (s *WebhookEndpoint) SetMaxAttempts(val int) {
 	s.MaxAttempts = val
 }
 
+// SetConsecutiveFailures sets the value of ConsecutiveFailures.
+func (s *WebhookEndpoint) SetConsecutiveFailures(val int) {
+	s.ConsecutiveFailures = val
+}
+
+// SetDisabledAt sets the value of DisabledAt.
+func (s *WebhookEndpoint) SetDisabledAt(val NilTimestamp) {
+	s.DisabledAt = val
+}
+
+// SetSecretRotatedAt sets the value of SecretRotatedAt.
+func (s *WebhookEndpoint) SetSecretRotatedAt(val NilTimestamp) {
+	s.SecretRotatedAt = val
+}
+
+// SetVersion sets the value of Version.
+func (s *WebhookEndpoint) SetVersion(val int64) {
+	s.Version = val
+}
+
 // SetCreatedAt sets the value of CreatedAt.
 func (s *WebhookEndpoint) SetCreatedAt(val Timestamp) {
 	s.CreatedAt = val
 }
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *WebhookEndpoint) SetUpdatedAt(val Timestamp) {
+	s.UpdatedAt = val
+}
+
+func (*WebhookEndpoint) patchWebhooksIDRes() {}
 
 // Ref: #/components/schemas/WebhookList
 type WebhookList struct {
@@ -8183,3 +12091,285 @@ func (s *WebhookList) SetWebhooks(val []WebhookEndpoint) {
 }
 
 func (*WebhookList) getWebhooksRes() {}
+
+// Visão por lista de permissão. Campos arbitrários do payload original, destinatários, conteúdo e
+// URLs nunca são retornados.
+// Ref: #/components/schemas/WebhookPayloadRedacted
+type WebhookPayloadRedacted struct {
+	EventType        OptWebhookDeliveryEventType `json:"event_type"`
+	MessageID        OptUUID                     `json:"message_id"`
+	InboundMessageID OptUUID                     `json:"inbound_message_id"`
+	OccurredAt       OptTimestamp                `json:"occurred_at"`
+	Test             OptBool                     `json:"test"`
+}
+
+// GetEventType returns the value of EventType.
+func (s *WebhookPayloadRedacted) GetEventType() OptWebhookDeliveryEventType {
+	return s.EventType
+}
+
+// GetMessageID returns the value of MessageID.
+func (s *WebhookPayloadRedacted) GetMessageID() OptUUID {
+	return s.MessageID
+}
+
+// GetInboundMessageID returns the value of InboundMessageID.
+func (s *WebhookPayloadRedacted) GetInboundMessageID() OptUUID {
+	return s.InboundMessageID
+}
+
+// GetOccurredAt returns the value of OccurredAt.
+func (s *WebhookPayloadRedacted) GetOccurredAt() OptTimestamp {
+	return s.OccurredAt
+}
+
+// GetTest returns the value of Test.
+func (s *WebhookPayloadRedacted) GetTest() OptBool {
+	return s.Test
+}
+
+// SetEventType sets the value of EventType.
+func (s *WebhookPayloadRedacted) SetEventType(val OptWebhookDeliveryEventType) {
+	s.EventType = val
+}
+
+// SetMessageID sets the value of MessageID.
+func (s *WebhookPayloadRedacted) SetMessageID(val OptUUID) {
+	s.MessageID = val
+}
+
+// SetInboundMessageID sets the value of InboundMessageID.
+func (s *WebhookPayloadRedacted) SetInboundMessageID(val OptUUID) {
+	s.InboundMessageID = val
+}
+
+// SetOccurredAt sets the value of OccurredAt.
+func (s *WebhookPayloadRedacted) SetOccurredAt(val OptTimestamp) {
+	s.OccurredAt = val
+}
+
+// SetTest sets the value of Test.
+func (s *WebhookPayloadRedacted) SetTest(val OptBool) {
+	s.Test = val
+}
+
+// Merged schema.
+// Ref: #/components/schemas/WebhookReplayAccepted
+type WebhookReplayAccepted struct {
+	DeliveryID       UUID      `json:"delivery_id"`
+	Status           string    `json:"status"`
+	CreatedAt        Timestamp `json:"created_at"`
+	SourceDeliveryID UUID      `json:"source_delivery_id"`
+}
+
+// GetDeliveryID returns the value of DeliveryID.
+func (s *WebhookReplayAccepted) GetDeliveryID() UUID {
+	return s.DeliveryID
+}
+
+// GetStatus returns the value of Status.
+func (s *WebhookReplayAccepted) GetStatus() string {
+	return s.Status
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *WebhookReplayAccepted) GetCreatedAt() Timestamp {
+	return s.CreatedAt
+}
+
+// GetSourceDeliveryID returns the value of SourceDeliveryID.
+func (s *WebhookReplayAccepted) GetSourceDeliveryID() UUID {
+	return s.SourceDeliveryID
+}
+
+// SetDeliveryID sets the value of DeliveryID.
+func (s *WebhookReplayAccepted) SetDeliveryID(val UUID) {
+	s.DeliveryID = val
+}
+
+// SetStatus sets the value of Status.
+func (s *WebhookReplayAccepted) SetStatus(val string) {
+	s.Status = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *WebhookReplayAccepted) SetCreatedAt(val Timestamp) {
+	s.CreatedAt = val
+}
+
+// SetSourceDeliveryID sets the value of SourceDeliveryID.
+func (s *WebhookReplayAccepted) SetSourceDeliveryID(val UUID) {
+	s.SourceDeliveryID = val
+}
+
+func (*WebhookReplayAccepted) postWebhooksIDDeliveriesDeliveryIDReplayRes() {}
+
+// Ref: #/components/schemas/WebhookSubscribableEventType
+type WebhookSubscribableEventType string
+
+const (
+	WebhookSubscribableEventTypeQueued          WebhookSubscribableEventType = "queued"
+	WebhookSubscribableEventTypeSent            WebhookSubscribableEventType = "sent"
+	WebhookSubscribableEventTypeDelivered       WebhookSubscribableEventType = "delivered"
+	WebhookSubscribableEventTypeDeferred        WebhookSubscribableEventType = "deferred"
+	WebhookSubscribableEventTypeSoftBounce      WebhookSubscribableEventType = "soft_bounce"
+	WebhookSubscribableEventTypeHardBounce      WebhookSubscribableEventType = "hard_bounce"
+	WebhookSubscribableEventTypeComplaint       WebhookSubscribableEventType = "complaint"
+	WebhookSubscribableEventTypeOpen            WebhookSubscribableEventType = "open"
+	WebhookSubscribableEventTypeClick           WebhookSubscribableEventType = "click"
+	WebhookSubscribableEventTypeUnsubscribe     WebhookSubscribableEventType = "unsubscribe"
+	WebhookSubscribableEventTypeRejected        WebhookSubscribableEventType = "rejected"
+	WebhookSubscribableEventTypeFailed          WebhookSubscribableEventType = "failed"
+	WebhookSubscribableEventTypeInboundReceived WebhookSubscribableEventType = "inbound.received"
+)
+
+// AllValues returns all WebhookSubscribableEventType values.
+func (WebhookSubscribableEventType) AllValues() []WebhookSubscribableEventType {
+	return []WebhookSubscribableEventType{
+		WebhookSubscribableEventTypeQueued,
+		WebhookSubscribableEventTypeSent,
+		WebhookSubscribableEventTypeDelivered,
+		WebhookSubscribableEventTypeDeferred,
+		WebhookSubscribableEventTypeSoftBounce,
+		WebhookSubscribableEventTypeHardBounce,
+		WebhookSubscribableEventTypeComplaint,
+		WebhookSubscribableEventTypeOpen,
+		WebhookSubscribableEventTypeClick,
+		WebhookSubscribableEventTypeUnsubscribe,
+		WebhookSubscribableEventTypeRejected,
+		WebhookSubscribableEventTypeFailed,
+		WebhookSubscribableEventTypeInboundReceived,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s WebhookSubscribableEventType) MarshalText() ([]byte, error) {
+	switch s {
+	case WebhookSubscribableEventTypeQueued:
+		return []byte(s), nil
+	case WebhookSubscribableEventTypeSent:
+		return []byte(s), nil
+	case WebhookSubscribableEventTypeDelivered:
+		return []byte(s), nil
+	case WebhookSubscribableEventTypeDeferred:
+		return []byte(s), nil
+	case WebhookSubscribableEventTypeSoftBounce:
+		return []byte(s), nil
+	case WebhookSubscribableEventTypeHardBounce:
+		return []byte(s), nil
+	case WebhookSubscribableEventTypeComplaint:
+		return []byte(s), nil
+	case WebhookSubscribableEventTypeOpen:
+		return []byte(s), nil
+	case WebhookSubscribableEventTypeClick:
+		return []byte(s), nil
+	case WebhookSubscribableEventTypeUnsubscribe:
+		return []byte(s), nil
+	case WebhookSubscribableEventTypeRejected:
+		return []byte(s), nil
+	case WebhookSubscribableEventTypeFailed:
+		return []byte(s), nil
+	case WebhookSubscribableEventTypeInboundReceived:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *WebhookSubscribableEventType) UnmarshalText(data []byte) error {
+	switch WebhookSubscribableEventType(data) {
+	case WebhookSubscribableEventTypeQueued:
+		*s = WebhookSubscribableEventTypeQueued
+		return nil
+	case WebhookSubscribableEventTypeSent:
+		*s = WebhookSubscribableEventTypeSent
+		return nil
+	case WebhookSubscribableEventTypeDelivered:
+		*s = WebhookSubscribableEventTypeDelivered
+		return nil
+	case WebhookSubscribableEventTypeDeferred:
+		*s = WebhookSubscribableEventTypeDeferred
+		return nil
+	case WebhookSubscribableEventTypeSoftBounce:
+		*s = WebhookSubscribableEventTypeSoftBounce
+		return nil
+	case WebhookSubscribableEventTypeHardBounce:
+		*s = WebhookSubscribableEventTypeHardBounce
+		return nil
+	case WebhookSubscribableEventTypeComplaint:
+		*s = WebhookSubscribableEventTypeComplaint
+		return nil
+	case WebhookSubscribableEventTypeOpen:
+		*s = WebhookSubscribableEventTypeOpen
+		return nil
+	case WebhookSubscribableEventTypeClick:
+		*s = WebhookSubscribableEventTypeClick
+		return nil
+	case WebhookSubscribableEventTypeUnsubscribe:
+		*s = WebhookSubscribableEventTypeUnsubscribe
+		return nil
+	case WebhookSubscribableEventTypeRejected:
+		*s = WebhookSubscribableEventTypeRejected
+		return nil
+	case WebhookSubscribableEventTypeFailed:
+		*s = WebhookSubscribableEventTypeFailed
+		return nil
+	case WebhookSubscribableEventTypeInboundReceived:
+		*s = WebhookSubscribableEventTypeInboundReceived
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Merged schema.
+// Ref: #/components/schemas/WebhookTestAccepted
+type WebhookTestAccepted struct {
+	DeliveryID UUID      `json:"delivery_id"`
+	Status     string    `json:"status"`
+	CreatedAt  Timestamp `json:"created_at"`
+	IsTest     bool      `json:"is_test"`
+}
+
+// GetDeliveryID returns the value of DeliveryID.
+func (s *WebhookTestAccepted) GetDeliveryID() UUID {
+	return s.DeliveryID
+}
+
+// GetStatus returns the value of Status.
+func (s *WebhookTestAccepted) GetStatus() string {
+	return s.Status
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *WebhookTestAccepted) GetCreatedAt() Timestamp {
+	return s.CreatedAt
+}
+
+// GetIsTest returns the value of IsTest.
+func (s *WebhookTestAccepted) GetIsTest() bool {
+	return s.IsTest
+}
+
+// SetDeliveryID sets the value of DeliveryID.
+func (s *WebhookTestAccepted) SetDeliveryID(val UUID) {
+	s.DeliveryID = val
+}
+
+// SetStatus sets the value of Status.
+func (s *WebhookTestAccepted) SetStatus(val string) {
+	s.Status = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *WebhookTestAccepted) SetCreatedAt(val Timestamp) {
+	s.CreatedAt = val
+}
+
+// SetIsTest sets the value of IsTest.
+func (s *WebhookTestAccepted) SetIsTest(val bool) {
+	s.IsTest = val
+}
+
+func (*WebhookTestAccepted) postWebhooksIDTestRes() {}

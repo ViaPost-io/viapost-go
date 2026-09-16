@@ -18,7 +18,7 @@ import (
 
 const (
 	// Version is the semantic version of this SDK.
-	Version = "0.1.0"
+	Version = "0.2.0"
 	// DefaultBaseURL is the production ViaPost API endpoint.
 	DefaultBaseURL = "https://api.viapost.io"
 	// DefaultTimeout bounds a request when the supplied context has no earlier deadline.

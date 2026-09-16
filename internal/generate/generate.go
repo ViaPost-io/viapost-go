@@ -15,25 +15,32 @@ import (
 
 var (
 	unsupportedItems     = regexp.MustCompile(`(?m)^[\t ]*items: false[\t ]*\r?\n`)
+	canonicalUUIDBlock   = regexp.MustCompile(`(?m)^    UUID:\r?\n      type: string\r?\n      format: uuid[\t ]*$`)
+	uuidFormatLine       = regexp.MustCompile(`(?m)^[\t ]*format: uuid[\t ]*\r?\n`)
 	sessionReference     = regexp.MustCompile(`(?m)^[\t ]*- sessionCookie: \[\][\t ]*\r?\n`)
 	csrfListReference    = regexp.MustCompile(`(?m)^[\t ]*- \$ref: '#/components/parameters/CsrfHeader'[\t ]*\r?\n`)
 	csrfInlineParameters = regexp.MustCompile(`(?m)^[\t ]*parameters: \[\{ \$ref: '#/components/parameters/CsrfHeader' \}\][\t ]*\r?\n`)
 	csrfComponent        = regexp.MustCompile(`(?ms)^    CsrfHeader:\r?\n.*?(^  securitySchemes:)`)
 	sessionScheme        = regexp.MustCompile(`(?ms)^    sessionCookie:\r?\n.*?(^  schemas:)`)
+	webhookDeliveryEvent = regexp.MustCompile(`(?ms)^    WebhookDeliveryEventType:\r?\n      anyOf:\r?\n        - \$ref: '#/components/schemas/WebhookSubscribableEventType'\r?\n        - type: string\r?\n          const: webhook\.test[\t ]*$`)
 )
 
 const (
-	canonicalUUIDSchema = "    UUID: { type: string, format: uuid }"
-	uuidSchemaSentinel  = "    UUID: { type: string, format: viapost-canonical-uuid }"
+	canonicalUUIDSchema = "    UUID:\n      type: string\n      format: uuid"
+	uuidSchemaSentinel  = "    UUID:\n      type: string\n      format: viapost-canonical-uuid"
 )
 
-func normalizeCodegenSpec(source []byte) []byte {
+func normalizeCodegenSpec(source []byte) ([]byte, error) {
 	normalized := string(append([]byte(nil), source...))
 	// ogen gives every inline UUID schema the same generated helper names. Keep
 	// the canonical UUID component typed and relax only those conflicting
 	// anonymous schemas until the public contract references UUID consistently.
-	normalized = strings.Replace(normalized, canonicalUUIDSchema, uuidSchemaSentinel, 1)
+	if matches := canonicalUUIDBlock.FindAllStringIndex(normalized, -1); len(matches) != 1 {
+		return nil, fmt.Errorf("expected exactly one canonical UUID schema, found %d", len(matches))
+	}
+	normalized = canonicalUUIDBlock.ReplaceAllString(normalized, uuidSchemaSentinel)
 	normalized = strings.ReplaceAll(normalized, ", format: uuid", "")
+	normalized = uuidFormatLine.ReplaceAllString(normalized, "")
 	normalized = strings.Replace(normalized, uuidSchemaSentinel, canonicalUUIDSchema, 1)
 	normalized = unsupportedItems.ReplaceAllString(normalized, "")
 	normalized = sessionReference.ReplaceAllString(normalized, "")
@@ -41,7 +48,12 @@ func normalizeCodegenSpec(source []byte) []byte {
 	normalized = csrfInlineParameters.ReplaceAllString(normalized, "")
 	normalized = csrfComponent.ReplaceAllString(normalized, "$1")
 	normalized = sessionScheme.ReplaceAllString(normalized, "$1")
-	return []byte(normalized)
+	// ogen v1.24 cannot represent the union between a referenced string enum
+	// and one additional string literal. Keep the response forward-compatible
+	// as a plain string in generated code; the versioned contract still retains
+	// the exact anyOf constraints for documentation and drift checks.
+	normalized = webhookDeliveryEvent.ReplaceAllString(normalized, "    WebhookDeliveryEventType:\n      type: string")
+	return []byte(normalized), nil
 }
 
 // Generate writes the normalized contract to a temporary file and generates a
@@ -59,7 +71,12 @@ func Generate(sourcePath, targetPath string) error {
 	temporaryPath := temporary.Name()
 	defer func() { _ = os.Remove(temporaryPath) }()
 
-	if _, err := temporary.Write(normalizeCodegenSpec(source)); err != nil {
+	normalized, err := normalizeCodegenSpec(source)
+	if err != nil {
+		_ = temporary.Close()
+		return fmt.Errorf("normalize OpenAPI contract: %w", err)
+	}
+	if _, err := temporary.Write(normalized); err != nil {
 		_ = temporary.Close()
 		return fmt.Errorf("write normalized OpenAPI contract: %w", err)
 	}

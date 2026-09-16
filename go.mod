@@ -2,6 +2,8 @@ module github.com/ViaPost-io/viapost-go
 
 go 1.25.0
 
+toolchain go1.26.6
+
 tool (
 	github.com/ogen-go/ogen/cmd/ogen
 	golang.org/x/vuln/cmd/govulncheck

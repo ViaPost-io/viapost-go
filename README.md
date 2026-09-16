@@ -1,6 +1,6 @@
 # ViaPost Go SDK
 
-SDK oficial, server-side, para a API pública do ViaPost. A versão `v0.1.0` cobre envio de e-mails,
+SDK oficial, server-side, para a API pública do ViaPost. A versão `v0.2.0` cobre envio de e-mails,
 mensagens e métricas, domínios, templates, webhooks, automações e consumo mensal.
 
 > Nunca coloque uma API key no frontend, em logs ou no repositório. Leia a chave de um secret ou
@@ -9,10 +9,11 @@ mensagens e métricas, domínios, templates, webhooks, automações e consumo me
 ## Instalação
 
 ```bash
-go get github.com/ViaPost-io/viapost-go@v0.1.0
+go get github.com/ViaPost-io/viapost-go@v0.2.0
 ```
 
-O SDK requer Go 1.25 ou posterior.
+O SDK requer Go 1.25 ou posterior. Desenvolvimento, CI e releases usam o toolchain
+Go 1.26.6 ou posterior para incluir as correções de segurança da biblioteca padrão.
 
 ## Quickstart
 
@@ -62,7 +63,7 @@ Um programa executável está em [`examples/send`](./examples/send).
 ## Configuração
 
 `NewClient` usa autenticação Bearer, `https://api.viapost.io`, timeout de 60 segundos e o
-User-Agent `viapost-go/0.1.0`. Use `WithBaseURL`, `WithTimeout`, `WithUserAgent` ou
+User-Agent `viapost-go/0.2.0`. Use `WithBaseURL`, `WithTimeout`, `WithUserAgent` ou
 `WithHTTPClient` para customizar. Todo método recebe `context.Context`; o primeiro limite atingido
 entre o contexto e o timeout do cliente encerra a requisição. Mutações não são repetidas
 automaticamente.
@@ -87,12 +88,12 @@ com o contrato.
 O arquivo [`openapi.yaml`](./openapi.yaml) é um snapshot versionado do contrato público em
 [`docs.viapost.io/openapi/public.yaml`](https://docs.viapost.io/openapi/public.yaml), sincronizado
 da fonte `ViaPost-io/base-code/docs/openapi/public.yaml` no merge
-`feee362f60fe7a1500a0b2f8aafd0f3dcd7eddfa` (PR #131).
+`5eed29795633d3c4509851ce8638ef97d2370b07`.
 
 SHA-256 do snapshot:
 
 ```text
-d1f223342ad1ca326ba716af6e508c78594e1b108958cce2ec4a1efd31a9773a
+b23e2c8615b4dccaa1bf89bdd026c3101616bebb86b17d0a7aba6776717723e7
 ```
 
 O código em `api/` é gerado com ogen `v1.24.0`, está versionado e não busca schemas remotos:
@@ -121,7 +122,7 @@ Consulte [CONTRIBUTING.md](./CONTRIBUTING.md), [SECURITY.md](./SECURITY.md) e
 The official server-side Go SDK for the ViaPost public API. Install it with:
 
 ```bash
-go get github.com/ViaPost-io/viapost-go@v0.1.0
+go get github.com/ViaPost-io/viapost-go@v0.2.0
 ```
 
 Create a client with `viapost.NewClient(os.Getenv("VIAPOST_API_KEY"))`, then call the resource

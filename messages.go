@@ -81,7 +81,7 @@ func (s *MessagesService) Get(ctx context.Context, id string) (*Message, error) 
 	if err != nil {
 		return nil, err
 	}
-	result, ok := response.(*api.Message)
+	result, ok := response.(*api.MessageDetail)
 	if !ok {
 		return nil, fmt.Errorf("viapost: unexpected GET /v1/messages/{id} response %T", response)
 	}

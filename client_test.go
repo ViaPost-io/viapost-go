@@ -530,7 +530,7 @@ func TestClient_RawServerOverrideCannotExfiltrateBearerCrossOrigin(t *testing.T)
 }
 
 func TestWebhooksCreate_ValidatesURLBeforeNetwork(t *testing.T) {
-	t.Run("absolute HTTP and HTTPS URLs are accepted", func(t *testing.T) {
+	t.Run("absolute HTTPS webhook URLs are accepted over HTTP and HTTPS API transports", func(t *testing.T) {
 		for _, useTLS := range []bool{false, true} {
 			t.Run(map[bool]string{false: "http", true: "https"}[useTLS], func(t *testing.T) {
 				var requests atomic.Int32
@@ -538,7 +538,7 @@ func TestWebhooksCreate_ValidatesURLBeforeNetwork(t *testing.T) {
 					requests.Add(1)
 					w.Header().Set("Content-Type", "application/json")
 					w.WriteHeader(http.StatusCreated)
-					_, _ = w.Write([]byte(`{"endpoint":{"id":"018f0000-0000-7000-8000-000000000001","url":"https://hooks.example.com/viapost","event_types":["email.delivered"],"enabled":true,"max_attempts":5,"created_at":"2026-09-11T12:00:00Z"},"secret":"test-secret"}`))
+					_, _ = w.Write([]byte(`{"endpoint":{"id":"018f0000-0000-7000-8000-000000000001","url":"https://hooks.example.com/viapost","event_types":["delivered"],"enabled":true,"max_attempts":5,"consecutive_failures":0,"disabled_at":null,"secret_rotated_at":null,"version":1,"created_at":"2026-09-11T12:00:00Z","updated_at":"2026-09-11T12:00:00Z"},"secret":"0123456789012345678901234567890123456789012"}`))
 				})
 
 				var server *httptest.Server
@@ -558,10 +558,7 @@ func TestWebhooksCreate_ValidatesURLBeforeNetwork(t *testing.T) {
 					t.Fatalf("NewClient() error = %v", err)
 				}
 				webhookURL := "https://hooks.example.com/viapost"
-				if !useTLS {
-					webhookURL = "http://hooks.example.com/viapost"
-				}
-				if _, err := client.Webhooks.Create(context.Background(), webhookURL, []string{"email.delivered"}); err != nil {
+				if _, err := client.Webhooks.Create(context.Background(), webhookURL, []string{"delivered"}); err != nil {
 					t.Fatalf("Create() error = %v", err)
 				}
 				if got, want := requests.Load(), int32(1); got != want {
@@ -571,7 +568,7 @@ func TestWebhooksCreate_ValidatesURLBeforeNetwork(t *testing.T) {
 		}
 	})
 
-	t.Run("relative and unsupported schemes are rejected", func(t *testing.T) {
+	t.Run("non-HTTPS, relative, credentialed, fragmented, and hostless URLs are rejected", func(t *testing.T) {
 		var requests atomic.Int32
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			requests.Add(1)
@@ -583,8 +580,16 @@ func TestWebhooksCreate_ValidatesURLBeforeNetwork(t *testing.T) {
 		if err != nil {
 			t.Fatalf("NewClient() error = %v", err)
 		}
-		for _, endpoint := range []string{"/relative", "ftp://hooks.example.com/viapost", "javascript:alert(1)"} {
-			_, err := client.Webhooks.Create(context.Background(), endpoint, []string{"email.delivered"})
+		for _, endpoint := range []string{
+			"/relative",
+			"http://hooks.example.com/viapost",
+			"ftp://hooks.example.com/viapost",
+			"javascript:alert(1)",
+			"https://user:password@hooks.example.com/viapost",
+			"https://hooks.example.com/viapost#secret",
+			"https://:443/viapost",
+		} {
+			_, err := client.Webhooks.Create(context.Background(), endpoint, []string{"delivered"})
 			if !errors.Is(err, ErrInvalidWebhookURL) {
 				t.Errorf("Create(%q) error = %v, want ErrInvalidWebhookURL", endpoint, err)
 			}

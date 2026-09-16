@@ -160,6 +160,15 @@ type Invoker interface {
 	//
 	// GET /v1/inbound-messages/{id}
 	GetInboundMessagesID(ctx context.Context, params GetInboundMessagesIDParams) (GetInboundMessagesIDRes, error)
+	// GetInboundMessagesIDRaw invokes getInboundMessagesIdRaw operation.
+	//
+	// Retorna o `.eml` bruto exatamente como recebido. A autorização e o isolamento por tenant são
+	// reavaliados em cada download; a URL relativa não é um bearer token e não pode ser compartilhada
+	// como uma URL pré-assinada. O conteúdo pode deixar de estar disponível por expurgo ou falha
+	// transitória do armazenamento, sem remover os metadados da mensagem.
+	//
+	// GET /v1/inbound-messages/{id}/raw
+	GetInboundMessagesIDRaw(ctx context.Context, params GetInboundMessagesIDRawParams) (GetInboundMessagesIDRawRes, error)
 	// GetMessages invokes getMessages operation.
 	//
 	// GET /v1/messages.
@@ -174,7 +183,9 @@ type Invoker interface {
 	GetMessagesEngagement(ctx context.Context, params GetMessagesEngagementParams) (GetMessagesEngagementRes, error)
 	// GetMessagesID invokes getMessagesId operation.
 	//
-	// GET /v1/messages/{id}.
+	// Retorna metadados com `messages:read`. Para Bearer API Keys, os campos de conteúdo e
+	// `raw_message_api_path` só são incluídos quando a chave também possui `messages:content:read`.
+	// Sessões autenticadas do painel recebem o conteúdo.
 	//
 	// GET /v1/messages/{id}
 	GetMessagesID(ctx context.Context, params GetMessagesIDParams) (GetMessagesIDRes, error)
@@ -184,6 +195,15 @@ type Invoker interface {
 	//
 	// GET /v1/messages/{id}/events
 	GetMessagesIDEvents(ctx context.Context, params GetMessagesIDEventsParams) (GetMessagesIDEventsRes, error)
+	// GetMessagesIDRaw invokes getMessagesIdRaw operation.
+	//
+	// Retorna o `.eml` armazenado no momento da submissão, antes da reescrita de links e pixel de
+	// tracking e antes da assinatura DKIM aplicada pelo MTA. Portanto, este arquivo é evidência do
+	// conteúdo submetido, não uma cópia byte a byte da mensagem entregue ao destinatário. A
+	// autorização e o isolamento por tenant são reavaliados em cada download.
+	//
+	// GET /v1/messages/{id}/raw
+	GetMessagesIDRaw(ctx context.Context, params GetMessagesIDRawParams) (GetMessagesIDRawRes, error)
 	// GetMessagesMetrics invokes getMessagesMetrics operation.
 	//
 	// GET /v1/messages/metrics.
@@ -224,6 +244,29 @@ type Invoker interface {
 	//
 	// GET /v1/segments/{id}/contacts
 	GetSegmentsIDContacts(ctx context.Context, params GetSegmentsIDContactsParams) (GetSegmentsIDContactsRes, error)
+	// GetSuppressions invokes getSuppressions operation.
+	//
+	// Retorna somente supressões pertencentes ao tenant autenticado. A paginação usa cursor opaco e
+	// exclusivo. O estado é derivado de `released_at` e `expires_at`; por padrão, somente entradas
+	// ativas são retornadas. Diagnósticos SMTP brutos não fazem parte deste contrato e nunca são
+	// expostos.
+	//
+	// GET /v1/suppressions
+	GetSuppressions(ctx context.Context, params GetSuppressionsParams) (GetSuppressionsRes, error)
+	// GetSuppressionsExport invokes getSuppressionsExport operation.
+	//
+	// Exporta o conjunto filtrado com cabeçalho `email,reason,state,origin,expires_at,note,updated_at`.
+	// Valores iniciados por caracteres de fórmula são neutralizados para impedir formula injection ao
+	// abrir o arquivo em uma planilha. O CSV nunca contém diagnóstico SMTP bruto.
+	//
+	// GET /v1/suppressions/export
+	GetSuppressionsExport(ctx context.Context, params GetSuppressionsExportParams) (GetSuppressionsExportRes, error)
+	// GetSuppressionsID invokes getSuppressionsId operation.
+	//
+	// Consulta uma supressão e seu histórico.
+	//
+	// GET /v1/suppressions/{id}
+	GetSuppressionsID(ctx context.Context, params GetSuppressionsIDParams) (GetSuppressionsIDRes, error)
 	// GetTemplates invokes getTemplates operation.
 	//
 	// GET /v1/templates.
@@ -266,6 +309,22 @@ type Invoker interface {
 	//
 	// GET /v1/webhooks
 	GetWebhooks(ctx context.Context) (GetWebhooksRes, error)
+	// GetWebhooksIDDeliveries invokes getWebhooksIdDeliveries operation.
+	//
+	// Retorna somente metadados operacionais. O corpo enviado, o corpo da resposta do destino, headers e
+	// secrets nunca fazem parte desta lista. A ordenação é estável por criação e UUID, do mais
+	// recente para o mais antigo.
+	//
+	// GET /v1/webhooks/{id}/deliveries
+	GetWebhooksIDDeliveries(ctx context.Context, params GetWebhooksIDDeliveriesParams) (GetWebhooksIDDeliveriesRes, error)
+	// GetWebhooksIDDeliveriesDeliveryID invokes getWebhooksIdDeliveriesDeliveryId operation.
+	//
+	// Expõe um resumo seguro do payload por lista de campos permitidos e metadados das tentativas. Não
+	// expõe destinatários, conteúdo arbitrário, resposta bruta do destino, URL do endpoint nem
+	// credenciais.
+	//
+	// GET /v1/webhooks/{id}/deliveries/{delivery_id}
+	GetWebhooksIDDeliveriesDeliveryID(ctx context.Context, params GetWebhooksIDDeliveriesDeliveryIDParams) (GetWebhooksIDDeliveriesDeliveryIDRes, error)
 	// HeadPublicStatus invokes headPublicStatus operation.
 	//
 	// Cabeçalhos do estado público curado.
@@ -308,6 +367,13 @@ type Invoker interface {
 	//
 	// PATCH /v1/templates/{id}/draft
 	PatchTemplatesIDDraft(ctx context.Context, request *UpdateTemplateDraftRequest, params PatchTemplatesIDDraftParams) (PatchTemplatesIDDraftRes, error)
+	// PatchWebhooksID invokes patchWebhooksId operation.
+	//
+	// Aplica uma alteração com controle otimista de concorrência. Envie a `version` atual em
+	// `expected_version`; uma versão desatualizada retorna `409` sem aplicar parcialmente o formulário.
+	//
+	// PATCH /v1/webhooks/{id}
+	PatchWebhooksID(ctx context.Context, request *UpdateWebhookRequest, params PatchWebhooksIDParams) (PatchWebhooksIDRes, error)
 	// PostAutomations invokes postAutomations operation.
 	//
 	// POST /v1/automations.
@@ -392,6 +458,54 @@ type Invoker interface {
 	//
 	// POST /v1/send
 	PostSend(ctx context.Context, request *SendRequest, params PostSendParams) (PostSendRes, error)
+	// PostStatusSubscriptions invokes postStatusSubscriptions operation.
+	//
+	// Disponível somente em `status.viapost.io`. Para todo e-mail sintaticamente válido, retorna a mesma
+	// resposta `202`, independentemente de já existir uma inscrição.
+	//
+	// POST /v1/status/subscriptions
+	PostStatusSubscriptions(ctx context.Context, request *StatusSubscriptionRequest) (PostStatusSubscriptionsRes, error)
+	// PostStatusSubscriptionsConfirm invokes postStatusSubscriptionsConfirm operation.
+	//
+	// Disponível somente em `status.viapost.io`. A confirmação é idempotente e retorna a mesma
+	// resposta genérica quando o token válido já foi consumido.
+	//
+	// POST /v1/status/subscriptions/confirm
+	PostStatusSubscriptionsConfirm(ctx context.Context, request *StatusSubscriptionTokenRequest) (PostStatusSubscriptionsConfirmRes, error)
+	// PostStatusSubscriptionsUnsubscribe invokes postStatusSubscriptionsUnsubscribe operation.
+	//
+	// Disponível somente em `status.viapost.io`. O cancelamento é idempotente e retorna a mesma resposta
+	// genérica quando o token válido já foi consumido.
+	//
+	// POST /v1/status/subscriptions/unsubscribe
+	PostStatusSubscriptionsUnsubscribe(ctx context.Context, request *StatusSubscriptionTokenRequest) (PostStatusSubscriptionsUnsubscribeRes, error)
+	// PostSuppressions invokes postSuppressions operation.
+	//
+	// Normaliza o endereço antes de persistir. `manual` e `invalid_address` são os únicos motivos
+	// aceitos neste endpoint; motivos derivados de entrega ou consentimento são administrados
+	// automaticamente. Uma entrada encerrada pode ser reativada. Uma entrada ativa idêntica é
+	// idempotente, enquanto uma entrada ativa incompatível retorna `409`.
+	//
+	// POST /v1/suppressions
+	PostSuppressions(ctx context.Context, request *CreateSuppressionRequest) (PostSuppressionsRes, error)
+	// PostSuppressionsIDRelease invokes postSuppressionsIdRelease operation.
+	//
+	// Operação otimista e auditada. Exige confirmação explícita, a versão atual e justificativa
+	// entre 10 e 500 caracteres. Supressões por `complaint`, `unsubscribe` ou `spam_trap` não podem ser
+	// liberadas por esta API. Versão desatualizada, entrada já encerrada ou motivo protegido retornam
+	// `409` sem alterar o registro.
+	//
+	// POST /v1/suppressions/{id}/release
+	PostSuppressionsIDRelease(ctx context.Context, request *ReleaseSuppressionRequest, params PostSuppressionsIDReleaseParams) (PostSuppressionsIDReleaseRes, error)
+	// PostSuppressionsImport invokes postSuppressionsImport operation.
+	//
+	// Recebe UTF-8 com o cabeçalho exato `email,reason,expires_at,note`, no máximo 2 MiB e 1.000
+	// registros. `expires_at` e `note` podem ficar vazios. O arquivo inteiro é validado antes da escrita
+	// e a importação é atômica: qualquer linha inválida rejeita tudo. Endereços repetidos no mesmo
+	// arquivo são contabilizados em `duplicates`.
+	//
+	// POST /v1/suppressions/import
+	PostSuppressionsImport(ctx context.Context, request PostSuppressionsImportReq) (PostSuppressionsImportRes, error)
 	// PostTemplates invokes postTemplates operation.
 	//
 	// POST /v1/templates.
@@ -446,6 +560,38 @@ type Invoker interface {
 	//
 	// POST /v1/webhooks
 	PostWebhooks(ctx context.Context, request *CreateWebhookRequest) (PostWebhooksRes, error)
+	// PostWebhooksIDDeliveriesDeliveryIDReplay invokes postWebhooksIdDeliveriesDeliveryIdReplay operation.
+	//
+	// Cria uma nova entrega a partir de uma entrega `delivered` ou `failed`. A nova entrega tem UUID
+	// próprio e preserva o evento/payload original. O replay é permitido por 7 dias enquanto o payload
+	// estiver retido. Repetir a solicitação com a mesma chave retorna a mesma operação; reutilizar a
+	// chave com outra solicitação, ou uma origem expirada, retorna `409`. O endpoint precisa estar ativo
+	// para uma operação nova; replays em endpoint desativado retornam `409` antes da criação de uma
+	// nova entrega. Um retry idempotente de uma operação já aceita continua retornando o resultado
+	// original. Novas operações estão sujeitas a cooldown por endpoint, limite persistente de 100 por
+	// tenant em 24 horas e teto de 100 jobs não terminais.
+	//
+	// POST /v1/webhooks/{id}/deliveries/{delivery_id}/replay
+	PostWebhooksIDDeliveriesDeliveryIDReplay(ctx context.Context, request *EmptyObjectRequest, params PostWebhooksIDDeliveriesDeliveryIDReplayParams) (PostWebhooksIDDeliveriesDeliveryIDReplayRes, error)
+	// PostWebhooksIDSecretRotate invokes postWebhooksIdSecretRotate operation.
+	//
+	// Substitui imediatamente o secret usado nas próximas entregas. O novo valor em texto puro só
+	// aparece na primeira resposta e deve ser armazenado com segurança. Um retry idempotente retorna
+	// apenas metadados, sem `secret`; o servidor não persiste uma cópia histórica recuperável. A API
+	// nunca retorna secrets em leituras.
+	//
+	// POST /v1/webhooks/{id}/secret/rotate
+	PostWebhooksIDSecretRotate(ctx context.Context, request *EmptyObjectRequest, params PostWebhooksIDSecretRotateParams) (PostWebhooksIDSecretRotateRes, error)
+	// PostWebhooksIDTest invokes postWebhooksIdTest operation.
+	//
+	// Enfileira `webhook.test` com um payload fixo gerado pela ViaPost, sem dados de mensagens nem
+	// destinatários. Repetir a chave de idempotência retorna a mesma entrega, inclusive se o endpoint
+	// tiver sido desativado depois. Uma operação nova exige endpoint ativo e retorna `409` antes de
+	// criar a entrega quando ele estiver desativado. Novas operações estão sujeitas a cooldown por
+	// endpoint, limite persistente de 100 por tenant em 24 horas e teto de 100 jobs não terminais.
+	//
+	// POST /v1/webhooks/{id}/test
+	PostWebhooksIDTest(ctx context.Context, request *EmptyObjectRequest, params PostWebhooksIDTestParams) (PostWebhooksIDTestRes, error)
 }
 
 // Client implements OAS client.
@@ -2749,6 +2895,104 @@ func (c *Client) sendGetInboundMessagesID(ctx context.Context, params GetInbound
 	return result, nil
 }
 
+// GetInboundMessagesIDRaw invokes getInboundMessagesIdRaw operation.
+//
+// Retorna o `.eml` bruto exatamente como recebido. A autorização e o isolamento por tenant são
+// reavaliados em cada download; a URL relativa não é um bearer token e não pode ser compartilhada
+// como uma URL pré-assinada. O conteúdo pode deixar de estar disponível por expurgo ou falha
+// transitória do armazenamento, sem remover os metadados da mensagem.
+//
+// GET /v1/inbound-messages/{id}/raw
+func (c *Client) GetInboundMessagesIDRaw(ctx context.Context, params GetInboundMessagesIDRawParams) (GetInboundMessagesIDRawRes, error) {
+	res, err := c.sendGetInboundMessagesIDRaw(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetInboundMessagesIDRaw(ctx context.Context, params GetInboundMessagesIDRawParams) (res GetInboundMessagesIDRawRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v1/inbound-messages/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/raw"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, GetInboundMessagesIDRawOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetInboundMessagesIDRawResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // GetMessages invokes getMessages operation.
 //
 // GET /v1/messages.
@@ -3028,7 +3272,9 @@ func (c *Client) sendGetMessagesEngagement(ctx context.Context, params GetMessag
 
 // GetMessagesID invokes getMessagesId operation.
 //
-// GET /v1/messages/{id}.
+// Retorna metadados com `messages:read`. Para Bearer API Keys, os campos de conteúdo e
+// `raw_message_api_path` só são incluídos quando a chave também possui `messages:content:read`.
+// Sessões autenticadas do painel recebem o conteúdo.
 //
 // GET /v1/messages/{id}
 func (c *Client) GetMessagesID(ctx context.Context, params GetMessagesIDParams) (GetMessagesIDRes, error) {
@@ -3208,6 +3454,104 @@ func (c *Client) sendGetMessagesIDEvents(ctx context.Context, params GetMessages
 	}()
 
 	result, err := decodeGetMessagesIDEventsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetMessagesIDRaw invokes getMessagesIdRaw operation.
+//
+// Retorna o `.eml` armazenado no momento da submissão, antes da reescrita de links e pixel de
+// tracking e antes da assinatura DKIM aplicada pelo MTA. Portanto, este arquivo é evidência do
+// conteúdo submetido, não uma cópia byte a byte da mensagem entregue ao destinatário. A
+// autorização e o isolamento por tenant são reavaliados em cada download.
+//
+// GET /v1/messages/{id}/raw
+func (c *Client) GetMessagesIDRaw(ctx context.Context, params GetMessagesIDRawParams) (GetMessagesIDRawRes, error) {
+	res, err := c.sendGetMessagesIDRaw(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetMessagesIDRaw(ctx context.Context, params GetMessagesIDRawParams) (res GetMessagesIDRawRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v1/messages/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/raw"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, GetMessagesIDRawOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetMessagesIDRawResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -3837,6 +4181,470 @@ func (c *Client) sendGetSegmentsIDContacts(ctx context.Context, params GetSegmen
 	}()
 
 	result, err := decodeGetSegmentsIDContactsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetSuppressions invokes getSuppressions operation.
+//
+// Retorna somente supressões pertencentes ao tenant autenticado. A paginação usa cursor opaco e
+// exclusivo. O estado é derivado de `released_at` e `expires_at`; por padrão, somente entradas
+// ativas são retornadas. Diagnósticos SMTP brutos não fazem parte deste contrato e nunca são
+// expostos.
+//
+// GET /v1/suppressions
+func (c *Client) GetSuppressions(ctx context.Context, params GetSuppressionsParams) (GetSuppressionsRes, error) {
+	res, err := c.sendGetSuppressions(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetSuppressions(ctx context.Context, params GetSuppressionsParams) (res GetSuppressionsRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/v1/suppressions"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "cursor" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "cursor",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Cursor.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "limit" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Limit.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "search" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "search",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Search.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "reason" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "reason",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Reason.Get(); ok {
+				return e.EncodeValue(conv.StringToString(string(val)))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "state" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "state",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.State.Get(); ok {
+				return e.EncodeValue(conv.StringToString(string(val)))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "origin" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "origin",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Origin.Get(); ok {
+				return e.EncodeValue(conv.StringToString(string(val)))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, GetSuppressionsOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetSuppressionsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetSuppressionsExport invokes getSuppressionsExport operation.
+//
+// Exporta o conjunto filtrado com cabeçalho `email,reason,state,origin,expires_at,note,updated_at`.
+// Valores iniciados por caracteres de fórmula são neutralizados para impedir formula injection ao
+// abrir o arquivo em uma planilha. O CSV nunca contém diagnóstico SMTP bruto.
+//
+// GET /v1/suppressions/export
+func (c *Client) GetSuppressionsExport(ctx context.Context, params GetSuppressionsExportParams) (GetSuppressionsExportRes, error) {
+	res, err := c.sendGetSuppressionsExport(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetSuppressionsExport(ctx context.Context, params GetSuppressionsExportParams) (res GetSuppressionsExportRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/v1/suppressions/export"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "search" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "search",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Search.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "reason" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "reason",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Reason.Get(); ok {
+				return e.EncodeValue(conv.StringToString(string(val)))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "state" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "state",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.State.Get(); ok {
+				return e.EncodeValue(conv.StringToString(string(val)))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "origin" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "origin",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Origin.Get(); ok {
+				return e.EncodeValue(conv.StringToString(string(val)))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, GetSuppressionsExportOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetSuppressionsExportResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetSuppressionsID invokes getSuppressionsId operation.
+//
+// Consulta uma supressão e seu histórico.
+//
+// GET /v1/suppressions/{id}
+func (c *Client) GetSuppressionsID(ctx context.Context, params GetSuppressionsIDParams) (GetSuppressionsIDRes, error) {
+	res, err := c.sendGetSuppressionsID(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetSuppressionsID(ctx context.Context, params GetSuppressionsIDParams) (res GetSuppressionsIDRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/v1/suppressions/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "history_cursor" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "history_cursor",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.HistoryCursor.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "history_limit" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "history_limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.HistoryLimit.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, GetSuppressionsIDOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetSuppressionsIDResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -4504,6 +5312,292 @@ func (c *Client) sendGetWebhooks(ctx context.Context) (res GetWebhooksRes, err e
 	return result, nil
 }
 
+// GetWebhooksIDDeliveries invokes getWebhooksIdDeliveries operation.
+//
+// Retorna somente metadados operacionais. O corpo enviado, o corpo da resposta do destino, headers e
+// secrets nunca fazem parte desta lista. A ordenação é estável por criação e UUID, do mais
+// recente para o mais antigo.
+//
+// GET /v1/webhooks/{id}/deliveries
+func (c *Client) GetWebhooksIDDeliveries(ctx context.Context, params GetWebhooksIDDeliveriesParams) (GetWebhooksIDDeliveriesRes, error) {
+	res, err := c.sendGetWebhooksIDDeliveries(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetWebhooksIDDeliveries(ctx context.Context, params GetWebhooksIDDeliveriesParams) (res GetWebhooksIDDeliveriesRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v1/webhooks/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/deliveries"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "cursor" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "cursor",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Cursor.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "limit" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Limit.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "status" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "status",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Status.Get(); ok {
+				return e.EncodeValue(conv.StringToString(string(val)))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "event_type" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "event_type",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.EventType.Get(); ok {
+				if unwrapped := string(val); true {
+					return e.EncodeValue(conv.StringToString(unwrapped))
+				}
+				return nil
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, GetWebhooksIDDeliveriesOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetWebhooksIDDeliveriesResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetWebhooksIDDeliveriesDeliveryID invokes getWebhooksIdDeliveriesDeliveryId operation.
+//
+// Expõe um resumo seguro do payload por lista de campos permitidos e metadados das tentativas. Não
+// expõe destinatários, conteúdo arbitrário, resposta bruta do destino, URL do endpoint nem
+// credenciais.
+//
+// GET /v1/webhooks/{id}/deliveries/{delivery_id}
+func (c *Client) GetWebhooksIDDeliveriesDeliveryID(ctx context.Context, params GetWebhooksIDDeliveriesDeliveryIDParams) (GetWebhooksIDDeliveriesDeliveryIDRes, error) {
+	res, err := c.sendGetWebhooksIDDeliveriesDeliveryID(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetWebhooksIDDeliveriesDeliveryID(ctx context.Context, params GetWebhooksIDDeliveriesDeliveryIDParams) (res GetWebhooksIDDeliveriesDeliveryIDRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/v1/webhooks/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/deliveries/"
+	{
+		// Encode "delivery_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "delivery_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.DeliveryID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, GetWebhooksIDDeliveriesDeliveryIDOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetWebhooksIDDeliveriesDeliveryIDResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // HeadPublicStatus invokes headPublicStatus operation.
 //
 // Cabeçalhos do estado público curado.
@@ -5151,6 +6245,113 @@ func (c *Client) sendPatchTemplatesIDDraft(ctx context.Context, request *UpdateT
 	}()
 
 	result, err := decodePatchTemplatesIDDraftResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// PatchWebhooksID invokes patchWebhooksId operation.
+//
+// Aplica uma alteração com controle otimista de concorrência. Envie a `version` atual em
+// `expected_version`; uma versão desatualizada retorna `409` sem aplicar parcialmente o formulário.
+//
+// PATCH /v1/webhooks/{id}
+func (c *Client) PatchWebhooksID(ctx context.Context, request *UpdateWebhookRequest, params PatchWebhooksIDParams) (PatchWebhooksIDRes, error) {
+	res, err := c.sendPatchWebhooksID(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendPatchWebhooksID(ctx context.Context, request *UpdateWebhookRequest, params PatchWebhooksIDParams) (res PatchWebhooksIDRes, err error) {
+	// Validate request before sending.
+	if err := func() error {
+		if err := request.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return res, errors.Wrap(err, "validate")
+	}
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/v1/webhooks/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "PATCH", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodePatchWebhooksIDRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, PatchWebhooksIDOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodePatchWebhooksIDResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -6441,6 +7642,457 @@ func (c *Client) sendPostSend(ctx context.Context, request *SendRequest, params 
 	return result, nil
 }
 
+// PostStatusSubscriptions invokes postStatusSubscriptions operation.
+//
+// Disponível somente em `status.viapost.io`. Para todo e-mail sintaticamente válido, retorna a mesma
+// resposta `202`, independentemente de já existir uma inscrição.
+//
+// POST /v1/status/subscriptions
+func (c *Client) PostStatusSubscriptions(ctx context.Context, request *StatusSubscriptionRequest) (PostStatusSubscriptionsRes, error) {
+	res, err := c.sendPostStatusSubscriptions(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendPostStatusSubscriptions(ctx context.Context, request *StatusSubscriptionRequest) (res PostStatusSubscriptionsRes, err error) {
+	// Validate request before sending.
+	if err := func() error {
+		if err := request.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return res, errors.Wrap(err, "validate")
+	}
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/v1/status/subscriptions"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodePostStatusSubscriptionsRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodePostStatusSubscriptionsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// PostStatusSubscriptionsConfirm invokes postStatusSubscriptionsConfirm operation.
+//
+// Disponível somente em `status.viapost.io`. A confirmação é idempotente e retorna a mesma
+// resposta genérica quando o token válido já foi consumido.
+//
+// POST /v1/status/subscriptions/confirm
+func (c *Client) PostStatusSubscriptionsConfirm(ctx context.Context, request *StatusSubscriptionTokenRequest) (PostStatusSubscriptionsConfirmRes, error) {
+	res, err := c.sendPostStatusSubscriptionsConfirm(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendPostStatusSubscriptionsConfirm(ctx context.Context, request *StatusSubscriptionTokenRequest) (res PostStatusSubscriptionsConfirmRes, err error) {
+	// Validate request before sending.
+	if err := func() error {
+		if err := request.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return res, errors.Wrap(err, "validate")
+	}
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/v1/status/subscriptions/confirm"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodePostStatusSubscriptionsConfirmRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodePostStatusSubscriptionsConfirmResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// PostStatusSubscriptionsUnsubscribe invokes postStatusSubscriptionsUnsubscribe operation.
+//
+// Disponível somente em `status.viapost.io`. O cancelamento é idempotente e retorna a mesma resposta
+// genérica quando o token válido já foi consumido.
+//
+// POST /v1/status/subscriptions/unsubscribe
+func (c *Client) PostStatusSubscriptionsUnsubscribe(ctx context.Context, request *StatusSubscriptionTokenRequest) (PostStatusSubscriptionsUnsubscribeRes, error) {
+	res, err := c.sendPostStatusSubscriptionsUnsubscribe(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendPostStatusSubscriptionsUnsubscribe(ctx context.Context, request *StatusSubscriptionTokenRequest) (res PostStatusSubscriptionsUnsubscribeRes, err error) {
+	// Validate request before sending.
+	if err := func() error {
+		if err := request.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return res, errors.Wrap(err, "validate")
+	}
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/v1/status/subscriptions/unsubscribe"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodePostStatusSubscriptionsUnsubscribeRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodePostStatusSubscriptionsUnsubscribeResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// PostSuppressions invokes postSuppressions operation.
+//
+// Normaliza o endereço antes de persistir. `manual` e `invalid_address` são os únicos motivos
+// aceitos neste endpoint; motivos derivados de entrega ou consentimento são administrados
+// automaticamente. Uma entrada encerrada pode ser reativada. Uma entrada ativa idêntica é
+// idempotente, enquanto uma entrada ativa incompatível retorna `409`.
+//
+// POST /v1/suppressions
+func (c *Client) PostSuppressions(ctx context.Context, request *CreateSuppressionRequest) (PostSuppressionsRes, error) {
+	res, err := c.sendPostSuppressions(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendPostSuppressions(ctx context.Context, request *CreateSuppressionRequest) (res PostSuppressionsRes, err error) {
+	// Validate request before sending.
+	if err := func() error {
+		if err := request.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return res, errors.Wrap(err, "validate")
+	}
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/v1/suppressions"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodePostSuppressionsRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, PostSuppressionsOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodePostSuppressionsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// PostSuppressionsIDRelease invokes postSuppressionsIdRelease operation.
+//
+// Operação otimista e auditada. Exige confirmação explícita, a versão atual e justificativa
+// entre 10 e 500 caracteres. Supressões por `complaint`, `unsubscribe` ou `spam_trap` não podem ser
+// liberadas por esta API. Versão desatualizada, entrada já encerrada ou motivo protegido retornam
+// `409` sem alterar o registro.
+//
+// POST /v1/suppressions/{id}/release
+func (c *Client) PostSuppressionsIDRelease(ctx context.Context, request *ReleaseSuppressionRequest, params PostSuppressionsIDReleaseParams) (PostSuppressionsIDReleaseRes, error) {
+	res, err := c.sendPostSuppressionsIDRelease(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendPostSuppressionsIDRelease(ctx context.Context, request *ReleaseSuppressionRequest, params PostSuppressionsIDReleaseParams) (res PostSuppressionsIDReleaseRes, err error) {
+	// Validate request before sending.
+	if err := func() error {
+		if err := request.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return res, errors.Wrap(err, "validate")
+	}
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v1/suppressions/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/release"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodePostSuppressionsIDReleaseRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, PostSuppressionsIDReleaseOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodePostSuppressionsIDReleaseResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// PostSuppressionsImport invokes postSuppressionsImport operation.
+//
+// Recebe UTF-8 com o cabeçalho exato `email,reason,expires_at,note`, no máximo 2 MiB e 1.000
+// registros. `expires_at` e `note` podem ficar vazios. O arquivo inteiro é validado antes da escrita
+// e a importação é atômica: qualquer linha inválida rejeita tudo. Endereços repetidos no mesmo
+// arquivo são contabilizados em `duplicates`.
+//
+// POST /v1/suppressions/import
+func (c *Client) PostSuppressionsImport(ctx context.Context, request PostSuppressionsImportReq) (PostSuppressionsImportRes, error) {
+	res, err := c.sendPostSuppressionsImport(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendPostSuppressionsImport(ctx context.Context, request PostSuppressionsImportReq) (res PostSuppressionsImportRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/v1/suppressions/import"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodePostSuppressionsImportRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, PostSuppressionsImportOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodePostSuppressionsImportResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // PostTemplates invokes postTemplates operation.
 //
 // POST /v1/templates.
@@ -7299,6 +8951,372 @@ func (c *Client) sendPostWebhooks(ctx context.Context, request *CreateWebhookReq
 	}()
 
 	result, err := decodePostWebhooksResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// PostWebhooksIDDeliveriesDeliveryIDReplay invokes postWebhooksIdDeliveriesDeliveryIdReplay operation.
+//
+// Cria uma nova entrega a partir de uma entrega `delivered` ou `failed`. A nova entrega tem UUID
+// próprio e preserva o evento/payload original. O replay é permitido por 7 dias enquanto o payload
+// estiver retido. Repetir a solicitação com a mesma chave retorna a mesma operação; reutilizar a
+// chave com outra solicitação, ou uma origem expirada, retorna `409`. O endpoint precisa estar ativo
+// para uma operação nova; replays em endpoint desativado retornam `409` antes da criação de uma
+// nova entrega. Um retry idempotente de uma operação já aceita continua retornando o resultado
+// original. Novas operações estão sujeitas a cooldown por endpoint, limite persistente de 100 por
+// tenant em 24 horas e teto de 100 jobs não terminais.
+//
+// POST /v1/webhooks/{id}/deliveries/{delivery_id}/replay
+func (c *Client) PostWebhooksIDDeliveriesDeliveryIDReplay(ctx context.Context, request *EmptyObjectRequest, params PostWebhooksIDDeliveriesDeliveryIDReplayParams) (PostWebhooksIDDeliveriesDeliveryIDReplayRes, error) {
+	res, err := c.sendPostWebhooksIDDeliveriesDeliveryIDReplay(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendPostWebhooksIDDeliveriesDeliveryIDReplay(ctx context.Context, request *EmptyObjectRequest, params PostWebhooksIDDeliveriesDeliveryIDReplayParams) (res PostWebhooksIDDeliveriesDeliveryIDReplayRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/webhooks/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/deliveries/"
+	{
+		// Encode "delivery_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "delivery_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.DeliveryID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/replay"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodePostWebhooksIDDeliveriesDeliveryIDReplayRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	h := uri.NewHeaderEncoder(r.Header)
+	{
+		cfg := uri.HeaderParameterEncodingConfig{
+			Name:    "Idempotency-Key",
+			Explode: false,
+		}
+		if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.StringToString(params.IdempotencyKey))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode header")
+		}
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, PostWebhooksIDDeliveriesDeliveryIDReplayOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodePostWebhooksIDDeliveriesDeliveryIDReplayResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// PostWebhooksIDSecretRotate invokes postWebhooksIdSecretRotate operation.
+//
+// Substitui imediatamente o secret usado nas próximas entregas. O novo valor em texto puro só
+// aparece na primeira resposta e deve ser armazenado com segurança. Um retry idempotente retorna
+// apenas metadados, sem `secret`; o servidor não persiste uma cópia histórica recuperável. A API
+// nunca retorna secrets em leituras.
+//
+// POST /v1/webhooks/{id}/secret/rotate
+func (c *Client) PostWebhooksIDSecretRotate(ctx context.Context, request *EmptyObjectRequest, params PostWebhooksIDSecretRotateParams) (PostWebhooksIDSecretRotateRes, error) {
+	res, err := c.sendPostWebhooksIDSecretRotate(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendPostWebhooksIDSecretRotate(ctx context.Context, request *EmptyObjectRequest, params PostWebhooksIDSecretRotateParams) (res PostWebhooksIDSecretRotateRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v1/webhooks/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/secret/rotate"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodePostWebhooksIDSecretRotateRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	h := uri.NewHeaderEncoder(r.Header)
+	{
+		cfg := uri.HeaderParameterEncodingConfig{
+			Name:    "Idempotency-Key",
+			Explode: false,
+		}
+		if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.StringToString(params.IdempotencyKey))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode header")
+		}
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, PostWebhooksIDSecretRotateOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodePostWebhooksIDSecretRotateResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// PostWebhooksIDTest invokes postWebhooksIdTest operation.
+//
+// Enfileira `webhook.test` com um payload fixo gerado pela ViaPost, sem dados de mensagens nem
+// destinatários. Repetir a chave de idempotência retorna a mesma entrega, inclusive se o endpoint
+// tiver sido desativado depois. Uma operação nova exige endpoint ativo e retorna `409` antes de
+// criar a entrega quando ele estiver desativado. Novas operações estão sujeitas a cooldown por
+// endpoint, limite persistente de 100 por tenant em 24 horas e teto de 100 jobs não terminais.
+//
+// POST /v1/webhooks/{id}/test
+func (c *Client) PostWebhooksIDTest(ctx context.Context, request *EmptyObjectRequest, params PostWebhooksIDTestParams) (PostWebhooksIDTestRes, error) {
+	res, err := c.sendPostWebhooksIDTest(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendPostWebhooksIDTest(ctx context.Context, request *EmptyObjectRequest, params PostWebhooksIDTestParams) (res PostWebhooksIDTestRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v1/webhooks/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/test"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodePostWebhooksIDTestRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	h := uri.NewHeaderEncoder(r.Header)
+	{
+		cfg := uri.HeaderParameterEncodingConfig{
+			Name:    "Idempotency-Key",
+			Explode: false,
+		}
+		if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.StringToString(params.IdempotencyKey))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode header")
+		}
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, PostWebhooksIDTestOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodePostWebhooksIDTestResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

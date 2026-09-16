@@ -6,7 +6,13 @@ import (
 	"net/http"
 
 	ht "github.com/ogen-go/ogen/http"
+	"github.com/ogen-go/ogen/ogenregex"
 )
+
+var regexMap = map[string]ogenregex.Regexp{
+	"^/v1/.+/raw$": ogenregex.MustCompile("^/v1/.+/raw$"),
+	"^https://":    ogenregex.MustCompile("^https://"),
+}
 
 type (
 	optionFunc[C any] func(*C)
