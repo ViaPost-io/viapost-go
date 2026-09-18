@@ -47,7 +47,7 @@ func TestGeneratedClient_SegmentContactsReturnsPaginatedList(t *testing.T) {
 }
 
 func TestGeneratedClient_SegmentVariantsRoundTrip(t *testing.T) {
-	const definition = `{"all":[{"text_attribute":{"field":"email","operator":"contains","value":"@example.com"}}]}`
+	const definition = `{"all":[{"field":"email","operator":"contains","value":"@example.com"}]}`
 	staticSegment := `{"id":"018f0000-0000-7000-8000-000000000001","name":"static","description":null,"kind":"static","definition":null,"contact_count":2,"created_at":"2026-09-16T12:00:00Z","updated_at":"2026-09-16T12:00:00Z"}`
 	dynamicSegment := `{"id":"018f0000-0000-7000-8000-000000000002","name":"dynamic","description":"rule","kind":"dynamic","definition":` + definition + `,"contact_count":3,"created_at":"2026-09-16T12:00:00Z","updated_at":"2026-09-16T12:00:00Z"}`
 	server := httptest.NewServer(http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
@@ -89,6 +89,18 @@ func TestGeneratedClient_SegmentVariantsRoundTrip(t *testing.T) {
 				t.Errorf("preview definition = %s, want %s", body.Definition, definition)
 			}
 			_, _ = response.Write([]byte(`{"contact_count":3,"data":[]}`))
+		case "PATCH /v1/segments/018f0000-0000-7000-8000-000000000002":
+			var body struct {
+				Definition json.RawMessage `json:"definition"`
+			}
+			if err := json.NewDecoder(request.Body).Decode(&body); err != nil {
+				t.Errorf("decode patch request: %v", err)
+				return
+			}
+			if string(body.Definition) != definition {
+				t.Errorf("patch definition = %s, want %s", body.Definition, definition)
+			}
+			_, _ = response.Write([]byte(dynamicSegment))
 		default:
 			t.Errorf("unexpected request %s %s", request.Method, request.URL.Path)
 		}
@@ -99,7 +111,7 @@ func TestGeneratedClient_SegmentVariantsRoundTrip(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewClient() error = %v", err)
 	}
-	definitionValue := api.SegmentDefinition{"all": jx.Raw(`[{"text_attribute":{"field":"email","operator":"contains","value":"@example.com"}}]`)}
+	definitionValue := api.SegmentDefinition{"all": jx.Raw(`[{"field":"email","operator":"contains","value":"@example.com"}]`)}
 	staticRequest := api.CreateSegmentRequest{"name": rawJSON(t, "static"), "description": rawJSON(t, "plain")}
 	dynamicRequest := api.CreateSegmentRequest{"name": rawJSON(t, "dynamic"), "kind": rawJSON(t, "dynamic"), "definition": rawJSON(t, json.RawMessage(definition))}
 	for _, request := range []api.CreateSegmentRequest{staticRequest, dynamicRequest} {
@@ -130,6 +142,14 @@ func TestGeneratedClient_SegmentVariantsRoundTrip(t *testing.T) {
 	if _, ok := previewResult.(*api.SegmentPreview); !ok {
 		t.Fatalf("PostSegmentsPreview() result = %T, want *api.SegmentPreview", previewResult)
 	}
+	patched := &api.UpdateSegmentRequest{Definition: api.NewOptSegmentDefinition(definitionValue)}
+	patchResult, err := client.Raw().PatchSegmentsID(context.Background(), patched, api.PatchSegmentsIDParams{ID: "018f0000-0000-7000-8000-000000000002"})
+	if err != nil {
+		t.Fatalf("PatchSegmentsID() error = %v", err)
+	}
+	if _, ok := patchResult.(*api.Segment); !ok {
+		t.Fatalf("PatchSegmentsID() result = %T, want *api.Segment", patchResult)
+	}
 }
 
 func TestGeneratedClient_RejectsInvalidDynamicSegmentUnion(t *testing.T) {
@@ -143,6 +163,66 @@ func TestGeneratedClient_RejectsInvalidDynamicSegmentUnion(t *testing.T) {
 	definition := api.SegmentDefinition{"all": jx.Raw(`[]`)}
 	if err := definition.Validate(); err == nil {
 		t.Fatal("empty segment definition group was accepted")
+	}
+}
+
+func TestGeneratedClient_SegmentDefinitionContractVariantsAndBounds(t *testing.T) {
+	valid := []string{
+		`{"all":[{"field":"email","operator":"eq","value":"a@example.com"}]}`,
+		`{"all":[{"field":"first_name","operator":"is_set"}]}`,
+		`{"all":[{"field":"subscribed","operator":"eq","value":true}]}`,
+		`{"all":[{"field":"created_at","operator":"after","value":"2026-09-16T12:00:00Z"}]}`,
+		`{"all":[{"field":"property","key":"plan","operator":"eq","value":"pro"}]}`,
+		`{"all":[{"field":"property","key":"plan","operator":"exists"}]}`,
+		`{"all":[{"event_name":"purchase.completed","operator":"occurred","within_days":30}]}`,
+		`{"all":[{"any":[{"all":[{"any":[{"field":"email","operator":"eq","value":"a@example.com"}]}]}]}]}`,
+	}
+	for _, input := range valid {
+		t.Run(input, func(t *testing.T) {
+			var definition api.SegmentDefinition
+			if err := json.Unmarshal([]byte(input), &definition); err != nil {
+				t.Fatalf("unmarshal definition: %v", err)
+			}
+			if err := definition.Validate(); err != nil {
+				t.Fatalf("valid definition rejected: %v", err)
+			}
+		})
+	}
+	invalid := []string{
+		`{"all":[{"field":"email","operator":"eq"}]}`,
+		`{"all":[{"field":"email","operator":"eq","value":null}]}`,
+		`{"all":[{"field":"subscribed","operator":"eq","value":null}]}`,
+		`{"all":[{"field":"property","key":"","operator":"exists"}]}`,
+		`{"all":[{"event_name":"viapost:internal","operator":"occurred","within_days":1}]}`,
+		`{"all":[{"all":[{"any":[{"all":[{"any":[{"field":"email","operator":"eq","value":"a@example.com"}]}]}]}]}]}`,
+	}
+	for _, input := range invalid {
+		var definition api.SegmentDefinition
+		if err := json.Unmarshal([]byte(input), &definition); err != nil {
+			t.Fatalf("unmarshal definition: %v", err)
+		}
+		if err := definition.Validate(); err == nil {
+			t.Fatalf("invalid definition accepted: %s", input)
+		}
+	}
+	var tooMany api.SegmentDefinition
+	children := make([]map[string]any, 5)
+	for i := range children {
+		leaves := make([]map[string]any, 21)
+		for j := range leaves {
+			leaves[j] = map[string]any{"field": "email", "operator": "eq", "value": "a@example.com"}
+		}
+		children[i] = map[string]any{"all": leaves}
+	}
+	encoded, err := json.Marshal(map[string]any{"all": children})
+	if err != nil {
+		t.Fatalf("marshal max predicate fixture: %v", err)
+	}
+	if err := json.Unmarshal(encoded, &tooMany); err != nil {
+		t.Fatalf("unmarshal max predicate fixture: %v", err)
+	}
+	if err := tooMany.Validate(); err == nil {
+		t.Fatal("definition with 101 predicates was accepted")
 	}
 }
 

@@ -9,6 +9,22 @@ All notable changes to this project are documented in this file. This project fo
 
 - `api.GetSegmentsIDContacts` now returns the documented paginated `*api.ContactList` on HTTP
   `200` instead of the incorrect generated `*api.GetSegmentsIDContactsNoContent` on HTTP `204`.
+- The low-level generated segment unions (`api.CreateSegmentRequest`, `api.Segment`, and
+  `api.SegmentDefinition`) are now lossless `map[string]jx.Raw` values because ogen cannot
+  faithfully model the documented recursive object `oneOf` schemas. Migrate creation calls from
+  generated struct fields to JSON raw fields, for example:
+
+  ```go
+  request := api.CreateSegmentRequest{
+      "name":       jx.Raw(`"VIP customers"`),
+      "kind":       jx.Raw(`"dynamic"`),
+      "definition": jx.Raw(`{"all":[{"field":"email","operator":"contains","value":"@example.com"}]}`),
+  }
+  ```
+
+  The SDK validates the documented static/dynamic variants, all seven predicate forms, group
+  depth and the 100-predicate bound before sending; inspect raw response fields with `encoding/json`
+  or the generated `Validate` helpers.
 
 ### Changed
 

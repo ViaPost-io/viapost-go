@@ -71,6 +71,9 @@ func encodePatchSegmentsIDRequest(
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
+	if err := validateUpdateSegmentRequest(req); err != nil {
+		return err
+	}
 	e := new(jx.Encoder)
 	{
 		req.Encode(e)
