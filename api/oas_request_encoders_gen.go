@@ -189,10 +189,13 @@ func encodePostEventsSendRequest(
 }
 
 func encodePostSegmentsRequest(
-	req *CreateSegmentRequest,
+	req CreateSegmentRequest,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
+	if err := req.Validate(); err != nil {
+		return err
+	}
 	e := new(jx.Encoder)
 	{
 		req.Encode(e)
@@ -221,6 +224,9 @@ func encodePostSegmentsPreviewRequest(
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
+	if err := req.Definition.Validate(); err != nil {
+		return err
+	}
 	e := new(jx.Encoder)
 	{
 		req.Encode(e)

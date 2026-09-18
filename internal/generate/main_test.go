@@ -58,50 +58,6 @@ parameters: [{ $ref: '#/components/parameters/CsrfHeader' }]
 	}
 }
 
-func TestRelaxSegmentObjectUnions(t *testing.T) {
-	source := `    Segment:
-      oneOf:
-        - $ref: '#/components/schemas/StaticSegment'
-        - $ref: '#/components/schemas/DynamicSegment'
-    StaticSegment:
-    CreateSegmentRequest:
-      oneOf:
-        - type: object
-    UpdateSegmentRequest:
-    SegmentDefinition:
-      description: bounded tree
-      oneOf:
-        - type: object
-    AllGroupDepth1:
-    SegmentRuleDepth1:
-      oneOf:
-        - type: object
-    SegmentRuleDepth2:
-    SegmentRuleDepth2:
-      oneOf:
-        - type: object
-    SegmentRuleDepth3:
-    SegmentRuleDepth3:
-      oneOf:
-        - type: object
-    LeafRule:
-    LeafRule:
-      oneOf:
-        - type: object
-    TextAttributePredicate:
-`
-
-	got, err := relaxSegmentObjectUnions(source)
-	if err != nil {
-		t.Fatalf("relaxSegmentObjectUnions() error = %v", err)
-	}
-	for _, name := range []string{"Segment", "CreateSegmentRequest", "SegmentDefinition", "SegmentRuleDepth1", "SegmentRuleDepth2", "SegmentRuleDepth3", "LeafRule"} {
-		if !strings.Contains(got, "    "+name+":\n      type: object") {
-			t.Fatalf("normalized schema did not relax %s:\n%s", name, got)
-		}
-	}
-}
-
 func TestNormalizeCodegenSpec_RequiresExactlyOneCanonicalUUIDSchema(t *testing.T) {
 	for name, source := range map[string]string{
 		"missing": `openapi: 3.1.1

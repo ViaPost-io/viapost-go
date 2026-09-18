@@ -516,7 +516,7 @@ type Invoker interface {
 	// Cria um segmento cujo nome deve ser único dentro do tenant.
 	//
 	// POST /v1/segments
-	PostSegments(ctx context.Context, request *CreateSegmentRequest) (PostSegmentsRes, error)
+	PostSegments(ctx context.Context, request CreateSegmentRequest) (PostSegmentsRes, error)
 	// PostSegmentsIDContacts invokes postSegmentsIdContacts operation.
 	//
 	// Adiciona um contato existente do mesmo tenant ao segmento estático. A associação já existente é
@@ -8032,12 +8032,12 @@ func (c *Client) sendPostMessagesIDCancel(ctx context.Context, params PostMessag
 // Cria um segmento cujo nome deve ser único dentro do tenant.
 //
 // POST /v1/segments
-func (c *Client) PostSegments(ctx context.Context, request *CreateSegmentRequest) (PostSegmentsRes, error) {
+func (c *Client) PostSegments(ctx context.Context, request CreateSegmentRequest) (PostSegmentsRes, error) {
 	res, err := c.sendPostSegments(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendPostSegments(ctx context.Context, request *CreateSegmentRequest) (res PostSegmentsRes, err error) {
+func (c *Client) sendPostSegments(ctx context.Context, request CreateSegmentRequest) (res PostSegmentsRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string

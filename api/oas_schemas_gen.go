@@ -1269,7 +1269,16 @@ func (s *CreateDomainResponse) SetDNSRecords(val []DNSRecord) {
 func (*CreateDomainResponse) postDomainsRes() {}
 
 // Ref: #/components/schemas/CreateSegmentRequest
-type CreateSegmentRequest struct{}
+type CreateSegmentRequest map[string]jx.Raw
+
+func (s *CreateSegmentRequest) init() CreateSegmentRequest {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
 
 // Ref: #/components/schemas/CreateSuppressionRequest
 type CreateSuppressionRequest struct {
@@ -9327,6 +9336,52 @@ func (o OptSPFAuthenticationResult) Or(d SPFAuthenticationResult) SPFAuthenticat
 	return d
 }
 
+// NewOptSegmentDefinition returns new OptSegmentDefinition with value set to v.
+func NewOptSegmentDefinition(v SegmentDefinition) OptSegmentDefinition {
+	return OptSegmentDefinition{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptSegmentDefinition is optional SegmentDefinition.
+type OptSegmentDefinition struct {
+	Value SegmentDefinition
+	Set   bool
+}
+
+// IsSet returns true if OptSegmentDefinition was set.
+func (o OptSegmentDefinition) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptSegmentDefinition) Reset() {
+	var v SegmentDefinition
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptSegmentDefinition) SetTo(v SegmentDefinition) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptSegmentDefinition) Get() (v SegmentDefinition, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptSegmentDefinition) Or(d SegmentDefinition) SegmentDefinition {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptSendCustomEventRequestProperties returns new OptSendCustomEventRequestProperties with value set to v.
 func NewOptSendCustomEventRequestProperties(v SendCustomEventRequestProperties) OptSendCustomEventRequestProperties {
 	return OptSendCustomEventRequestProperties{
@@ -12058,7 +12113,16 @@ func (s *SPFAuthenticationResult) UnmarshalText(data []byte) error {
 }
 
 // Ref: #/components/schemas/Segment
-type Segment struct{}
+type Segment map[string]jx.Raw
+
+func (s *Segment) init() Segment {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
 
 func (*Segment) getSegmentsIDRes()   {}
 func (*Segment) patchSegmentsIDRes() {}
@@ -12080,7 +12144,16 @@ func (s *SegmentContactRequest) SetContactID(val UUID) {
 }
 
 // Ref: #/components/schemas/SegmentDefinition
-type SegmentDefinition struct{}
+type SegmentDefinition map[string]jx.Raw
+
+func (s *SegmentDefinition) init() SegmentDefinition {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
 
 // Ref: #/components/schemas/SegmentList
 type SegmentList struct {
@@ -13850,9 +13923,9 @@ func (s *UpdateCustomEventRequestSchema) init() UpdateCustomEventRequestSchema {
 
 // Ref: #/components/schemas/UpdateSegmentRequest
 type UpdateSegmentRequest struct {
-	Name        OptString          `json:"name"`
-	Description OptNilString       `json:"description"`
-	Definition  *SegmentDefinition `json:"definition"`
+	Name        OptString            `json:"name"`
+	Description OptNilString         `json:"description"`
+	Definition  OptSegmentDefinition `json:"definition"`
 }
 
 // GetName returns the value of Name.
@@ -13866,7 +13939,7 @@ func (s *UpdateSegmentRequest) GetDescription() OptNilString {
 }
 
 // GetDefinition returns the value of Definition.
-func (s *UpdateSegmentRequest) GetDefinition() *SegmentDefinition {
+func (s *UpdateSegmentRequest) GetDefinition() OptSegmentDefinition {
 	return s.Definition
 }
 
@@ -13881,7 +13954,7 @@ func (s *UpdateSegmentRequest) SetDescription(val OptNilString) {
 }
 
 // SetDefinition sets the value of Definition.
-func (s *UpdateSegmentRequest) SetDefinition(val *SegmentDefinition) {
+func (s *UpdateSegmentRequest) SetDefinition(val OptSegmentDefinition) {
 	s.Definition = val
 }
 

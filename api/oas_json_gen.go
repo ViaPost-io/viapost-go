@@ -3456,29 +3456,43 @@ func (s *CreateDomainResponse) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s *CreateSegmentRequest) Encode(e *jx.Encoder) {
+func (s CreateSegmentRequest) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
-// encodeFields encodes fields.
-func (s *CreateSegmentRequest) encodeFields(e *jx.Encoder) {
-}
+// encodeFields implements json.Marshaler.
+func (s CreateSegmentRequest) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
 
-var jsonFieldsNameOfCreateSegmentRequest = [0]string{}
+		if len(elem) != 0 {
+			e.Raw(elem)
+		}
+	}
+}
 
 // Decode decodes CreateSegmentRequest from json.
 func (s *CreateSegmentRequest) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode CreateSegmentRequest to nil")
 	}
-
+	m := s.init()
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		default:
-			return d.Skip()
+		var elem jx.Raw
+		if err := func() error {
+			v, err := d.RawAppend(nil)
+			elem = jx.Raw(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
 		}
+		m[string(k)] = elem
+		return nil
 	}); err != nil {
 		return errors.Wrap(err, "decode CreateSegmentRequest")
 	}
@@ -3487,7 +3501,7 @@ func (s *CreateSegmentRequest) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *CreateSegmentRequest) MarshalJSON() ([]byte, error) {
+func (s CreateSegmentRequest) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
@@ -24915,6 +24929,40 @@ func (s *OptSPFAuthenticationResult) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes SegmentDefinition as json.
+func (o OptSegmentDefinition) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes SegmentDefinition from json.
+func (o *OptSegmentDefinition) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptSegmentDefinition to nil")
+	}
+	o.Set = true
+	o.Value = make(SegmentDefinition)
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptSegmentDefinition) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptSegmentDefinition) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes SendCustomEventRequestProperties as json.
 func (o OptSendCustomEventRequestProperties) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -36314,38 +36362,55 @@ func (s *SPFAuthenticationResult) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s *Segment) Encode(e *jx.Encoder) {
+func (s Segment) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
-// encodeFields encodes fields.
-func (s *Segment) encodeFields(e *jx.Encoder) {
-}
+// encodeFields implements json.Marshaler.
+func (s Segment) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
 
-var jsonFieldsNameOfSegment = [0]string{}
+		if len(elem) != 0 {
+			e.Raw(elem)
+		}
+	}
+}
 
 // Decode decodes Segment from json.
 func (s *Segment) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode Segment to nil")
 	}
-
+	m := s.init()
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		default:
-			return d.Skip()
+		var elem jx.Raw
+		if err := func() error {
+			v, err := d.RawAppend(nil)
+			elem = jx.Raw(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
 		}
+		m[string(k)] = elem
+		return nil
 	}); err != nil {
 		return errors.Wrap(err, "decode Segment")
+	}
+	if err := s.Validate(); err != nil {
+		return errors.Wrap(err, "validate Segment")
 	}
 
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *Segment) MarshalJSON() ([]byte, error) {
+func (s Segment) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
@@ -36452,29 +36517,43 @@ func (s *SegmentContactRequest) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s *SegmentDefinition) Encode(e *jx.Encoder) {
+func (s SegmentDefinition) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
-// encodeFields encodes fields.
-func (s *SegmentDefinition) encodeFields(e *jx.Encoder) {
-}
+// encodeFields implements json.Marshaler.
+func (s SegmentDefinition) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
 
-var jsonFieldsNameOfSegmentDefinition = [0]string{}
+		if len(elem) != 0 {
+			e.Raw(elem)
+		}
+	}
+}
 
 // Decode decodes SegmentDefinition from json.
 func (s *SegmentDefinition) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode SegmentDefinition to nil")
 	}
-
+	m := s.init()
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		default:
-			return d.Skip()
+		var elem jx.Raw
+		if err := func() error {
+			v, err := d.RawAppend(nil)
+			elem = jx.Raw(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
 		}
+		m[string(k)] = elem
+		return nil
 	}); err != nil {
 		return errors.Wrap(err, "decode SegmentDefinition")
 	}
@@ -36483,7 +36562,7 @@ func (s *SegmentDefinition) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *SegmentDefinition) MarshalJSON() ([]byte, error) {
+func (s SegmentDefinition) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
@@ -40996,7 +41075,7 @@ func (s *UpdateSegmentRequest) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		if s.Definition != nil {
+		if s.Definition.Set {
 			e.FieldStart("definition")
 			s.Definition.Encode(e)
 		}
@@ -41041,12 +41120,10 @@ func (s *UpdateSegmentRequest) Decode(d *jx.Decoder) error {
 			}
 		case "definition":
 			if err := func() error {
-				s.Definition = nil
-				var elem SegmentDefinition
-				if err := elem.Decode(d); err != nil {
+				s.Definition.Reset()
+				if err := s.Definition.Decode(d); err != nil {
 					return err
 				}
-				s.Definition = &elem
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"definition\"")
