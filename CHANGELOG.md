@@ -13,7 +13,9 @@ All notable changes to this project are documented in this file. This project fo
 ### Changed
 
 - Synchronize the generated client with the public OpenAPI contract reviewed at
-  `ViaPost-io/base-code@891adebbe79a26178fb780ec986172c890a5e261`.
+  `ViaPost-io/base-code@207702c8309db84354ae6a5f7a9f3042e21050a0`.
+- Include the published contacts import, domain health and inbound configuration,
+  message events and cancellation, batch send, and segment preview operations.
 - Add a regression test that decodes the documented segment-contact list response.
 - Keep JSON responses capped at 8 MiB while allowing raw RFC822 messages and CSV exports up to
   the API-supported 40 MiB by default, with a separately configurable bounded limit.

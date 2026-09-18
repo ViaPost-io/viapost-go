@@ -136,6 +136,16 @@ func encodePostContactsRequest(
 	return nil
 }
 
+func encodePostContactsImportRequest(
+	req PostContactsImportReq,
+	r *http.Request,
+) error {
+	const contentType = "text/csv"
+	body := req
+	ht.SetBody(r, body, contentType)
+	return nil
+}
+
 func encodePostDomainsRequest(
 	req *CreateDomainRequest,
 	r *http.Request,
@@ -206,8 +216,36 @@ func encodePostSegmentsIDContactsRequest(
 	return nil
 }
 
+func encodePostSegmentsPreviewRequest(
+	req *SegmentPreviewRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodePostSendRequest(
 	req *SendRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodePostSendBatchRequest(
+	req *BatchSendRequest,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

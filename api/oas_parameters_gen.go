@@ -62,8 +62,11 @@ type GetAutomationsIDParams struct {
 // GetAutomationsIDRunsParams is parameters of getAutomationsIdRuns operation.
 type GetAutomationsIDRunsParams struct {
 	ID string
-	// Cursor opaco base64url retornado pela API; timestamps RFC 3339 legados também são aceitos.
-	Cursor OptString                     `json:",omitempty,omitzero"`
+	// Cursor opaco base64url retornado pela API, com desempate estável por `(created_at,id)`; timestamps
+	// RFC 3339 legados também são aceitos. Não o interprete ou modifique e reutilize-o somente com os
+	// mesmos filtros.
+	Cursor OptString `json:",omitempty,omitzero"`
+	// Máximo de itens por página; padrão 50.
 	Limit  OptInt                        `json:",omitempty,omitzero"`
 	Status OptGetAutomationsIDRunsStatus `json:",omitempty,omitzero"`
 }
@@ -76,9 +79,13 @@ type GetAutomationsIDRunsRunIDParams struct {
 
 // GetContactsParams is parameters of getContacts operation.
 type GetContactsParams struct {
-	// Cursor opaco base64url retornado pela API; timestamps RFC 3339 legados também são aceitos.
+	// Cursor opaco base64url retornado pela API, com desempate estável por `(created_at,id)`; timestamps
+	// RFC 3339 legados também são aceitos. Não o interprete ou modifique e reutilize-o somente com os
+	// mesmos filtros.
 	Cursor OptString `json:",omitempty,omitzero"`
-	Limit  OptInt    `json:",omitempty,omitzero"`
+	// Máximo de itens por página; padrão 50.
+	Limit OptInt `json:",omitempty,omitzero"`
+	// Busca por e-mail ou nome do contato; máximo de 200 caracteres.
 	Search OptString `json:",omitempty,omitzero"`
 }
 
@@ -94,6 +101,16 @@ type GetDomainsIDParams struct {
 
 // GetDomainsIDDNSParams is parameters of getDomainsIdDns operation.
 type GetDomainsIDDNSParams struct {
+	ID string
+}
+
+// GetDomainsIDHealthParams is parameters of getDomainsIdHealth operation.
+type GetDomainsIDHealthParams struct {
+	ID string
+}
+
+// GetDomainsIDInboundParams is parameters of getDomainsIdInbound operation.
+type GetDomainsIDInboundParams struct {
 	ID string
 }
 
@@ -137,6 +154,20 @@ type GetMessagesEngagementParams struct {
 	Days OptInt `json:",omitempty,omitzero"`
 }
 
+// GetMessagesEventsParams is parameters of getMessagesEvents operation.
+type GetMessagesEventsParams struct {
+	// Cursor opaco retornado em `next_cursor`; não deve ser interpretado ou alterado pelo cliente.
+	Cursor OptString `json:",omitempty,omitzero"`
+	// Quantidade máxima de eventos retornados.
+	Limit OptInt `json:",omitempty,omitzero"`
+	// Janela relativa ao instante da consulta; usa `24h` quando omitida.
+	Period OptGetMessagesEventsPeriod `json:",omitempty,omitzero"`
+	// Filtra por um único tipo outbound de entrega ou tracking.
+	Type OptOutboundMessageEventType `json:",omitempty,omitzero"`
+	// Filtra pelo UUID de uma mensagem pertencente ao tenant autenticado.
+	MessageID OptString `json:",omitempty,omitzero"`
+}
+
 // GetMessagesIDParams is parameters of getMessagesId operation.
 type GetMessagesIDParams struct {
 	ID string
@@ -167,9 +198,13 @@ type GetMessagesTimeseriesParams struct {
 
 // GetSegmentsParams is parameters of getSegments operation.
 type GetSegmentsParams struct {
-	// Cursor opaco base64url retornado pela API; timestamps RFC 3339 legados também são aceitos.
+	// Cursor opaco base64url retornado pela API, com desempate estável por `(created_at,id)`; timestamps
+	// RFC 3339 legados também são aceitos. Não o interprete ou modifique e reutilize-o somente com os
+	// mesmos filtros.
 	Cursor OptString `json:",omitempty,omitzero"`
-	Limit  OptInt    `json:",omitempty,omitzero"`
+	// Máximo de itens por página; padrão 50.
+	Limit OptInt `json:",omitempty,omitzero"`
+	// Busca pelo nome do segmento; máximo de 200 caracteres.
 	Search OptString `json:",omitempty,omitzero"`
 }
 
@@ -181,9 +216,13 @@ type GetSegmentsIDParams struct {
 // GetSegmentsIDContactsParams is parameters of getSegmentsIdContacts operation.
 type GetSegmentsIDContactsParams struct {
 	ID string
-	// Cursor opaco base64url retornado pela API; timestamps RFC 3339 legados também são aceitos.
+	// Cursor opaco base64url retornado pela API, com desempate estável por `(created_at,id)`; timestamps
+	// RFC 3339 legados também são aceitos. Não o interprete ou modifique e reutilize-o somente com os
+	// mesmos filtros.
 	Cursor OptString `json:",omitempty,omitzero"`
-	Limit  OptInt    `json:",omitempty,omitzero"`
+	// Máximo de itens por página; padrão 50.
+	Limit OptInt `json:",omitempty,omitzero"`
+	// Busca pelo e-mail do contato; máximo de 200 caracteres.
 	Search OptString `json:",omitempty,omitzero"`
 }
 
@@ -320,6 +359,11 @@ type PostDomainsIDDkimRotateParams struct {
 
 // PostDomainsIDVerifyParams is parameters of postDomainsIdVerify operation.
 type PostDomainsIDVerifyParams struct {
+	ID string
+}
+
+// PostMessagesIDCancelParams is parameters of postMessagesIdCancel operation.
+type PostMessagesIDCancelParams struct {
 	ID string
 }
 

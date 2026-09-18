@@ -15,15 +15,25 @@ import (
 //go:generate go run ../cmd/generate ../../openapi.yaml ../../api
 
 var (
-	unsupportedItems     = regexp.MustCompile(`(?m)^[\t ]*items: false[\t ]*\r?\n`)
-	canonicalUUIDBlock   = regexp.MustCompile(`(?m)^    UUID:\r?\n      type: string\r?\n      format: uuid[\t ]*$`)
-	uuidFormatLine       = regexp.MustCompile(`(?m)^[\t ]*format: uuid[\t ]*\r?\n`)
-	sessionReference     = regexp.MustCompile(`(?m)^[\t ]*- sessionCookie: \[\][\t ]*\r?\n`)
-	csrfListReference    = regexp.MustCompile(`(?m)^[\t ]*- \$ref: '#/components/parameters/CsrfHeader'[\t ]*\r?\n`)
-	csrfInlineParameters = regexp.MustCompile(`(?m)^[\t ]*parameters: \[\{ \$ref: '#/components/parameters/CsrfHeader' \}\][\t ]*\r?\n`)
-	csrfComponent        = regexp.MustCompile(`(?ms)^    CsrfHeader:\r?\n.*?(^  securitySchemes:)`)
-	sessionScheme        = regexp.MustCompile(`(?ms)^    sessionCookie:\r?\n.*?(^  schemas:)`)
-	webhookDeliveryEvent = regexp.MustCompile(`(?ms)^    WebhookDeliveryEventType:\r?\n      anyOf:\r?\n        - \$ref: '#/components/schemas/WebhookSubscribableEventType'\r?\n        - type: string\r?\n          const: webhook\.test[\t ]*$`)
+	unsupportedItems        = regexp.MustCompile(`(?m)^[\t ]*items: false[\t ]*\r?\n`)
+	canonicalUUIDBlock      = regexp.MustCompile(`(?m)^    UUID:\r?\n      type: string\r?\n      format: uuid[\t ]*$`)
+	uuidFormatLine          = regexp.MustCompile(`(?m)^[\t ]*format: uuid[\t ]*\r?\n`)
+	sessionReference        = regexp.MustCompile(`(?m)^[\t ]*- sessionCookie: \[\][\t ]*\r?\n`)
+	csrfListReference       = regexp.MustCompile(`(?m)^[\t ]*- \$ref: '#/components/parameters/CsrfHeader'[\t ]*\r?\n`)
+	csrfInlineParameters    = regexp.MustCompile(`(?m)^[\t ]*parameters: \[\{ \$ref: '#/components/parameters/CsrfHeader' \}\][\t ]*\r?\n`)
+	csrfComponent           = regexp.MustCompile(`(?ms)^    CsrfHeader:\r?\n.*?(^  securitySchemes:)`)
+	sessionScheme           = regexp.MustCompile(`(?ms)^    sessionCookie:\r?\n.*?(^  schemas:)`)
+	webhookDeliveryEvent    = regexp.MustCompile(`(?ms)^    WebhookDeliveryEventType:\r?\n      anyOf:\r?\n        - \$ref: '#/components/schemas/WebhookSubscribableEventType'\r?\n        - type: string\r?\n          const: webhook\.test[\t ]*$`)
+	propertyComparisonValue = regexp.MustCompile(`(?m)^        value:\r?\n          type:\r?\n            - string\r?\n            - number\r?\n            - boolean\r?\n`)
+	segmentObjectUnions     = []struct{ name, next string }{
+		{"Segment", "StaticSegment"},
+		{"CreateSegmentRequest", "UpdateSegmentRequest"},
+		{"SegmentDefinition", "AllGroupDepth1"},
+		{"SegmentRuleDepth1", "SegmentRuleDepth2"},
+		{"SegmentRuleDepth2", "SegmentRuleDepth3"},
+		{"SegmentRuleDepth3", "LeafRule"},
+		{"LeafRule", "TextAttributePredicate"},
+	}
 )
 
 const (
@@ -54,7 +64,30 @@ func normalizeCodegenSpec(source []byte) ([]byte, error) {
 	// as a plain string in generated code; the versioned contract still retains
 	// the exact anyOf constraints for documentation and drift checks.
 	normalized = webhookDeliveryEvent.ReplaceAllString(normalized, "    WebhookDeliveryEventType:\n      type: string")
+	// ogen v1.24 does not support JSON Schema's multi-type form. The generated
+	// client represents this documented scalar union as an unconstrained value.
+	normalized = propertyComparisonValue.ReplaceAllString(normalized, "        value: {}\n")
+	var err error
+	normalized, err = relaxSegmentObjectUnions(normalized)
+	if err != nil {
+		return nil, err
+	}
 	return []byte(normalized), nil
+}
+
+func relaxSegmentObjectUnions(source string) (string, error) {
+	for _, union := range segmentObjectUnions {
+		pattern := regexp.MustCompile(`(?ms)^    ` + regexp.QuoteMeta(union.name) + `:\r?\n(?:      description:.*\r?\n)?      oneOf:\r?\n.*?(^    ` + regexp.QuoteMeta(union.next) + `:)`)
+		matches := pattern.FindAllStringIndex(source, -1)
+		if len(matches) == 0 {
+			continue
+		}
+		if len(matches) != 1 {
+			return "", fmt.Errorf("expected exactly one %s object union, found %d", union.name, len(matches))
+		}
+		source = pattern.ReplaceAllString(source, "    "+union.name+":\n      type: object\n$1")
+	}
+	return source, nil
 }
 
 // Generate writes the normalized contract to a temporary file and generates a
@@ -132,6 +165,14 @@ func hardenSensitiveResponses(targetPath string) error {
 		}
 		content = strings.Replace(content, original, hardened, 1)
 	}
+	// ogen v1.24 emits this newly added string const as Raw(string), while the
+	// current jx API requires raw JSON bytes. Encode the documented const as a
+	// JSON string instead.
+	const dynamicMembershipRaw = `e.Raw("dynamic_segment_membership")`
+	if strings.Count(content, dynamicMembershipRaw) != 1 {
+		return fmt.Errorf("expected exactly one generated dynamic membership const codec")
+	}
+	content = strings.Replace(content, dynamicMembershipRaw, `e.Str("dynamic_segment_membership")`, 1)
 	formattedContent, err := format.Source([]byte(content))
 	if err != nil {
 		return fmt.Errorf("format hardened generated JSON codecs: %w", err)

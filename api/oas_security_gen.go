@@ -12,7 +12,8 @@ import (
 // SecuritySource is provider of security values (tokens, passwords, etc.).
 type SecuritySource interface {
 	// BearerAPIKey provides bearerApiKey security value.
-	// API Key do tenant; o scope exato está em x-viapost-scope.
+	// API Key do tenant; o scope principal está em x-viapost-scope e combinações obrigatórias em
+	// x-viapost-required-scopes.
 	BearerAPIKey(ctx context.Context, operationName OperationName) (BearerAPIKey, error)
 }
 
@@ -36,12 +37,15 @@ var operationRolesBearerAPIKey = map[string][]string{
 	GetDomainsOperation:                               []string{},
 	GetDomainsIDOperation:                             []string{},
 	GetDomainsIDDNSOperation:                          []string{},
+	GetDomainsIDHealthOperation:                       []string{},
+	GetDomainsIDInboundOperation:                      []string{},
 	GetEventsOperation:                                []string{},
 	GetInboundMessagesOperation:                       []string{},
 	GetInboundMessagesIDOperation:                     []string{},
 	GetInboundMessagesIDRawOperation:                  []string{},
 	GetMessagesOperation:                              []string{},
 	GetMessagesEngagementOperation:                    []string{},
+	GetMessagesEventsOperation:                        []string{},
 	GetMessagesIDOperation:                            []string{},
 	GetMessagesIDEventsOperation:                      []string{},
 	GetMessagesIDRawOperation:                         []string{},
@@ -75,14 +79,18 @@ var operationRolesBearerAPIKey = map[string][]string{
 	PostAutomationsIDDuplicateOperation:               []string{},
 	PostAutomationsIDRunsRunIDCancelOperation:         []string{},
 	PostContactsOperation:                             []string{},
+	PostContactsImportOperation:                       []string{},
 	PostDomainsOperation:                              []string{},
 	PostDomainsIDDkimRotateOperation:                  []string{},
 	PostDomainsIDVerifyOperation:                      []string{},
 	PostEventsOperation:                               []string{},
 	PostEventsSendOperation:                           []string{},
+	PostMessagesIDCancelOperation:                     []string{},
 	PostSegmentsOperation:                             []string{},
 	PostSegmentsIDContactsOperation:                   []string{},
+	PostSegmentsPreviewOperation:                      []string{},
 	PostSendOperation:                                 []string{},
+	PostSendBatchOperation:                            []string{},
 	PostSuppressionsOperation:                         []string{},
 	PostSuppressionsIDReleaseOperation:                []string{},
 	PostSuppressionsImportOperation:                   []string{},
