@@ -71,6 +71,9 @@ func encodePatchSegmentsIDRequest(
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
+	if err := validateUpdateSegmentRequest(req); err != nil {
+		return err
+	}
 	e := new(jx.Encoder)
 	{
 		req.Encode(e)
@@ -136,6 +139,16 @@ func encodePostContactsRequest(
 	return nil
 }
 
+func encodePostContactsImportRequest(
+	req PostContactsImportReq,
+	r *http.Request,
+) error {
+	const contentType = "text/csv"
+	body := req
+	ht.SetBody(r, body, contentType)
+	return nil
+}
+
 func encodePostDomainsRequest(
 	req *CreateDomainRequest,
 	r *http.Request,
@@ -179,10 +192,13 @@ func encodePostEventsSendRequest(
 }
 
 func encodePostSegmentsRequest(
-	req *CreateSegmentRequest,
+	req CreateSegmentRequest,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
+	if err := req.Validate(); err != nil {
+		return err
+	}
 	e := new(jx.Encoder)
 	{
 		req.Encode(e)
@@ -206,8 +222,39 @@ func encodePostSegmentsIDContactsRequest(
 	return nil
 }
 
+func encodePostSegmentsPreviewRequest(
+	req *SegmentPreviewRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	if err := req.Definition.Validate(); err != nil {
+		return err
+	}
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodePostSendRequest(
 	req *SendRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodePostSendBatchRequest(
+	req *BatchSendRequest,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
