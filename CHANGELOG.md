@@ -10,6 +10,8 @@ All notable changes to this project are documented in this file. This project fo
 - The generated low-level `api` package now includes the current public contacts import,
   tracking-domain, inbound, audience-segment, and broadcast foundations. Implementations of
   low-level generated interfaces must add the corresponding operations.
+- `api.DynamicSegmentMembershipErrorError.Code` is now the documented `string` constant instead
+  of `jx.Raw`; consumers assigning or comparing raw JSON must migrate to a string.
 
 ### Changed
 
