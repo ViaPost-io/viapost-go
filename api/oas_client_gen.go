@@ -115,6 +115,18 @@ type Invoker interface {
 	//
 	// GET /v1/contacts/{id}
 	GetContactsID(ctx context.Context, params GetContactsIDParams) (GetContactsIDRes, error)
+	// GetDomainTrackingDomain invokes getDomainTrackingDomain operation.
+	//
+	// Consultar domínio de tracking.
+	//
+	// GET /v1/domains/{domain_id}/tracking-domains/{tracking_domain_id}
+	GetDomainTrackingDomain(ctx context.Context, params GetDomainTrackingDomainParams) (GetDomainTrackingDomainRes, error)
+	// GetDomainTrackingDomains invokes getDomainTrackingDomains operation.
+	//
+	// Listar domínios de tracking.
+	//
+	// GET /v1/domains/{domain_id}/tracking-domains
+	GetDomainTrackingDomains(ctx context.Context, params GetDomainTrackingDomainsParams) (GetDomainTrackingDomainsRes, error)
 	// GetDomains invokes getDomains operation.
 	//
 	// GET /v1/domains.
@@ -471,6 +483,36 @@ type Invoker interface {
 	//
 	// POST /v1/contacts/import
 	PostContactsImport(ctx context.Context, request PostContactsImportReq) (PostContactsImportRes, error)
+	// PostDomainTrackingDomainActivate invokes postDomainTrackingDomainActivate operation.
+	//
+	// Iniciar provisionamento do domínio de tracking.
+	//
+	// POST /v1/domains/{domain_id}/tracking-domains/{tracking_domain_id}/activate
+	PostDomainTrackingDomainActivate(ctx context.Context, params PostDomainTrackingDomainActivateParams) (PostDomainTrackingDomainActivateRes, error)
+	// PostDomainTrackingDomainProofRotate invokes postDomainTrackingDomainProofRotate operation.
+	//
+	// Rotacionar prova do domínio de tracking.
+	//
+	// POST /v1/domains/{domain_id}/tracking-domains/{tracking_domain_id}/proof/rotate
+	PostDomainTrackingDomainProofRotate(ctx context.Context, params PostDomainTrackingDomainProofRotateParams) (PostDomainTrackingDomainProofRotateRes, error)
+	// PostDomainTrackingDomainRevoke invokes postDomainTrackingDomainRevoke operation.
+	//
+	// Revogar domínio de tracking.
+	//
+	// POST /v1/domains/{domain_id}/tracking-domains/{tracking_domain_id}/revoke
+	PostDomainTrackingDomainRevoke(ctx context.Context, params PostDomainTrackingDomainRevokeParams) (PostDomainTrackingDomainRevokeRes, error)
+	// PostDomainTrackingDomainVerify invokes postDomainTrackingDomainVerify operation.
+	//
+	// Verificar prova TXT do domínio de tracking.
+	//
+	// POST /v1/domains/{domain_id}/tracking-domains/{tracking_domain_id}/verify
+	PostDomainTrackingDomainVerify(ctx context.Context, params PostDomainTrackingDomainVerifyParams) (PostDomainTrackingDomainVerifyRes, error)
+	// PostDomainTrackingDomains invokes postDomainTrackingDomains operation.
+	//
+	// Reservar domínio de tracking.
+	//
+	// POST /v1/domains/{domain_id}/tracking-domains
+	PostDomainTrackingDomains(ctx context.Context, request *CreateTrackingDomainRequest, params PostDomainTrackingDomainsParams) (PostDomainTrackingDomainsRes, error)
 	// PostDomains invokes postDomains operation.
 	//
 	// POST /v1/domains.
@@ -2277,6 +2319,214 @@ func (c *Client) sendGetContactsID(ctx context.Context, params GetContactsIDPara
 	}()
 
 	result, err := decodeGetContactsIDResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetDomainTrackingDomain invokes getDomainTrackingDomain operation.
+//
+// Consultar domínio de tracking.
+//
+// GET /v1/domains/{domain_id}/tracking-domains/{tracking_domain_id}
+func (c *Client) GetDomainTrackingDomain(ctx context.Context, params GetDomainTrackingDomainParams) (GetDomainTrackingDomainRes, error) {
+	res, err := c.sendGetDomainTrackingDomain(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetDomainTrackingDomain(ctx context.Context, params GetDomainTrackingDomainParams) (res GetDomainTrackingDomainRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/v1/domains/"
+	{
+		// Encode "domain_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "domain_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.DomainID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/tracking-domains/"
+	{
+		// Encode "tracking_domain_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "tracking_domain_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.TrackingDomainID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, GetDomainTrackingDomainOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetDomainTrackingDomainResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetDomainTrackingDomains invokes getDomainTrackingDomains operation.
+//
+// Listar domínios de tracking.
+//
+// GET /v1/domains/{domain_id}/tracking-domains
+func (c *Client) GetDomainTrackingDomains(ctx context.Context, params GetDomainTrackingDomainsParams) (GetDomainTrackingDomainsRes, error) {
+	res, err := c.sendGetDomainTrackingDomains(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetDomainTrackingDomains(ctx context.Context, params GetDomainTrackingDomainsParams) (res GetDomainTrackingDomainsRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v1/domains/"
+	{
+		// Encode "domain_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "domain_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.DomainID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/tracking-domains"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, GetDomainTrackingDomainsOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetDomainTrackingDomainsResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -7494,6 +7744,560 @@ func (c *Client) sendPostContactsImport(ctx context.Context, request PostContact
 	}()
 
 	result, err := decodePostContactsImportResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// PostDomainTrackingDomainActivate invokes postDomainTrackingDomainActivate operation.
+//
+// Iniciar provisionamento do domínio de tracking.
+//
+// POST /v1/domains/{domain_id}/tracking-domains/{tracking_domain_id}/activate
+func (c *Client) PostDomainTrackingDomainActivate(ctx context.Context, params PostDomainTrackingDomainActivateParams) (PostDomainTrackingDomainActivateRes, error) {
+	res, err := c.sendPostDomainTrackingDomainActivate(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendPostDomainTrackingDomainActivate(ctx context.Context, params PostDomainTrackingDomainActivateParams) (res PostDomainTrackingDomainActivateRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/domains/"
+	{
+		// Encode "domain_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "domain_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.DomainID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/tracking-domains/"
+	{
+		// Encode "tracking_domain_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "tracking_domain_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.TrackingDomainID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/activate"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, PostDomainTrackingDomainActivateOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodePostDomainTrackingDomainActivateResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// PostDomainTrackingDomainProofRotate invokes postDomainTrackingDomainProofRotate operation.
+//
+// Rotacionar prova do domínio de tracking.
+//
+// POST /v1/domains/{domain_id}/tracking-domains/{tracking_domain_id}/proof/rotate
+func (c *Client) PostDomainTrackingDomainProofRotate(ctx context.Context, params PostDomainTrackingDomainProofRotateParams) (PostDomainTrackingDomainProofRotateRes, error) {
+	res, err := c.sendPostDomainTrackingDomainProofRotate(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendPostDomainTrackingDomainProofRotate(ctx context.Context, params PostDomainTrackingDomainProofRotateParams) (res PostDomainTrackingDomainProofRotateRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/domains/"
+	{
+		// Encode "domain_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "domain_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.DomainID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/tracking-domains/"
+	{
+		// Encode "tracking_domain_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "tracking_domain_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.TrackingDomainID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/proof/rotate"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, PostDomainTrackingDomainProofRotateOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodePostDomainTrackingDomainProofRotateResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// PostDomainTrackingDomainRevoke invokes postDomainTrackingDomainRevoke operation.
+//
+// Revogar domínio de tracking.
+//
+// POST /v1/domains/{domain_id}/tracking-domains/{tracking_domain_id}/revoke
+func (c *Client) PostDomainTrackingDomainRevoke(ctx context.Context, params PostDomainTrackingDomainRevokeParams) (PostDomainTrackingDomainRevokeRes, error) {
+	res, err := c.sendPostDomainTrackingDomainRevoke(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendPostDomainTrackingDomainRevoke(ctx context.Context, params PostDomainTrackingDomainRevokeParams) (res PostDomainTrackingDomainRevokeRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/domains/"
+	{
+		// Encode "domain_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "domain_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.DomainID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/tracking-domains/"
+	{
+		// Encode "tracking_domain_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "tracking_domain_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.TrackingDomainID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/revoke"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, PostDomainTrackingDomainRevokeOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodePostDomainTrackingDomainRevokeResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// PostDomainTrackingDomainVerify invokes postDomainTrackingDomainVerify operation.
+//
+// Verificar prova TXT do domínio de tracking.
+//
+// POST /v1/domains/{domain_id}/tracking-domains/{tracking_domain_id}/verify
+func (c *Client) PostDomainTrackingDomainVerify(ctx context.Context, params PostDomainTrackingDomainVerifyParams) (PostDomainTrackingDomainVerifyRes, error) {
+	res, err := c.sendPostDomainTrackingDomainVerify(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendPostDomainTrackingDomainVerify(ctx context.Context, params PostDomainTrackingDomainVerifyParams) (res PostDomainTrackingDomainVerifyRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/domains/"
+	{
+		// Encode "domain_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "domain_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.DomainID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/tracking-domains/"
+	{
+		// Encode "tracking_domain_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "tracking_domain_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.TrackingDomainID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/verify"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, PostDomainTrackingDomainVerifyOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodePostDomainTrackingDomainVerifyResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// PostDomainTrackingDomains invokes postDomainTrackingDomains operation.
+//
+// Reservar domínio de tracking.
+//
+// POST /v1/domains/{domain_id}/tracking-domains
+func (c *Client) PostDomainTrackingDomains(ctx context.Context, request *CreateTrackingDomainRequest, params PostDomainTrackingDomainsParams) (PostDomainTrackingDomainsRes, error) {
+	res, err := c.sendPostDomainTrackingDomains(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendPostDomainTrackingDomains(ctx context.Context, request *CreateTrackingDomainRequest, params PostDomainTrackingDomainsParams) (res PostDomainTrackingDomainsRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v1/domains/"
+	{
+		// Encode "domain_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "domain_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.DomainID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/tracking-domains"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodePostDomainTrackingDomainsRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, PostDomainTrackingDomainsOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodePostDomainTrackingDomainsResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

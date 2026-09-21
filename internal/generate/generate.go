@@ -26,6 +26,7 @@ var (
 	sessionScheme           = regexp.MustCompile(`(?ms)^    sessionCookie:\r?\n.*?(^  schemas:)`)
 	webhookDeliveryEvent    = regexp.MustCompile(`(?ms)^    WebhookDeliveryEventType:\r?\n      anyOf:\r?\n        - \$ref: '#/components/schemas/WebhookSubscribableEventType'\r?\n        - type: string\r?\n          const: webhook\.test[\t ]*$`)
 	propertyComparisonValue = regexp.MustCompile(`(?m)^        value:\r?\n          type:\r?\n            - string\r?\n            - number\r?\n            - boolean\r?\n`)
+	untypedConst            = regexp.MustCompile(`(?m)^([ \t]+)([[:alnum:]_]+):\r?\n([ \t]+)const: ([^\r\n]+)[\t ]*$`)
 )
 
 const (
@@ -59,6 +60,20 @@ func normalizeCodegenSpec(source []byte) ([]byte, error) {
 	// ogen v1.24 does not support JSON Schema's multi-type form. The generated
 	// client represents this documented scalar union as an unconstrained value.
 	normalized = propertyComparisonValue.ReplaceAllString(normalized, "        value: {}\n")
+	// OpenAPI 3.1 infers a scalar type from const, but ogen v1.24 emits invalid
+	// encoders for untyped constants. Make that inferred type explicit only in
+	// the temporary generation input.
+	normalized = untypedConst.ReplaceAllStringFunc(normalized, func(match string) string {
+		parts := untypedConst.FindStringSubmatch(match)
+		value := strings.TrimSpace(parts[4])
+		typ := "string"
+		if value == "true" || value == "false" {
+			typ = "boolean"
+		} else if matched, _ := regexp.MatchString(`^-?[0-9]+$`, value); matched {
+			typ = "integer"
+		}
+		return fmt.Sprintf("%s%s:\n%stype: %s\n%sconst: %s", parts[1], parts[2], parts[3], typ, parts[3], value)
+	})
 	var err error
 	normalized, err = rawSegmentObjectUnions(normalized)
 	if err != nil {
@@ -263,14 +278,6 @@ func hardenSensitiveResponses(targetPath string) error {
 		}
 		content = strings.Replace(content, original, hardened, 1)
 	}
-	// ogen v1.24 emits this newly added string const as Raw(string), while the
-	// current jx API requires raw JSON bytes. Encode the documented const as a
-	// JSON string instead.
-	const dynamicMembershipRaw = `e.Raw("dynamic_segment_membership")`
-	if strings.Count(content, dynamicMembershipRaw) != 1 {
-		return fmt.Errorf("expected exactly one generated dynamic membership const codec")
-	}
-	content = strings.Replace(content, dynamicMembershipRaw, `e.Str("dynamic_segment_membership")`, 1)
 	formattedContent, err := format.Source([]byte(content))
 	if err != nil {
 		return fmt.Errorf("format hardened generated JSON codecs: %w", err)

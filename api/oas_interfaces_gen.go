@@ -61,6 +61,14 @@ type GetContactsRes interface {
 	getContactsRes()
 }
 
+type GetDomainTrackingDomainRes interface {
+	getDomainTrackingDomainRes()
+}
+
+type GetDomainTrackingDomainsRes interface {
+	getDomainTrackingDomainsRes()
+}
+
 type GetDomainsIDDNSRes interface {
 	getDomainsIDDNSRes()
 }
@@ -259,6 +267,26 @@ type PostContactsImportRes interface {
 
 type PostContactsRes interface {
 	postContactsRes()
+}
+
+type PostDomainTrackingDomainActivateRes interface {
+	postDomainTrackingDomainActivateRes()
+}
+
+type PostDomainTrackingDomainProofRotateRes interface {
+	postDomainTrackingDomainProofRotateRes()
+}
+
+type PostDomainTrackingDomainRevokeRes interface {
+	postDomainTrackingDomainRevokeRes()
+}
+
+type PostDomainTrackingDomainVerifyRes interface {
+	postDomainTrackingDomainVerifyRes()
+}
+
+type PostDomainTrackingDomainsRes interface {
+	postDomainTrackingDomainsRes()
 }
 
 type PostDomainsIDDkimRotateRes interface {

@@ -94,6 +94,17 @@ type GetContactsIDParams struct {
 	ID string
 }
 
+// GetDomainTrackingDomainParams is parameters of getDomainTrackingDomain operation.
+type GetDomainTrackingDomainParams struct {
+	DomainID         string
+	TrackingDomainID string
+}
+
+// GetDomainTrackingDomainsParams is parameters of getDomainTrackingDomains operation.
+type GetDomainTrackingDomainsParams struct {
+	DomainID string
+}
+
 // GetDomainsIDParams is parameters of getDomainsId operation.
 type GetDomainsIDParams struct {
 	ID string
@@ -350,6 +361,35 @@ type PostAutomationsIDDuplicateParams struct {
 type PostAutomationsIDRunsRunIDCancelParams struct {
 	ID    string
 	RunID string
+}
+
+// PostDomainTrackingDomainActivateParams is parameters of postDomainTrackingDomainActivate operation.
+type PostDomainTrackingDomainActivateParams struct {
+	DomainID         string
+	TrackingDomainID string
+}
+
+// PostDomainTrackingDomainProofRotateParams is parameters of postDomainTrackingDomainProofRotate operation.
+type PostDomainTrackingDomainProofRotateParams struct {
+	DomainID         string
+	TrackingDomainID string
+}
+
+// PostDomainTrackingDomainRevokeParams is parameters of postDomainTrackingDomainRevoke operation.
+type PostDomainTrackingDomainRevokeParams struct {
+	DomainID         string
+	TrackingDomainID string
+}
+
+// PostDomainTrackingDomainVerifyParams is parameters of postDomainTrackingDomainVerify operation.
+type PostDomainTrackingDomainVerifyParams struct {
+	DomainID         string
+	TrackingDomainID string
+}
+
+// PostDomainTrackingDomainsParams is parameters of postDomainTrackingDomains operation.
+type PostDomainTrackingDomainsParams struct {
+	DomainID string
 }
 
 // PostDomainsIDDkimRotateParams is parameters of postDomainsIdDkimRotate operation.
