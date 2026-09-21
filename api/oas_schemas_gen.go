@@ -1476,6 +1476,22 @@ func (s *CreateThemeRequestStyle) init() CreateThemeRequestStyle {
 	return m
 }
 
+// Ref: #/components/schemas/CreateTrackingDomainRequest
+type CreateTrackingDomainRequest struct {
+	// Hostname DNS, canonicalizado para ASCII/IDNA.
+	Hostname string `json:"hostname"`
+}
+
+// GetHostname returns the value of Hostname.
+func (s *CreateTrackingDomainRequest) GetHostname() string {
+	return s.Hostname
+}
+
+// SetHostname sets the value of Hostname.
+func (s *CreateTrackingDomainRequest) SetHostname(val string) {
+	s.Hostname = val
+}
+
 // Ref: #/components/schemas/CreateWebhookRequest
 type CreateWebhookRequest struct {
 	URL        url.URL                        `json:"url"`
@@ -3510,13 +3526,13 @@ func (*DynamicSegmentMembershipError) deleteSegmentsIDContactsContactIDRes() {}
 func (*DynamicSegmentMembershipError) postSegmentsIDContactsRes()            {}
 
 type DynamicSegmentMembershipErrorError struct {
-	Code      jx.Raw `json:"code"`
+	Code      string `json:"code"`
 	Message   string `json:"message"`
 	RequestID string `json:"request_id"`
 }
 
 // GetCode returns the value of Code.
-func (s *DynamicSegmentMembershipErrorError) GetCode() jx.Raw {
+func (s *DynamicSegmentMembershipErrorError) GetCode() string {
 	return s.Code
 }
 
@@ -3531,7 +3547,7 @@ func (s *DynamicSegmentMembershipErrorError) GetRequestID() string {
 }
 
 // SetCode sets the value of Code.
-func (s *DynamicSegmentMembershipErrorError) SetCode(val jx.Raw) {
+func (s *DynamicSegmentMembershipErrorError) SetCode(val string) {
 	s.Code = val
 }
 
@@ -3872,6 +3888,11 @@ func (s *Error) GetError() ErrorDetail {
 func (s *Error) SetError(val ErrorDetail) {
 	s.Error = val
 }
+
+func (*Error) getDomainTrackingDomainRes()        {}
+func (*Error) getDomainTrackingDomainsRes()       {}
+func (*Error) postDomainTrackingDomainRevokeRes() {}
+func (*Error) postDomainTrackingDomainVerifyRes() {}
 
 // Ref: #/components/schemas/ErrorDetail
 type ErrorDetail struct {
@@ -10492,6 +10513,34 @@ type PostContactsUnauthorized Error
 
 func (*PostContactsUnauthorized) postContactsRes() {}
 
+type PostDomainTrackingDomainActivateConflict Error
+
+func (*PostDomainTrackingDomainActivateConflict) postDomainTrackingDomainActivateRes() {}
+
+type PostDomainTrackingDomainActivateNotFound Error
+
+func (*PostDomainTrackingDomainActivateNotFound) postDomainTrackingDomainActivateRes() {}
+
+type PostDomainTrackingDomainProofRotateConflict Error
+
+func (*PostDomainTrackingDomainProofRotateConflict) postDomainTrackingDomainProofRotateRes() {}
+
+type PostDomainTrackingDomainProofRotateNotFound Error
+
+func (*PostDomainTrackingDomainProofRotateNotFound) postDomainTrackingDomainProofRotateRes() {}
+
+type PostDomainTrackingDomainsBadRequest Error
+
+func (*PostDomainTrackingDomainsBadRequest) postDomainTrackingDomainsRes() {}
+
+type PostDomainTrackingDomainsConflict Error
+
+func (*PostDomainTrackingDomainsConflict) postDomainTrackingDomainsRes() {}
+
+type PostDomainTrackingDomainsNotFound Error
+
+func (*PostDomainTrackingDomainsNotFound) postDomainTrackingDomainsRes() {}
+
 type PostDomainsBadRequest Error
 
 func (*PostDomainsBadRequest) postDomainsRes() {}
@@ -13781,6 +13830,329 @@ func (*TooManyRequestsHeaders) postWebhooksIDDeliveriesDeliveryIDReplayRes() {}
 func (*TooManyRequestsHeaders) postWebhooksIDSecretRotateRes()               {}
 func (*TooManyRequestsHeaders) postWebhooksIDTestRes()                       {}
 func (*TooManyRequestsHeaders) postWebhooksRes()                             {}
+
+// Ref: #/components/schemas/TrackingDomain
+type TrackingDomain struct {
+	ID              UUID                `json:"id"`
+	Hostname        string              `json:"hostname"`
+	State           TrackingDomainState `json:"state"`
+	ProofExpiresAt  NilTimestamp        `json:"proof_expires_at"`
+	ProofVerifiedAt NilTimestamp        `json:"proof_verified_at"`
+	LastCheckedAt   NilTimestamp        `json:"last_checked_at"`
+	ActivatedAt     NilTimestamp        `json:"activated_at"`
+	SuspendedAt     NilTimestamp        `json:"suspended_at"`
+	RevokedAt       NilTimestamp        `json:"revoked_at"`
+	CreatedAt       Timestamp           `json:"created_at"`
+	UpdatedAt       Timestamp           `json:"updated_at"`
+}
+
+// GetID returns the value of ID.
+func (s *TrackingDomain) GetID() UUID {
+	return s.ID
+}
+
+// GetHostname returns the value of Hostname.
+func (s *TrackingDomain) GetHostname() string {
+	return s.Hostname
+}
+
+// GetState returns the value of State.
+func (s *TrackingDomain) GetState() TrackingDomainState {
+	return s.State
+}
+
+// GetProofExpiresAt returns the value of ProofExpiresAt.
+func (s *TrackingDomain) GetProofExpiresAt() NilTimestamp {
+	return s.ProofExpiresAt
+}
+
+// GetProofVerifiedAt returns the value of ProofVerifiedAt.
+func (s *TrackingDomain) GetProofVerifiedAt() NilTimestamp {
+	return s.ProofVerifiedAt
+}
+
+// GetLastCheckedAt returns the value of LastCheckedAt.
+func (s *TrackingDomain) GetLastCheckedAt() NilTimestamp {
+	return s.LastCheckedAt
+}
+
+// GetActivatedAt returns the value of ActivatedAt.
+func (s *TrackingDomain) GetActivatedAt() NilTimestamp {
+	return s.ActivatedAt
+}
+
+// GetSuspendedAt returns the value of SuspendedAt.
+func (s *TrackingDomain) GetSuspendedAt() NilTimestamp {
+	return s.SuspendedAt
+}
+
+// GetRevokedAt returns the value of RevokedAt.
+func (s *TrackingDomain) GetRevokedAt() NilTimestamp {
+	return s.RevokedAt
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *TrackingDomain) GetCreatedAt() Timestamp {
+	return s.CreatedAt
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *TrackingDomain) GetUpdatedAt() Timestamp {
+	return s.UpdatedAt
+}
+
+// SetID sets the value of ID.
+func (s *TrackingDomain) SetID(val UUID) {
+	s.ID = val
+}
+
+// SetHostname sets the value of Hostname.
+func (s *TrackingDomain) SetHostname(val string) {
+	s.Hostname = val
+}
+
+// SetState sets the value of State.
+func (s *TrackingDomain) SetState(val TrackingDomainState) {
+	s.State = val
+}
+
+// SetProofExpiresAt sets the value of ProofExpiresAt.
+func (s *TrackingDomain) SetProofExpiresAt(val NilTimestamp) {
+	s.ProofExpiresAt = val
+}
+
+// SetProofVerifiedAt sets the value of ProofVerifiedAt.
+func (s *TrackingDomain) SetProofVerifiedAt(val NilTimestamp) {
+	s.ProofVerifiedAt = val
+}
+
+// SetLastCheckedAt sets the value of LastCheckedAt.
+func (s *TrackingDomain) SetLastCheckedAt(val NilTimestamp) {
+	s.LastCheckedAt = val
+}
+
+// SetActivatedAt sets the value of ActivatedAt.
+func (s *TrackingDomain) SetActivatedAt(val NilTimestamp) {
+	s.ActivatedAt = val
+}
+
+// SetSuspendedAt sets the value of SuspendedAt.
+func (s *TrackingDomain) SetSuspendedAt(val NilTimestamp) {
+	s.SuspendedAt = val
+}
+
+// SetRevokedAt sets the value of RevokedAt.
+func (s *TrackingDomain) SetRevokedAt(val NilTimestamp) {
+	s.RevokedAt = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *TrackingDomain) SetCreatedAt(val Timestamp) {
+	s.CreatedAt = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *TrackingDomain) SetUpdatedAt(val Timestamp) {
+	s.UpdatedAt = val
+}
+
+// Ref: #/components/schemas/TrackingDomainList
+type TrackingDomainList struct {
+	TrackingDomains []TrackingDomain `json:"tracking_domains"`
+}
+
+// GetTrackingDomains returns the value of TrackingDomains.
+func (s *TrackingDomainList) GetTrackingDomains() []TrackingDomain {
+	return s.TrackingDomains
+}
+
+// SetTrackingDomains sets the value of TrackingDomains.
+func (s *TrackingDomainList) SetTrackingDomains(val []TrackingDomain) {
+	s.TrackingDomains = val
+}
+
+func (*TrackingDomainList) getDomainTrackingDomainsRes() {}
+
+// Ref: #/components/schemas/TrackingDomainProofResponse
+type TrackingDomainProofResponse struct {
+	TrackingDomain TrackingDomain                   `json:"tracking_domain"`
+	Proof          TrackingDomainProofResponseProof `json:"proof"`
+}
+
+// GetTrackingDomain returns the value of TrackingDomain.
+func (s *TrackingDomainProofResponse) GetTrackingDomain() TrackingDomain {
+	return s.TrackingDomain
+}
+
+// GetProof returns the value of Proof.
+func (s *TrackingDomainProofResponse) GetProof() TrackingDomainProofResponseProof {
+	return s.Proof
+}
+
+// SetTrackingDomain sets the value of TrackingDomain.
+func (s *TrackingDomainProofResponse) SetTrackingDomain(val TrackingDomain) {
+	s.TrackingDomain = val
+}
+
+// SetProof sets the value of Proof.
+func (s *TrackingDomainProofResponse) SetProof(val TrackingDomainProofResponseProof) {
+	s.Proof = val
+}
+
+// TrackingDomainProofResponseHeaders wraps TrackingDomainProofResponse with response headers.
+type TrackingDomainProofResponseHeaders struct {
+	CacheControl OptString
+	Response     TrackingDomainProofResponse
+}
+
+// GetCacheControl returns the value of CacheControl.
+func (s *TrackingDomainProofResponseHeaders) GetCacheControl() OptString {
+	return s.CacheControl
+}
+
+// GetResponse returns the value of Response.
+func (s *TrackingDomainProofResponseHeaders) GetResponse() TrackingDomainProofResponse {
+	return s.Response
+}
+
+// SetCacheControl sets the value of CacheControl.
+func (s *TrackingDomainProofResponseHeaders) SetCacheControl(val OptString) {
+	s.CacheControl = val
+}
+
+// SetResponse sets the value of Response.
+func (s *TrackingDomainProofResponseHeaders) SetResponse(val TrackingDomainProofResponse) {
+	s.Response = val
+}
+
+func (*TrackingDomainProofResponseHeaders) postDomainTrackingDomainProofRotateRes() {}
+func (*TrackingDomainProofResponseHeaders) postDomainTrackingDomainsRes()           {}
+
+type TrackingDomainProofResponseProof struct {
+	Type string `json:"type"`
+	Name string `json:"name"`
+	// Valor retornado somente nas respostas de reserva e rotação; nunca em leituras.
+	Value string `json:"value"`
+}
+
+// GetType returns the value of Type.
+func (s *TrackingDomainProofResponseProof) GetType() string {
+	return s.Type
+}
+
+// GetName returns the value of Name.
+func (s *TrackingDomainProofResponseProof) GetName() string {
+	return s.Name
+}
+
+// GetValue returns the value of Value.
+func (s *TrackingDomainProofResponseProof) GetValue() string {
+	return s.Value
+}
+
+// SetType sets the value of Type.
+func (s *TrackingDomainProofResponseProof) SetType(val string) {
+	s.Type = val
+}
+
+// SetName sets the value of Name.
+func (s *TrackingDomainProofResponseProof) SetName(val string) {
+	s.Name = val
+}
+
+// SetValue sets the value of Value.
+func (s *TrackingDomainProofResponseProof) SetValue(val string) {
+	s.Value = val
+}
+
+// Ref: #/components/schemas/TrackingDomainResponse
+type TrackingDomainResponse struct {
+	TrackingDomain TrackingDomain `json:"tracking_domain"`
+}
+
+// GetTrackingDomain returns the value of TrackingDomain.
+func (s *TrackingDomainResponse) GetTrackingDomain() TrackingDomain {
+	return s.TrackingDomain
+}
+
+// SetTrackingDomain sets the value of TrackingDomain.
+func (s *TrackingDomainResponse) SetTrackingDomain(val TrackingDomain) {
+	s.TrackingDomain = val
+}
+
+func (*TrackingDomainResponse) getDomainTrackingDomainRes()          {}
+func (*TrackingDomainResponse) postDomainTrackingDomainActivateRes() {}
+func (*TrackingDomainResponse) postDomainTrackingDomainRevokeRes()   {}
+func (*TrackingDomainResponse) postDomainTrackingDomainVerifyRes()   {}
+
+type TrackingDomainState string
+
+const (
+	TrackingDomainStatePendingProof TrackingDomainState = "pending_proof"
+	TrackingDomainStateVerified     TrackingDomainState = "verified"
+	TrackingDomainStateProvisioning TrackingDomainState = "provisioning"
+	TrackingDomainStateActive       TrackingDomainState = "active"
+	TrackingDomainStateSuspended    TrackingDomainState = "suspended"
+	TrackingDomainStateRevoked      TrackingDomainState = "revoked"
+)
+
+// AllValues returns all TrackingDomainState values.
+func (TrackingDomainState) AllValues() []TrackingDomainState {
+	return []TrackingDomainState{
+		TrackingDomainStatePendingProof,
+		TrackingDomainStateVerified,
+		TrackingDomainStateProvisioning,
+		TrackingDomainStateActive,
+		TrackingDomainStateSuspended,
+		TrackingDomainStateRevoked,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s TrackingDomainState) MarshalText() ([]byte, error) {
+	switch s {
+	case TrackingDomainStatePendingProof:
+		return []byte(s), nil
+	case TrackingDomainStateVerified:
+		return []byte(s), nil
+	case TrackingDomainStateProvisioning:
+		return []byte(s), nil
+	case TrackingDomainStateActive:
+		return []byte(s), nil
+	case TrackingDomainStateSuspended:
+		return []byte(s), nil
+	case TrackingDomainStateRevoked:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *TrackingDomainState) UnmarshalText(data []byte) error {
+	switch TrackingDomainState(data) {
+	case TrackingDomainStatePendingProof:
+		*s = TrackingDomainStatePendingProof
+		return nil
+	case TrackingDomainStateVerified:
+		*s = TrackingDomainStateVerified
+		return nil
+	case TrackingDomainStateProvisioning:
+		*s = TrackingDomainStateProvisioning
+		return nil
+	case TrackingDomainStateActive:
+		*s = TrackingDomainStateActive
+		return nil
+	case TrackingDomainStateSuspended:
+		*s = TrackingDomainStateSuspended
+		return nil
+	case TrackingDomainStateRevoked:
+		*s = TrackingDomainStateRevoked
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
 
 type UUID uuid.UUID
 

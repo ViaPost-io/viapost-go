@@ -83,3 +83,26 @@ other:
 		})
 	}
 }
+
+func TestNormalizeCodegenSpec_TypesBareStringConstant(t *testing.T) {
+	source := []byte(`openapi: 3.1.1
+components:
+  schemas:
+    UUID:
+      type: string
+      format: uuid
+    UntypedConstant:
+      type: object
+      properties:
+        code:
+          const: dynamic_segment_membership
+`)
+
+	normalized, err := normalizeCodegenSpec(source)
+	if err != nil {
+		t.Fatalf("normalizeCodegenSpec() error = %v", err)
+	}
+	if !strings.Contains(string(normalized), "code:\n          type: string\n          const: dynamic_segment_membership") {
+		t.Fatalf("normalizeCodegenSpec() did not type bare string const:\n%s", normalized)
+	}
+}

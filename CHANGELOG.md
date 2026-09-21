@@ -3,6 +3,23 @@
 All notable changes to this project are documented in this file. This project follows
 [Semantic Versioning](https://semver.org/).
 
+## [0.4.0] - 2026-09-21
+
+### Breaking changes
+
+- The generated low-level `api` package now includes the current public contacts import,
+  tracking-domain, inbound, audience-segment, and broadcast foundations. Implementations of
+  low-level generated interfaces must add the corresponding operations.
+- `api.DynamicSegmentMembershipErrorError.Code` is now the documented `string` constant instead
+  of `jx.Raw`; consumers assigning or comparing raw JSON must migrate to a string.
+
+### Changed
+
+- Synchronize the generated client with the published public OpenAPI contract at
+  `ViaPost-io/base-code@a8d78b4dc2140d3ceee2dbc52eb9ee438b640560`.
+- Keep the v0.3 segment-union normalization and validation intact while adding a temporary,
+  explicit type for otherwise bare OpenAPI string constants that ogen v1.24 cannot encode.
+
 ## [0.3.0] - 2026-09-16
 
 ### Breaking changes
