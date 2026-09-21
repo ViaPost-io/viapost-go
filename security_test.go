@@ -48,6 +48,37 @@ func TestSensitiveWebhookResponsesAreRedactedByDefault(t *testing.T) {
 	}
 }
 
+func TestTrackingDomainProofResponsesAreRedactedByDefault(t *testing.T) {
+	const proofValue = "vp_tracking_proof_never_log_this"
+	proof := api.TrackingDomainProofResponseProof{Name: "_viapost.example.com", Value: proofValue}
+	response := api.TrackingDomainProofResponse{Proof: proof}
+
+	for label, value := range map[string]any{
+		"proof":    proof,
+		"response": response,
+	} {
+		serialized, err := json.Marshal(value)
+		if err != nil {
+			t.Fatalf("json.Marshal(%s): %v", label, err)
+		}
+		var logs bytes.Buffer
+		logger := slog.New(slog.NewJSONHandler(&logs, nil))
+		logger.Info("response", "value", value)
+		for representation, output := range map[string]string{
+			"json": string(serialized),
+			"fmt":  fmt.Sprintf("%+v %#v", value, value),
+			"slog": logs.String(),
+		} {
+			if strings.Contains(output, proofValue) {
+				t.Fatalf("%s %s leaked tracking proof: %s", label, representation, output)
+			}
+		}
+	}
+	if response.Proof.GetValue() != proofValue {
+		t.Fatal("explicit proof accessor did not return the one-time proof value")
+	}
+}
+
 func TestClientRepresentationsNeverExposeAPIKey(t *testing.T) {
 	const apiKey = "vp_test_never_log_this"
 	client, err := NewClient(apiKey)

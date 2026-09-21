@@ -41304,7 +41304,8 @@ func (s *TrackingDomainProofResponse) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *TrackingDomainProofResponse) MarshalJSON() ([]byte, error) {
+func (s TrackingDomainProofResponse) MarshalJSON() ([]byte, error) {
+	s.Proof.Value = "[REDACTED]"
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
@@ -41434,7 +41435,8 @@ func (s *TrackingDomainProofResponseProof) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *TrackingDomainProofResponseProof) MarshalJSON() ([]byte, error) {
+func (s TrackingDomainProofResponseProof) MarshalJSON() ([]byte, error) {
+	s.Value = "[REDACTED]"
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil

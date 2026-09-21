@@ -271,6 +271,26 @@ func hardenSensitiveResponses(targetPath string) error {
 	s.Encode(&e)
 	return e.Bytes(), nil
 }`,
+		`func (s *TrackingDomainProofResponse) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}`: `func (s TrackingDomainProofResponse) MarshalJSON() ([]byte, error) {
+	s.Proof.Value = "[REDACTED]"
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}`,
+		`func (s *TrackingDomainProofResponseProof) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}`: `func (s TrackingDomainProofResponseProof) MarshalJSON() ([]byte, error) {
+	s.Value = "[REDACTED]"
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}`,
 	}
 	for original, hardened := range replacements {
 		if strings.Count(content, original) != 1 {
@@ -456,6 +476,18 @@ func (s RotateWebhookSecretResponse) String() string { return "RotateWebhookSecr
 func (s RotateWebhookSecretResponse) GoString() string { return s.String() }
 func (s RotateWebhookSecretResponse) LogValue() slog.Value {
 	return slog.GroupValue(slog.String("secret", redactedSensitiveValue))
+}
+
+func (s TrackingDomainProofResponse) String() string { return "TrackingDomainProofResponse{Proof:[REDACTED]}" }
+func (s TrackingDomainProofResponse) GoString() string { return s.String() }
+func (s TrackingDomainProofResponse) LogValue() slog.Value {
+	return slog.GroupValue(slog.String("proof", redactedSensitiveValue))
+}
+
+func (s TrackingDomainProofResponseProof) String() string { return "TrackingDomainProofResponseProof{Value:[REDACTED]}" }
+func (s TrackingDomainProofResponseProof) GoString() string { return s.String() }
+func (s TrackingDomainProofResponseProof) LogValue() slog.Value {
+	return slog.GroupValue(slog.String("value", redactedSensitiveValue))
 }
 
 func (c Client) String() string { return "ViaPostOpenAPIClient{Security:[REDACTED]}" }
