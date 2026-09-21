@@ -65,6 +65,14 @@ type GetDomainsIDDNSRes interface {
 	getDomainsIDDNSRes()
 }
 
+type GetDomainsIDHealthRes interface {
+	getDomainsIDHealthRes()
+}
+
+type GetDomainsIDInboundRes interface {
+	getDomainsIDInboundRes()
+}
+
 type GetDomainsIDRes interface {
 	getDomainsIDRes()
 }
@@ -99,6 +107,10 @@ type GetInboundMessagesRes interface {
 
 type GetMessagesEngagementRes interface {
 	getMessagesEngagementRes()
+}
+
+type GetMessagesEventsRes interface {
+	getMessagesEventsRes()
 }
 
 type GetMessagesIDEventsRes interface {
@@ -241,6 +253,10 @@ type PostAutomationsRes interface {
 	postAutomationsRes()
 }
 
+type PostContactsImportRes interface {
+	postContactsImportRes()
+}
+
 type PostContactsRes interface {
 	postContactsRes()
 }
@@ -265,12 +281,24 @@ type PostEventsSendRes interface {
 	postEventsSendRes()
 }
 
+type PostMessagesIDCancelRes interface {
+	postMessagesIDCancelRes()
+}
+
 type PostSegmentsIDContactsRes interface {
 	postSegmentsIDContactsRes()
 }
 
+type PostSegmentsPreviewRes interface {
+	postSegmentsPreviewRes()
+}
+
 type PostSegmentsRes interface {
 	postSegmentsRes()
+}
+
+type PostSendBatchRes interface {
+	postSendBatchRes()
 }
 
 type PostSendRes interface {
