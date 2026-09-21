@@ -25,7 +25,7 @@ var (
 	sessionScheme        = regexp.MustCompile(`(?ms)^    sessionCookie:\r?\n.*?(^  schemas:)`)
 	webhookDeliveryEvent = regexp.MustCompile(`(?ms)^    WebhookDeliveryEventType:\r?\n      anyOf:\r?\n        - \$ref: '#/components/schemas/WebhookSubscribableEventType'\r?\n        - type: string\r?\n          const: webhook\.test[\t ]*$`)
 	propertyScalarUnion  = regexp.MustCompile(`(?m)^        value:\r?\n          type:\r?\n            - string\r?\n            - number\r?\n            - boolean[\t ]*$`)
-	untypedConst          = regexp.MustCompile(`(?m)^([ \t]+)([[:alnum:]_]+):\r?\n([ \t]+)const: ([^\r\n]+)[ \t]*$`)
+	untypedConst         = regexp.MustCompile(`(?m)^([ \t]+)([[:alnum:]_]+):\r?\n([ \t]+)const: ([^\r\n]+)[ \t]*$`)
 )
 
 var segmentObjectUnionSchemas = []string{
