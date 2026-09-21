@@ -54,7 +54,9 @@ type Invoker interface {
 	DeleteSegmentsID(ctx context.Context, params DeleteSegmentsIDParams) (DeleteSegmentsIDRes, error)
 	// DeleteSegmentsIDContactsContactID invokes deleteSegmentsIdContactsContactId operation.
 	//
-	// DELETE /v1/segments/{id}/contacts/{contact_id}.
+	// Remove uma associação existente de um segmento estático. Retorna `404` se o segmento, o contato
+	// ou a associação não existir no tenant. Um segmento dinâmico retorna
+	// `409 dynamic_segment_membership` sem alteração.
 	//
 	// DELETE /v1/segments/{id}/contacts/{contact_id}
 	DeleteSegmentsIDContactsContactID(ctx context.Context, params DeleteSegmentsIDContactsContactIDParams) (DeleteSegmentsIDContactsContactIDRes, error)
@@ -102,7 +104,8 @@ type Invoker interface {
 	GetAutomationsIDRunsRunID(ctx context.Context, params GetAutomationsIDRunsRunIDParams) (GetAutomationsIDRunsRunIDRes, error)
 	// GetContacts invokes getContacts operation.
 	//
-	// GET /v1/contacts.
+	// Lista somente os contatos ativos do tenant autenticado. `Audience` e `audience` são nomes internos;
+	// não existe rota pública `/v1/audiences`.
 	//
 	// GET /v1/contacts
 	GetContacts(ctx context.Context, params GetContactsParams) (GetContactsRes, error)
@@ -112,6 +115,18 @@ type Invoker interface {
 	//
 	// GET /v1/contacts/{id}
 	GetContactsID(ctx context.Context, params GetContactsIDParams) (GetContactsIDRes, error)
+	// GetDomainTrackingDomain invokes getDomainTrackingDomain operation.
+	//
+	// Consultar domínio de tracking.
+	//
+	// GET /v1/domains/{domain_id}/tracking-domains/{tracking_domain_id}
+	GetDomainTrackingDomain(ctx context.Context, params GetDomainTrackingDomainParams) (GetDomainTrackingDomainRes, error)
+	// GetDomainTrackingDomains invokes getDomainTrackingDomains operation.
+	//
+	// Listar domínios de tracking.
+	//
+	// GET /v1/domains/{domain_id}/tracking-domains
+	GetDomainTrackingDomains(ctx context.Context, params GetDomainTrackingDomainsParams) (GetDomainTrackingDomainsRes, error)
 	// GetDomains invokes getDomains operation.
 	//
 	// GET /v1/domains.
@@ -130,6 +145,37 @@ type Invoker interface {
 	//
 	// GET /v1/domains/{id}/dns
 	GetDomainsIDDNS(ctx context.Context, params GetDomainsIDDNSParams) (GetDomainsIDDNSRes, error)
+	// GetDomainsIDHealth invokes getDomainsIdHealth operation.
+	//
+	// Retorna um snapshot tenant-scoped da configuração DNS e dos resultados terminais de entrega.
+	// Bearer API Keys precisam ter os scopes `domains:read` e `messages:read`; sessões usam o tenant
+	// ativo. Domínio ausente e domínio de outro tenant retornam o mesmo `404`.
+	//
+	// A fórmula `domain_health_v1` usa a janela móvel e semiaberta de 30 dias `[start, end)` e exige uma
+	// amostra mínima de 100 mensagens. Taxas são inteiros em basis points (`10000` = 100%). Snapshots da
+	// mesma versão com menos de 15 minutos podem ser reutilizados; `evaluated_at` torna essa idade
+	// observável.
+	//
+	// Complaint é deliberadamente omitido porque o pipeline atual não o persiste com completude
+	// suficiente para uma taxa confiável. O estado legado `complained` conta somente no numerador de
+	// entrega, pois pressupõe aceite anterior. O score é uma heurística operacional: não mede inbox
+	// placement, não é SLA e não garante entregabilidade.
+	//
+	// A resposta nunca expõe destinatários, local-parts, códigos ou diagnósticos SMTP, respostas DNS,
+	// selectors ou chaves DKIM, hosts MX, IPs, nomes de serviços nem identificadores de storage, broker
+	// ou banco.
+	//
+	// GET /v1/domains/{id}/health
+	GetDomainsIDHealth(ctx context.Context, params GetDomainsIDHealthParams) (GetDomainsIDHealthRes, error)
+	// GetDomainsIDInbound invokes getDomainsIdInbound operation.
+	//
+	// Retorna o domínio destinatário, a prontidão do receptor ViaPost e a observação atual do
+	// registro MX público. `ready` significa que o receptor está apto a aceitar o domínio verificado;
+	// `mx.status` informa independentemente se os remetentes externos apontam para a ViaPost. Uma falha
+	// transitória de resolução retorna `unavailable`, nunca `not_configured`.
+	//
+	// GET /v1/domains/{id}/inbound
+	GetDomainsIDInbound(ctx context.Context, params GetDomainsIDInboundParams) (GetDomainsIDInboundRes, error)
 	// GetEvents invokes getEvents operation.
 	//
 	// GET /v1/events.
@@ -181,6 +227,16 @@ type Invoker interface {
 	//
 	// GET /v1/messages/engagement
 	GetMessagesEngagement(ctx context.Context, params GetMessagesEngagementParams) (GetMessagesEngagementRes, error)
+	// GetMessagesEvents invokes getMessagesEvents operation.
+	//
+	// Primeira fatia da timeline unificada: agrega, do mais recente para o mais antigo, somente eventos
+	// outbound de entrega e tracking persistidos para o tenant autenticado. Não inclui mensagens inbound,
+	// eventos customizados de automações, execuções de automação, operações de webhook nem eventos
+	// de auditoria. O endpoint legado `/v1/messages/{id}/events` mantém sua resposta cronológica e sem
+	// paginação.
+	//
+	// GET /v1/messages/events
+	GetMessagesEvents(ctx context.Context, params GetMessagesEventsParams) (GetMessagesEventsRes, error)
 	// GetMessagesID invokes getMessagesId operation.
 	//
 	// Retorna metadados com `messages:read`. Para Bearer API Keys, os campos de conteúdo e
@@ -228,7 +284,8 @@ type Invoker interface {
 	GetPublicStatus(ctx context.Context) (GetPublicStatusRes, error)
 	// GetSegments invokes getSegments operation.
 	//
-	// GET /v1/segments.
+	// Lista somente os segmentos ativos do tenant autenticado. O recurso público chama-se `segments`;
+	// `audiences` é terminologia interna e não é uma rota.
 	//
 	// GET /v1/segments
 	GetSegments(ctx context.Context, params GetSegmentsParams) (GetSegmentsRes, error)
@@ -240,7 +297,10 @@ type Invoker interface {
 	GetSegmentsID(ctx context.Context, params GetSegmentsIDParams) (GetSegmentsIDRes, error)
 	// GetSegmentsIDContacts invokes getSegmentsIdContacts operation.
 	//
-	// GET /v1/segments/{id}/contacts.
+	// Lista os contatos ativos que pertencem ao segmento. Em segmentos estáticos, aceita cursor opaco ou
+	// RFC3339 legado; em dinâmicos, o cursor opaco é vinculado à definição, `search` e `limit`, e
+	// cursores legados ou alterados retornam `400 validation_error`. Retorna `404` quando o segmento não
+	// existe, está arquivado ou pertence a outro tenant.
 	//
 	// GET /v1/segments/{id}/contacts
 	GetSegmentsIDContacts(ctx context.Context, params GetSegmentsIDContactsParams) (GetSegmentsIDContactsRes, error)
@@ -345,7 +405,8 @@ type Invoker interface {
 	PatchAutomationsIDDraft(ctx context.Context, request *UpdateAutomationDraftRequest, params PatchAutomationsIDDraftParams) (PatchAutomationsIDDraftRes, error)
 	// PatchContactsID invokes patchContactsId operation.
 	//
-	// PATCH /v1/contacts/{id}.
+	// Substitui apenas os campos presentes. `first_name` e `last_name` aceitam `null` para limpar o valor;
+	// os demais campos não aceitam `null`.
 	//
 	// PATCH /v1/contacts/{id}
 	PatchContactsID(ctx context.Context, request *UpdateContactRequest, params PatchContactsIDParams) (PatchContactsIDRes, error)
@@ -357,7 +418,8 @@ type Invoker interface {
 	PatchEventsID(ctx context.Context, request *UpdateCustomEventRequest, params PatchEventsIDParams) (PatchEventsIDRes, error)
 	// PatchSegmentsID invokes patchSegmentsId operation.
 	//
-	// PATCH /v1/segments/{id}.
+	// Substitui apenas os campos presentes; `description: null` remove a descrição. `name` não pode ser
+	// nulo ou vazio.
 	//
 	// PATCH /v1/segments/{id}
 	PatchSegmentsID(ctx context.Context, request *UpdateSegmentRequest, params PatchSegmentsIDParams) (PatchSegmentsIDRes, error)
@@ -406,10 +468,51 @@ type Invoker interface {
 	PostAutomationsIDRunsRunIDCancel(ctx context.Context, params PostAutomationsIDRunsRunIDCancelParams) (PostAutomationsIDRunsRunIDCancelRes, error)
 	// PostContacts invokes postContacts operation.
 	//
-	// POST /v1/contacts.
+	// Cria um contato. O e-mail é normalizado para minúsculas e deve ser único dentro do tenant; a
+	// mesma caixa postal pode existir em outro tenant.
 	//
 	// POST /v1/contacts
 	PostContacts(ctx context.Context, request *CreateContactRequest) (PostContactsRes, error)
+	// PostContactsImport invokes postContactsImport operation.
+	//
+	// Importação síncrona, atômica e somente de criação para no máximo 1.000 contatos do tenant.
+	// Aceita CSV UTF-8 (BOM opcional) com cabeçalho exato
+	// `email,first_name,last_name,subscribed,properties`. Contatos existentes não são alterados;
+	// duplicatas do arquivo preservam a primeira linha válida. `subscribed` vazio cria contato não
+	// inscrito por padrão seguro de consentimento.
+	//
+	// POST /v1/contacts/import
+	PostContactsImport(ctx context.Context, request PostContactsImportReq) (PostContactsImportRes, error)
+	// PostDomainTrackingDomainActivate invokes postDomainTrackingDomainActivate operation.
+	//
+	// Iniciar provisionamento do domínio de tracking.
+	//
+	// POST /v1/domains/{domain_id}/tracking-domains/{tracking_domain_id}/activate
+	PostDomainTrackingDomainActivate(ctx context.Context, params PostDomainTrackingDomainActivateParams) (PostDomainTrackingDomainActivateRes, error)
+	// PostDomainTrackingDomainProofRotate invokes postDomainTrackingDomainProofRotate operation.
+	//
+	// Rotacionar prova do domínio de tracking.
+	//
+	// POST /v1/domains/{domain_id}/tracking-domains/{tracking_domain_id}/proof/rotate
+	PostDomainTrackingDomainProofRotate(ctx context.Context, params PostDomainTrackingDomainProofRotateParams) (PostDomainTrackingDomainProofRotateRes, error)
+	// PostDomainTrackingDomainRevoke invokes postDomainTrackingDomainRevoke operation.
+	//
+	// Revogar domínio de tracking.
+	//
+	// POST /v1/domains/{domain_id}/tracking-domains/{tracking_domain_id}/revoke
+	PostDomainTrackingDomainRevoke(ctx context.Context, params PostDomainTrackingDomainRevokeParams) (PostDomainTrackingDomainRevokeRes, error)
+	// PostDomainTrackingDomainVerify invokes postDomainTrackingDomainVerify operation.
+	//
+	// Verificar prova TXT do domínio de tracking.
+	//
+	// POST /v1/domains/{domain_id}/tracking-domains/{tracking_domain_id}/verify
+	PostDomainTrackingDomainVerify(ctx context.Context, params PostDomainTrackingDomainVerifyParams) (PostDomainTrackingDomainVerifyRes, error)
+	// PostDomainTrackingDomains invokes postDomainTrackingDomains operation.
+	//
+	// Reservar domínio de tracking.
+	//
+	// POST /v1/domains/{domain_id}/tracking-domains
+	PostDomainTrackingDomains(ctx context.Context, request *CreateTrackingDomainRequest, params PostDomainTrackingDomainsParams) (PostDomainTrackingDomainsRes, error)
 	// PostDomains invokes postDomains operation.
 	//
 	// POST /v1/domains.
@@ -424,7 +527,9 @@ type Invoker interface {
 	PostDomainsIDDkimRotate(ctx context.Context, params PostDomainsIDDkimRotateParams) (PostDomainsIDDkimRotateRes, error)
 	// PostDomainsIDVerify invokes postDomainsIdVerify operation.
 	//
-	// POST /v1/domains/{id}/verify.
+	// Verifica SPF, DKIM e um único registro DMARC sintaticamente válido. DMARC exige `v=DMARC1`,
+	// política `p` em `none`, `quarantine` ou `reject`, e URI(s) `mailto:` válida(s) em `rua`; o sufixo
+	// de tamanho legado, como `!10m`, é aceito.
 	//
 	// POST /v1/domains/{id}/verify
 	PostDomainsIDVerify(ctx context.Context, params PostDomainsIDVerifyParams) (PostDomainsIDVerifyRes, error)
@@ -440,24 +545,49 @@ type Invoker interface {
 	//
 	// POST /v1/events/send
 	PostEventsSend(ctx context.Context, request *SendCustomEventRequest) (PostEventsSendRes, error)
+	// PostMessagesIDCancel invokes postMessagesIdCancel operation.
+	//
+	// Faz a transição atômica de `scheduled` para `cancelled` somente para o tenant autenticado. Se o
+	// reconciliador já enfileirou a mensagem, retorna `409` e nenhuma entrega é removida. A reserva de
+	// quota criada no aceite permanece no ledger.
+	//
+	// POST /v1/messages/{id}/cancel
+	PostMessagesIDCancel(ctx context.Context, params PostMessagesIDCancelParams) (PostMessagesIDCancelRes, error)
 	// PostSegments invokes postSegments operation.
 	//
-	// POST /v1/segments.
+	// Cria um segmento cujo nome deve ser único dentro do tenant.
 	//
 	// POST /v1/segments
-	PostSegments(ctx context.Context, request *CreateSegmentRequest) (PostSegmentsRes, error)
+	PostSegments(ctx context.Context, request CreateSegmentRequest) (PostSegmentsRes, error)
 	// PostSegmentsIDContacts invokes postSegmentsIdContacts operation.
 	//
-	// POST /v1/segments/{id}/contacts.
+	// Adiciona um contato existente do mesmo tenant ao segmento estático. A associação já existente é
+	// idempotente e também retorna `204`; segmento ou contato ausente/fora do tenant retorna `404`. Um
+	// segmento dinâmico retorna `409 dynamic_segment_membership` sem alteração.
 	//
 	// POST /v1/segments/{id}/contacts
 	PostSegmentsIDContacts(ctx context.Context, request *SegmentContactRequest, params PostSegmentsIDContactsParams) (PostSegmentsIDContactsRes, error)
+	// PostSegmentsPreview invokes postSegmentsPreview operation.
+	//
+	// Retorna a cardinalidade exata e uma amostra de contatos no mesmo snapshot PostgreSQL. A resposta
+	// contém PII de contatos e não é uma rota de exportação ou listagem completa.
+	//
+	// POST /v1/segments/preview
+	PostSegmentsPreview(ctx context.Context, request *SegmentPreviewRequest) (PostSegmentsPreviewRes, error)
 	// PostSend invokes postSend operation.
 	//
 	// POST /v1/send.
 	//
 	// POST /v1/send
 	PostSend(ctx context.Context, request *SendRequest, params PostSendParams) (PostSendRes, error)
+	// PostSendBatch invokes postSendBatch operation.
+	//
+	// Cada item usa o schema de envio individual e tem uma chave de idempotência própria. O header
+	// Idempotency-Key não é aceito; erros de cada item são retornados no respectivo resultado, mantendo
+	// a ordem enviada.
+	//
+	// POST /v1/send/batch
+	PostSendBatch(ctx context.Context, request *BatchSendRequest) (PostSendBatchRes, error)
 	// PostStatusSubscriptions invokes postStatusSubscriptions operation.
 	//
 	// Disponível somente em `status.viapost.io`. Para todo e-mail sintaticamente válido, retorna a mesma
@@ -1107,7 +1237,9 @@ func (c *Client) sendDeleteSegmentsID(ctx context.Context, params DeleteSegments
 
 // DeleteSegmentsIDContactsContactID invokes deleteSegmentsIdContactsContactId operation.
 //
-// DELETE /v1/segments/{id}/contacts/{contact_id}.
+// Remove uma associação existente de um segmento estático. Retorna `404` se o segmento, o contato
+// ou a associação não existir no tenant. Um segmento dinâmico retorna
+// `409 dynamic_segment_membership` sem alteração.
 //
 // DELETE /v1/segments/{id}/contacts/{contact_id}
 func (c *Client) DeleteSegmentsIDContactsContactID(ctx context.Context, params DeleteSegmentsIDContactsContactIDParams) (DeleteSegmentsIDContactsContactIDRes, error) {
@@ -1971,7 +2103,8 @@ func (c *Client) sendGetAutomationsIDRunsRunID(ctx context.Context, params GetAu
 
 // GetContacts invokes getContacts operation.
 //
-// GET /v1/contacts.
+// Lista somente os contatos ativos do tenant autenticado. `Audience` e `audience` são nomes internos;
+// não existe rota pública `/v1/audiences`.
 //
 // GET /v1/contacts
 func (c *Client) GetContacts(ctx context.Context, params GetContactsParams) (GetContactsRes, error) {
@@ -2186,6 +2319,214 @@ func (c *Client) sendGetContactsID(ctx context.Context, params GetContactsIDPara
 	}()
 
 	result, err := decodeGetContactsIDResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetDomainTrackingDomain invokes getDomainTrackingDomain operation.
+//
+// Consultar domínio de tracking.
+//
+// GET /v1/domains/{domain_id}/tracking-domains/{tracking_domain_id}
+func (c *Client) GetDomainTrackingDomain(ctx context.Context, params GetDomainTrackingDomainParams) (GetDomainTrackingDomainRes, error) {
+	res, err := c.sendGetDomainTrackingDomain(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetDomainTrackingDomain(ctx context.Context, params GetDomainTrackingDomainParams) (res GetDomainTrackingDomainRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/v1/domains/"
+	{
+		// Encode "domain_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "domain_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.DomainID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/tracking-domains/"
+	{
+		// Encode "tracking_domain_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "tracking_domain_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.TrackingDomainID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, GetDomainTrackingDomainOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetDomainTrackingDomainResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetDomainTrackingDomains invokes getDomainTrackingDomains operation.
+//
+// Listar domínios de tracking.
+//
+// GET /v1/domains/{domain_id}/tracking-domains
+func (c *Client) GetDomainTrackingDomains(ctx context.Context, params GetDomainTrackingDomainsParams) (GetDomainTrackingDomainsRes, error) {
+	res, err := c.sendGetDomainTrackingDomains(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetDomainTrackingDomains(ctx context.Context, params GetDomainTrackingDomainsParams) (res GetDomainTrackingDomainsRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v1/domains/"
+	{
+		// Encode "domain_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "domain_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.DomainID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/tracking-domains"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, GetDomainTrackingDomainsOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetDomainTrackingDomainsResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -2451,6 +2792,215 @@ func (c *Client) sendGetDomainsIDDNS(ctx context.Context, params GetDomainsIDDNS
 	}()
 
 	result, err := decodeGetDomainsIDDNSResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetDomainsIDHealth invokes getDomainsIdHealth operation.
+//
+// Retorna um snapshot tenant-scoped da configuração DNS e dos resultados terminais de entrega.
+// Bearer API Keys precisam ter os scopes `domains:read` e `messages:read`; sessões usam o tenant
+// ativo. Domínio ausente e domínio de outro tenant retornam o mesmo `404`.
+//
+// A fórmula `domain_health_v1` usa a janela móvel e semiaberta de 30 dias `[start, end)` e exige uma
+// amostra mínima de 100 mensagens. Taxas são inteiros em basis points (`10000` = 100%). Snapshots da
+// mesma versão com menos de 15 minutos podem ser reutilizados; `evaluated_at` torna essa idade
+// observável.
+//
+// Complaint é deliberadamente omitido porque o pipeline atual não o persiste com completude
+// suficiente para uma taxa confiável. O estado legado `complained` conta somente no numerador de
+// entrega, pois pressupõe aceite anterior. O score é uma heurística operacional: não mede inbox
+// placement, não é SLA e não garante entregabilidade.
+//
+// A resposta nunca expõe destinatários, local-parts, códigos ou diagnósticos SMTP, respostas DNS,
+// selectors ou chaves DKIM, hosts MX, IPs, nomes de serviços nem identificadores de storage, broker
+// ou banco.
+//
+// GET /v1/domains/{id}/health
+func (c *Client) GetDomainsIDHealth(ctx context.Context, params GetDomainsIDHealthParams) (GetDomainsIDHealthRes, error) {
+	res, err := c.sendGetDomainsIDHealth(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetDomainsIDHealth(ctx context.Context, params GetDomainsIDHealthParams) (res GetDomainsIDHealthRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v1/domains/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/health"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, GetDomainsIDHealthOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetDomainsIDHealthResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetDomainsIDInbound invokes getDomainsIdInbound operation.
+//
+// Retorna o domínio destinatário, a prontidão do receptor ViaPost e a observação atual do
+// registro MX público. `ready` significa que o receptor está apto a aceitar o domínio verificado;
+// `mx.status` informa independentemente se os remetentes externos apontam para a ViaPost. Uma falha
+// transitória de resolução retorna `unavailable`, nunca `not_configured`.
+//
+// GET /v1/domains/{id}/inbound
+func (c *Client) GetDomainsIDInbound(ctx context.Context, params GetDomainsIDInboundParams) (GetDomainsIDInboundRes, error) {
+	res, err := c.sendGetDomainsIDInbound(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetDomainsIDInbound(ctx context.Context, params GetDomainsIDInboundParams) (res GetDomainsIDInboundRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v1/domains/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/inbound"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, GetDomainsIDInboundOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetDomainsIDInboundResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -3270,6 +3820,174 @@ func (c *Client) sendGetMessagesEngagement(ctx context.Context, params GetMessag
 	return result, nil
 }
 
+// GetMessagesEvents invokes getMessagesEvents operation.
+//
+// Primeira fatia da timeline unificada: agrega, do mais recente para o mais antigo, somente eventos
+// outbound de entrega e tracking persistidos para o tenant autenticado. Não inclui mensagens inbound,
+// eventos customizados de automações, execuções de automação, operações de webhook nem eventos
+// de auditoria. O endpoint legado `/v1/messages/{id}/events` mantém sua resposta cronológica e sem
+// paginação.
+//
+// GET /v1/messages/events
+func (c *Client) GetMessagesEvents(ctx context.Context, params GetMessagesEventsParams) (GetMessagesEventsRes, error) {
+	res, err := c.sendGetMessagesEvents(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetMessagesEvents(ctx context.Context, params GetMessagesEventsParams) (res GetMessagesEventsRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/v1/messages/events"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "cursor" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "cursor",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Cursor.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "limit" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Limit.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "period" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "period",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Period.Get(); ok {
+				return e.EncodeValue(conv.StringToString(string(val)))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "type" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "type",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Type.Get(); ok {
+				return e.EncodeValue(conv.StringToString(string(val)))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "message_id" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "message_id",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.MessageID.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, GetMessagesEventsOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetMessagesEventsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // GetMessagesID invokes getMessagesId operation.
 //
 // Retorna metadados com `messages:read`. Para Bearer API Keys, os campos de conteúdo e
@@ -3817,7 +4535,8 @@ func (c *Client) sendGetPublicStatus(ctx context.Context) (res GetPublicStatusRe
 
 // GetSegments invokes getSegments operation.
 //
-// GET /v1/segments.
+// Lista somente os segmentos ativos do tenant autenticado. O recurso público chama-se `segments`;
+// `audiences` é terminologia interna e não é uma rota.
 //
 // GET /v1/segments
 func (c *Client) GetSegments(ctx context.Context, params GetSegmentsParams) (GetSegmentsRes, error) {
@@ -4041,7 +4760,10 @@ func (c *Client) sendGetSegmentsID(ctx context.Context, params GetSegmentsIDPara
 
 // GetSegmentsIDContacts invokes getSegmentsIdContacts operation.
 //
-// GET /v1/segments/{id}/contacts.
+// Lista os contatos ativos que pertencem ao segmento. Em segmentos estáticos, aceita cursor opaco ou
+// RFC3339 legado; em dinâmicos, o cursor opaco é vinculado à definição, `search` e `limit`, e
+// cursores legados ou alterados retornam `400 validation_error`. Retorna `404` quando o segmento não
+// existe, está arquivado ou pertence a outro tenant.
 //
 // GET /v1/segments/{id}/contacts
 func (c *Client) GetSegmentsIDContacts(ctx context.Context, params GetSegmentsIDContactsParams) (GetSegmentsIDContactsRes, error) {
@@ -5847,7 +6569,8 @@ func (c *Client) sendPatchAutomationsIDDraft(ctx context.Context, request *Updat
 
 // PatchContactsID invokes patchContactsId operation.
 //
-// PATCH /v1/contacts/{id}.
+// Substitui apenas os campos presentes. `first_name` e `last_name` aceitam `null` para limpar o valor;
+// os demais campos não aceitam `null`.
 //
 // PATCH /v1/contacts/{id}
 func (c *Client) PatchContactsID(ctx context.Context, request *UpdateContactRequest, params PatchContactsIDParams) (PatchContactsIDRes, error) {
@@ -6050,7 +6773,8 @@ func (c *Client) sendPatchEventsID(ctx context.Context, request *UpdateCustomEve
 
 // PatchSegmentsID invokes patchSegmentsId operation.
 //
-// PATCH /v1/segments/{id}.
+// Substitui apenas os campos presentes; `description: null` remove a descrição. `name` não pode ser
+// nulo ou vazio.
 //
 // PATCH /v1/segments/{id}
 func (c *Client) PatchSegmentsID(ctx context.Context, request *UpdateSegmentRequest, params PatchSegmentsIDParams) (PatchSegmentsIDRes, error) {
@@ -6059,6 +6783,15 @@ func (c *Client) PatchSegmentsID(ctx context.Context, request *UpdateSegmentRequ
 }
 
 func (c *Client) sendPatchSegmentsID(ctx context.Context, request *UpdateSegmentRequest, params PatchSegmentsIDParams) (res PatchSegmentsIDRes, err error) {
+	// Validate request before sending.
+	if err := func() error {
+		if err := request.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return res, errors.Wrap(err, "validate")
+	}
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [2]string
@@ -6848,7 +7581,8 @@ func (c *Client) sendPostAutomationsIDRunsRunIDCancel(ctx context.Context, param
 
 // PostContacts invokes postContacts operation.
 //
-// POST /v1/contacts.
+// Cria um contato. O e-mail é normalizado para minúsculas e deve ser único dentro do tenant; a
+// mesma caixa postal pode existir em outro tenant.
 //
 // POST /v1/contacts
 func (c *Client) PostContacts(ctx context.Context, request *CreateContactRequest) (PostContactsRes, error) {
@@ -6927,6 +7661,643 @@ func (c *Client) sendPostContacts(ctx context.Context, request *CreateContactReq
 	}()
 
 	result, err := decodePostContactsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// PostContactsImport invokes postContactsImport operation.
+//
+// Importação síncrona, atômica e somente de criação para no máximo 1.000 contatos do tenant.
+// Aceita CSV UTF-8 (BOM opcional) com cabeçalho exato
+// `email,first_name,last_name,subscribed,properties`. Contatos existentes não são alterados;
+// duplicatas do arquivo preservam a primeira linha válida. `subscribed` vazio cria contato não
+// inscrito por padrão seguro de consentimento.
+//
+// POST /v1/contacts/import
+func (c *Client) PostContactsImport(ctx context.Context, request PostContactsImportReq) (PostContactsImportRes, error) {
+	res, err := c.sendPostContactsImport(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendPostContactsImport(ctx context.Context, request PostContactsImportReq) (res PostContactsImportRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/v1/contacts/import"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodePostContactsImportRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, PostContactsImportOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodePostContactsImportResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// PostDomainTrackingDomainActivate invokes postDomainTrackingDomainActivate operation.
+//
+// Iniciar provisionamento do domínio de tracking.
+//
+// POST /v1/domains/{domain_id}/tracking-domains/{tracking_domain_id}/activate
+func (c *Client) PostDomainTrackingDomainActivate(ctx context.Context, params PostDomainTrackingDomainActivateParams) (PostDomainTrackingDomainActivateRes, error) {
+	res, err := c.sendPostDomainTrackingDomainActivate(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendPostDomainTrackingDomainActivate(ctx context.Context, params PostDomainTrackingDomainActivateParams) (res PostDomainTrackingDomainActivateRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/domains/"
+	{
+		// Encode "domain_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "domain_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.DomainID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/tracking-domains/"
+	{
+		// Encode "tracking_domain_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "tracking_domain_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.TrackingDomainID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/activate"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, PostDomainTrackingDomainActivateOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodePostDomainTrackingDomainActivateResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// PostDomainTrackingDomainProofRotate invokes postDomainTrackingDomainProofRotate operation.
+//
+// Rotacionar prova do domínio de tracking.
+//
+// POST /v1/domains/{domain_id}/tracking-domains/{tracking_domain_id}/proof/rotate
+func (c *Client) PostDomainTrackingDomainProofRotate(ctx context.Context, params PostDomainTrackingDomainProofRotateParams) (PostDomainTrackingDomainProofRotateRes, error) {
+	res, err := c.sendPostDomainTrackingDomainProofRotate(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendPostDomainTrackingDomainProofRotate(ctx context.Context, params PostDomainTrackingDomainProofRotateParams) (res PostDomainTrackingDomainProofRotateRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/domains/"
+	{
+		// Encode "domain_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "domain_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.DomainID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/tracking-domains/"
+	{
+		// Encode "tracking_domain_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "tracking_domain_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.TrackingDomainID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/proof/rotate"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, PostDomainTrackingDomainProofRotateOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodePostDomainTrackingDomainProofRotateResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// PostDomainTrackingDomainRevoke invokes postDomainTrackingDomainRevoke operation.
+//
+// Revogar domínio de tracking.
+//
+// POST /v1/domains/{domain_id}/tracking-domains/{tracking_domain_id}/revoke
+func (c *Client) PostDomainTrackingDomainRevoke(ctx context.Context, params PostDomainTrackingDomainRevokeParams) (PostDomainTrackingDomainRevokeRes, error) {
+	res, err := c.sendPostDomainTrackingDomainRevoke(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendPostDomainTrackingDomainRevoke(ctx context.Context, params PostDomainTrackingDomainRevokeParams) (res PostDomainTrackingDomainRevokeRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/domains/"
+	{
+		// Encode "domain_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "domain_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.DomainID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/tracking-domains/"
+	{
+		// Encode "tracking_domain_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "tracking_domain_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.TrackingDomainID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/revoke"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, PostDomainTrackingDomainRevokeOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodePostDomainTrackingDomainRevokeResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// PostDomainTrackingDomainVerify invokes postDomainTrackingDomainVerify operation.
+//
+// Verificar prova TXT do domínio de tracking.
+//
+// POST /v1/domains/{domain_id}/tracking-domains/{tracking_domain_id}/verify
+func (c *Client) PostDomainTrackingDomainVerify(ctx context.Context, params PostDomainTrackingDomainVerifyParams) (PostDomainTrackingDomainVerifyRes, error) {
+	res, err := c.sendPostDomainTrackingDomainVerify(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendPostDomainTrackingDomainVerify(ctx context.Context, params PostDomainTrackingDomainVerifyParams) (res PostDomainTrackingDomainVerifyRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/v1/domains/"
+	{
+		// Encode "domain_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "domain_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.DomainID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/tracking-domains/"
+	{
+		// Encode "tracking_domain_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "tracking_domain_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.TrackingDomainID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/verify"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, PostDomainTrackingDomainVerifyOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodePostDomainTrackingDomainVerifyResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// PostDomainTrackingDomains invokes postDomainTrackingDomains operation.
+//
+// Reservar domínio de tracking.
+//
+// POST /v1/domains/{domain_id}/tracking-domains
+func (c *Client) PostDomainTrackingDomains(ctx context.Context, request *CreateTrackingDomainRequest, params PostDomainTrackingDomainsParams) (PostDomainTrackingDomainsRes, error) {
+	res, err := c.sendPostDomainTrackingDomains(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendPostDomainTrackingDomains(ctx context.Context, request *CreateTrackingDomainRequest, params PostDomainTrackingDomainsParams) (res PostDomainTrackingDomainsRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v1/domains/"
+	{
+		// Encode "domain_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "domain_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.DomainID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/tracking-domains"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodePostDomainTrackingDomainsRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, PostDomainTrackingDomainsOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodePostDomainTrackingDomainsResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -7110,7 +8481,9 @@ func (c *Client) sendPostDomainsIDDkimRotate(ctx context.Context, params PostDom
 
 // PostDomainsIDVerify invokes postDomainsIdVerify operation.
 //
-// POST /v1/domains/{id}/verify.
+// Verifica SPF, DKIM e um único registro DMARC sintaticamente válido. DMARC exige `v=DMARC1`,
+// política `p` em `none`, `quarantine` ou `reject`, e URI(s) `mailto:` válida(s) em `rua`; o sufixo
+// de tamanho legado, como `!10m`, é aceito.
 //
 // POST /v1/domains/{id}/verify
 func (c *Client) PostDomainsIDVerify(ctx context.Context, params PostDomainsIDVerifyParams) (PostDomainsIDVerifyRes, error) {
@@ -7361,17 +8734,114 @@ func (c *Client) sendPostEventsSend(ctx context.Context, request *SendCustomEven
 	return result, nil
 }
 
+// PostMessagesIDCancel invokes postMessagesIdCancel operation.
+//
+// Faz a transição atômica de `scheduled` para `cancelled` somente para o tenant autenticado. Se o
+// reconciliador já enfileirou a mensagem, retorna `409` e nenhuma entrega é removida. A reserva de
+// quota criada no aceite permanece no ledger.
+//
+// POST /v1/messages/{id}/cancel
+func (c *Client) PostMessagesIDCancel(ctx context.Context, params PostMessagesIDCancelParams) (PostMessagesIDCancelRes, error) {
+	res, err := c.sendPostMessagesIDCancel(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendPostMessagesIDCancel(ctx context.Context, params PostMessagesIDCancelParams) (res PostMessagesIDCancelRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v1/messages/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/cancel"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, PostMessagesIDCancelOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodePostMessagesIDCancelResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // PostSegments invokes postSegments operation.
 //
-// POST /v1/segments.
+// Cria um segmento cujo nome deve ser único dentro do tenant.
 //
 // POST /v1/segments
-func (c *Client) PostSegments(ctx context.Context, request *CreateSegmentRequest) (PostSegmentsRes, error) {
+func (c *Client) PostSegments(ctx context.Context, request CreateSegmentRequest) (PostSegmentsRes, error) {
 	res, err := c.sendPostSegments(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendPostSegments(ctx context.Context, request *CreateSegmentRequest) (res PostSegmentsRes, err error) {
+func (c *Client) sendPostSegments(ctx context.Context, request CreateSegmentRequest) (res PostSegmentsRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
@@ -7442,7 +8912,9 @@ func (c *Client) sendPostSegments(ctx context.Context, request *CreateSegmentReq
 
 // PostSegmentsIDContacts invokes postSegmentsIdContacts operation.
 //
-// POST /v1/segments/{id}/contacts.
+// Adiciona um contato existente do mesmo tenant ao segmento estático. A associação já existente é
+// idempotente e também retorna `204`; segmento ou contato ausente/fora do tenant retorna `404`. Um
+// segmento dinâmico retorna `409 dynamic_segment_membership` sem alteração.
 //
 // POST /v1/segments/{id}/contacts
 func (c *Client) PostSegmentsIDContacts(ctx context.Context, request *SegmentContactRequest, params PostSegmentsIDContactsParams) (PostSegmentsIDContactsRes, error) {
@@ -7531,6 +9003,95 @@ func (c *Client) sendPostSegmentsIDContacts(ctx context.Context, request *Segmen
 	}()
 
 	result, err := decodePostSegmentsIDContactsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// PostSegmentsPreview invokes postSegmentsPreview operation.
+//
+// Retorna a cardinalidade exata e uma amostra de contatos no mesmo snapshot PostgreSQL. A resposta
+// contém PII de contatos e não é uma rota de exportação ou listagem completa.
+//
+// POST /v1/segments/preview
+func (c *Client) PostSegmentsPreview(ctx context.Context, request *SegmentPreviewRequest) (PostSegmentsPreviewRes, error) {
+	res, err := c.sendPostSegmentsPreview(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendPostSegmentsPreview(ctx context.Context, request *SegmentPreviewRequest) (res PostSegmentsPreviewRes, err error) {
+	// Validate request before sending.
+	if err := func() error {
+		if err := request.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return res, errors.Wrap(err, "validate")
+	}
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/v1/segments/preview"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodePostSegmentsPreviewRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, PostSegmentsPreviewOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodePostSegmentsPreviewResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -7635,6 +9196,96 @@ func (c *Client) sendPostSend(ctx context.Context, request *SendRequest, params 
 	}()
 
 	result, err := decodePostSendResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// PostSendBatch invokes postSendBatch operation.
+//
+// Cada item usa o schema de envio individual e tem uma chave de idempotência própria. O header
+// Idempotency-Key não é aceito; erros de cada item são retornados no respectivo resultado, mantendo
+// a ordem enviada.
+//
+// POST /v1/send/batch
+func (c *Client) PostSendBatch(ctx context.Context, request *BatchSendRequest) (PostSendBatchRes, error) {
+	res, err := c.sendPostSendBatch(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendPostSendBatch(ctx context.Context, request *BatchSendRequest) (res PostSendBatchRes, err error) {
+	// Validate request before sending.
+	if err := func() error {
+		if err := request.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return res, errors.Wrap(err, "validate")
+	}
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/v1/send/batch"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodePostSendBatchRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, PostSendBatchOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodePostSendBatchResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

@@ -61,8 +61,24 @@ type GetContactsRes interface {
 	getContactsRes()
 }
 
+type GetDomainTrackingDomainRes interface {
+	getDomainTrackingDomainRes()
+}
+
+type GetDomainTrackingDomainsRes interface {
+	getDomainTrackingDomainsRes()
+}
+
 type GetDomainsIDDNSRes interface {
 	getDomainsIDDNSRes()
+}
+
+type GetDomainsIDHealthRes interface {
+	getDomainsIDHealthRes()
+}
+
+type GetDomainsIDInboundRes interface {
+	getDomainsIDInboundRes()
 }
 
 type GetDomainsIDRes interface {
@@ -99,6 +115,10 @@ type GetInboundMessagesRes interface {
 
 type GetMessagesEngagementRes interface {
 	getMessagesEngagementRes()
+}
+
+type GetMessagesEventsRes interface {
+	getMessagesEventsRes()
 }
 
 type GetMessagesIDEventsRes interface {
@@ -241,8 +261,32 @@ type PostAutomationsRes interface {
 	postAutomationsRes()
 }
 
+type PostContactsImportRes interface {
+	postContactsImportRes()
+}
+
 type PostContactsRes interface {
 	postContactsRes()
+}
+
+type PostDomainTrackingDomainActivateRes interface {
+	postDomainTrackingDomainActivateRes()
+}
+
+type PostDomainTrackingDomainProofRotateRes interface {
+	postDomainTrackingDomainProofRotateRes()
+}
+
+type PostDomainTrackingDomainRevokeRes interface {
+	postDomainTrackingDomainRevokeRes()
+}
+
+type PostDomainTrackingDomainVerifyRes interface {
+	postDomainTrackingDomainVerifyRes()
+}
+
+type PostDomainTrackingDomainsRes interface {
+	postDomainTrackingDomainsRes()
 }
 
 type PostDomainsIDDkimRotateRes interface {
@@ -265,12 +309,24 @@ type PostEventsSendRes interface {
 	postEventsSendRes()
 }
 
+type PostMessagesIDCancelRes interface {
+	postMessagesIDCancelRes()
+}
+
 type PostSegmentsIDContactsRes interface {
 	postSegmentsIDContactsRes()
 }
 
+type PostSegmentsPreviewRes interface {
+	postSegmentsPreviewRes()
+}
+
 type PostSegmentsRes interface {
 	postSegmentsRes()
+}
+
+type PostSendBatchRes interface {
+	postSendBatchRes()
 }
 
 type PostSendRes interface {

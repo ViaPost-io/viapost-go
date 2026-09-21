@@ -3,6 +3,22 @@
 All notable changes to this project are documented in this file. This project follows
 [Semantic Versioning](https://semver.org/).
 
+## [0.4.0] - 2026-09-21
+
+### Breaking changes
+
+- The generated low-level `api` package now includes the current public contacts import,
+  tracking-domain, inbound, audience-segment, and broadcast foundations. Implementations of
+  low-level generated interfaces must add the corresponding operations.
+
+### Changed
+
+- Synchronize the generated client with the published public OpenAPI contract at
+  `ViaPost-io/base-code@a8d78b4dc2140d3ceee2dbc52eb9ee438b640560`.
+- Preserve recursive segment definitions as object-shaped values in generated code because the
+  pinned ogen release cannot represent their structural JSON Schema unions; the versioned
+  `openapi.yaml` snapshot remains exact and the API accepts the documented payloads.
+
 ## [0.3.0] - 2026-09-16
 
 ### Breaking changes

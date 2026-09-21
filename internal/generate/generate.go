@@ -24,7 +24,19 @@ var (
 	csrfComponent        = regexp.MustCompile(`(?ms)^    CsrfHeader:\r?\n.*?(^  securitySchemes:)`)
 	sessionScheme        = regexp.MustCompile(`(?ms)^    sessionCookie:\r?\n.*?(^  schemas:)`)
 	webhookDeliveryEvent = regexp.MustCompile(`(?ms)^    WebhookDeliveryEventType:\r?\n      anyOf:\r?\n        - \$ref: '#/components/schemas/WebhookSubscribableEventType'\r?\n        - type: string\r?\n          const: webhook\.test[\t ]*$`)
+	propertyScalarUnion  = regexp.MustCompile(`(?m)^        value:\r?\n          type:\r?\n            - string\r?\n            - number\r?\n            - boolean[\t ]*$`)
+	untypedConst          = regexp.MustCompile(`(?m)^([ \t]+)([[:alnum:]_]+):\r?\n([ \t]+)const: ([^\r\n]+)[ \t]*$`)
 )
+
+var segmentObjectUnionSchemas = []string{
+	"Segment",
+	"CreateSegmentRequest",
+	"SegmentDefinition",
+	"SegmentRuleDepth1",
+	"SegmentRuleDepth2",
+	"SegmentRuleDepth3",
+	"LeafRule",
+}
 
 const (
 	canonicalUUIDSchema = "    UUID:\n      type: string\n      format: uuid"
@@ -54,6 +66,34 @@ func normalizeCodegenSpec(source []byte) ([]byte, error) {
 	// as a plain string in generated code; the versioned contract still retains
 	// the exact anyOf constraints for documentation and drift checks.
 	normalized = webhookDeliveryEvent.ReplaceAllString(normalized, "    WebhookDeliveryEventType:\n      type: string")
+	// OpenAPI 3.1 infers a scalar type from const, but ogen v1.24 emits
+	// invalid encoders for untyped constants. Make that inferred type explicit
+	// in the temporary generation input only.
+	normalized = untypedConst.ReplaceAllStringFunc(normalized, func(match string) string {
+		parts := untypedConst.FindStringSubmatch(match)
+		value := strings.TrimSpace(parts[4])
+		typ := "string"
+		if value == "true" || value == "false" {
+			typ = "boolean"
+		} else if matched, _ := regexp.MatchString(`^-?[0-9]+$`, value); matched {
+			typ = "integer"
+		}
+		return fmt.Sprintf("%s%s:\n%stype: %s\n%sconst: %s", parts[1], parts[2], parts[3], typ, parts[3], value)
+	})
+	// JSON Schema 2020-12 permits a multi-type scalar union, but ogen v1.24
+	// cannot generate it. Removing the local type constraint produces `any` in
+	// the generated client while the checked-in source remains exact.
+	normalized = propertyScalarUnion.ReplaceAllString(normalized, "        value: {}")
+	// The segment DSL uses recursive, structural oneOf unions that ogen v1.24
+	// cannot discriminate because several variants are JSON objects. Preserve
+	// the exact union in openapi.yaml and expose it as an object in generated
+	// code rather than rejecting valid API payloads during generation.
+	for _, schema := range segmentObjectUnionSchemas {
+		// Keep the next top-level schema header so each union can be handled
+		// independently, including adjacent recursive definitions.
+		pattern := regexp.MustCompile(`(?ms)^    (` + regexp.QuoteMeta(schema) + `):\r?\n.*?^(    [^ \t][^\r\n]*:\r?\n)`)
+		normalized = pattern.ReplaceAllString(normalized, "    $1:\n      type: object\n      additionalProperties: true\n$2")
+	}
 	return []byte(normalized), nil
 }
 

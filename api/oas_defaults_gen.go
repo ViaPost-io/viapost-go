@@ -3,6 +3,14 @@
 package api
 
 // setDefaults set default value of fields.
+func (s *SegmentPreviewRequest) setDefaults() {
+	{
+		val := int(20)
+		s.Limit.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
 func (s *SendRequest) setDefaults() {
 	{
 		val := SendRequestStream("transactional")

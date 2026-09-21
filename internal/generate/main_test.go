@@ -1,6 +1,7 @@
 package generate
 
 import (
+	"os"
 	"strings"
 	"testing"
 )
@@ -28,6 +29,27 @@ parameters: [{ $ref: '#/components/parameters/CsrfHeader' }]
         - $ref: '#/components/schemas/WebhookSubscribableEventType'
         - type: string
           const: webhook.test
+    PropertyValuePredicate:
+      type: object
+      properties:
+        value:
+          type:
+            - string
+            - number
+            - boolean
+    Segment:
+      oneOf:
+        - $ref: '#/components/schemas/StaticSegment'
+        - $ref: '#/components/schemas/DynamicSegment'
+    StaticSegment:
+      type: object
+    DynamicSegment:
+      type: object
+    UntypedConstant:
+      type: object
+      properties:
+        code:
+          const: dynamic_segment_membership
 `)
 
 	normalized, err := normalizeCodegenSpec(source)
@@ -52,6 +74,15 @@ parameters: [{ $ref: '#/components/parameters/CsrfHeader' }]
 	}
 	if !strings.Contains(got, "WebhookDeliveryEventType:\n      type: string") || strings.Contains(got, "const: webhook.test") {
 		t.Fatalf("normalized schema retained unsupported webhook event union:\n%s", got)
+	}
+	if !strings.Contains(got, "value: {}") || strings.Contains(got, "- number") {
+		t.Fatalf("normalized schema retained unsupported scalar union:\n%s", got)
+	}
+	if !strings.Contains(got, "Segment:\n      type: object\n      additionalProperties: true") || strings.Contains(got, "$ref: '#/components/schemas/StaticSegment'") {
+		t.Fatalf("normalized schema retained unsupported segment union:\n%s", got)
+	}
+	if !strings.Contains(got, "code:\n          type: string\n          const: dynamic_segment_membership") {
+		t.Fatalf("normalized schema did not type bare string const:\n%s", got)
 	}
 	if !strings.Contains(string(source), "items: false") {
 		t.Fatal("normalization mutated the source buffer")
@@ -81,5 +112,22 @@ other:
 				t.Fatal("normalizeCodegenSpec() error = nil, want canonical UUID count error")
 			}
 		})
+	}
+}
+
+func TestNormalizeCodegenSpec_NormalizesPublishedSegmentUnions(t *testing.T) {
+	source, err := os.ReadFile("../../openapi.yaml")
+	if err != nil {
+		t.Fatalf("read public contract: %v", err)
+	}
+	normalized, err := normalizeCodegenSpec(source)
+	if err != nil {
+		t.Fatalf("normalizeCodegenSpec() error = %v", err)
+	}
+	got := string(normalized)
+	for _, schema := range []string{"Segment", "CreateSegmentRequest", "SegmentDefinition", "SegmentRuleDepth1", "SegmentRuleDepth2", "SegmentRuleDepth3", "LeafRule"} {
+		if strings.Contains(got, "    "+schema+":\n      oneOf:") {
+			t.Fatalf("normalized public contract retained unsupported union %s", schema)
+		}
 	}
 }

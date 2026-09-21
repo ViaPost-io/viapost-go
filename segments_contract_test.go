@@ -39,7 +39,7 @@ func TestGeneratedClient_SegmentContactsReturnsPaginatedList(t *testing.T) {
 	if len(list.Data) != 1 || list.Data[0].Email != "person@example.com" {
 		t.Fatalf("contacts = %#v, want one person@example.com contact", list.Data)
 	}
-	if cursor, ok := list.NextCursor.Get(); !ok || cursor != "next-page" {
-		t.Fatalf("next cursor = %q, %t, want next-page, true", cursor, ok)
+	if list.NextCursor != "next-page" {
+		t.Fatalf("next cursor = %q, want next-page", list.NextCursor)
 	}
 }

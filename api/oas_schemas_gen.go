@@ -661,6 +661,228 @@ func (s *AutomationStatus) UnmarshalText(data []byte) error {
 	}
 }
 
+// Ref: #/components/schemas/BatchSendError
+type BatchSendError struct {
+	Code    BatchSendErrorCode `json:"code"`
+	Message string             `json:"message"`
+}
+
+// GetCode returns the value of Code.
+func (s *BatchSendError) GetCode() BatchSendErrorCode {
+	return s.Code
+}
+
+// GetMessage returns the value of Message.
+func (s *BatchSendError) GetMessage() string {
+	return s.Message
+}
+
+// SetCode sets the value of Code.
+func (s *BatchSendError) SetCode(val BatchSendErrorCode) {
+	s.Code = val
+}
+
+// SetMessage sets the value of Message.
+func (s *BatchSendError) SetMessage(val string) {
+	s.Message = val
+}
+
+type BatchSendErrorCode string
+
+const (
+	BatchSendErrorCodeNotFound           BatchSendErrorCode = "not_found"
+	BatchSendErrorCodeConflict           BatchSendErrorCode = "conflict"
+	BatchSendErrorCodeTenantInactive     BatchSendErrorCode = "tenant_inactive"
+	BatchSendErrorCodeForbidden          BatchSendErrorCode = "forbidden"
+	BatchSendErrorCodeValidationError    BatchSendErrorCode = "validation_error"
+	BatchSendErrorCodeRateLimited        BatchSendErrorCode = "rate_limited"
+	BatchSendErrorCodeQuotaExceeded      BatchSendErrorCode = "quota_exceeded"
+	BatchSendErrorCodeServiceUnavailable BatchSendErrorCode = "service_unavailable"
+	BatchSendErrorCodeInternalError      BatchSendErrorCode = "internal_error"
+)
+
+// AllValues returns all BatchSendErrorCode values.
+func (BatchSendErrorCode) AllValues() []BatchSendErrorCode {
+	return []BatchSendErrorCode{
+		BatchSendErrorCodeNotFound,
+		BatchSendErrorCodeConflict,
+		BatchSendErrorCodeTenantInactive,
+		BatchSendErrorCodeForbidden,
+		BatchSendErrorCodeValidationError,
+		BatchSendErrorCodeRateLimited,
+		BatchSendErrorCodeQuotaExceeded,
+		BatchSendErrorCodeServiceUnavailable,
+		BatchSendErrorCodeInternalError,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s BatchSendErrorCode) MarshalText() ([]byte, error) {
+	switch s {
+	case BatchSendErrorCodeNotFound:
+		return []byte(s), nil
+	case BatchSendErrorCodeConflict:
+		return []byte(s), nil
+	case BatchSendErrorCodeTenantInactive:
+		return []byte(s), nil
+	case BatchSendErrorCodeForbidden:
+		return []byte(s), nil
+	case BatchSendErrorCodeValidationError:
+		return []byte(s), nil
+	case BatchSendErrorCodeRateLimited:
+		return []byte(s), nil
+	case BatchSendErrorCodeQuotaExceeded:
+		return []byte(s), nil
+	case BatchSendErrorCodeServiceUnavailable:
+		return []byte(s), nil
+	case BatchSendErrorCodeInternalError:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *BatchSendErrorCode) UnmarshalText(data []byte) error {
+	switch BatchSendErrorCode(data) {
+	case BatchSendErrorCodeNotFound:
+		*s = BatchSendErrorCodeNotFound
+		return nil
+	case BatchSendErrorCodeConflict:
+		*s = BatchSendErrorCodeConflict
+		return nil
+	case BatchSendErrorCodeTenantInactive:
+		*s = BatchSendErrorCodeTenantInactive
+		return nil
+	case BatchSendErrorCodeForbidden:
+		*s = BatchSendErrorCodeForbidden
+		return nil
+	case BatchSendErrorCodeValidationError:
+		*s = BatchSendErrorCodeValidationError
+		return nil
+	case BatchSendErrorCodeRateLimited:
+		*s = BatchSendErrorCodeRateLimited
+		return nil
+	case BatchSendErrorCodeQuotaExceeded:
+		*s = BatchSendErrorCodeQuotaExceeded
+		return nil
+	case BatchSendErrorCodeServiceUnavailable:
+		*s = BatchSendErrorCodeServiceUnavailable
+		return nil
+	case BatchSendErrorCodeInternalError:
+		*s = BatchSendErrorCodeInternalError
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/BatchSendMessage
+type BatchSendMessage struct {
+	IdempotencyKey string      `json:"idempotency_key"`
+	Request        SendRequest `json:"request"`
+}
+
+// GetIdempotencyKey returns the value of IdempotencyKey.
+func (s *BatchSendMessage) GetIdempotencyKey() string {
+	return s.IdempotencyKey
+}
+
+// GetRequest returns the value of Request.
+func (s *BatchSendMessage) GetRequest() SendRequest {
+	return s.Request
+}
+
+// SetIdempotencyKey sets the value of IdempotencyKey.
+func (s *BatchSendMessage) SetIdempotencyKey(val string) {
+	s.IdempotencyKey = val
+}
+
+// SetRequest sets the value of Request.
+func (s *BatchSendMessage) SetRequest(val SendRequest) {
+	s.Request = val
+}
+
+// Ref: #/components/schemas/BatchSendRequest
+type BatchSendRequest struct {
+	Messages []BatchSendMessage `json:"messages"`
+}
+
+// GetMessages returns the value of Messages.
+func (s *BatchSendRequest) GetMessages() []BatchSendMessage {
+	return s.Messages
+}
+
+// SetMessages sets the value of Messages.
+func (s *BatchSendRequest) SetMessages(val []BatchSendMessage) {
+	s.Messages = val
+}
+
+// Ref: #/components/schemas/BatchSendResult
+type BatchSendResult struct {
+	Results []BatchSendResultItem `json:"results"`
+}
+
+// GetResults returns the value of Results.
+func (s *BatchSendResult) GetResults() []BatchSendResultItem {
+	return s.Results
+}
+
+// SetResults sets the value of Results.
+func (s *BatchSendResult) SetResults(val []BatchSendResultItem) {
+	s.Results = val
+}
+
+func (*BatchSendResult) postSendBatchRes() {}
+
+// Ref: #/components/schemas/BatchSendResultItem
+type BatchSendResultItem struct {
+	Index    int                  `json:"index"`
+	Accepted []AcceptedMessage    `json:"accepted"`
+	Rejected []RejectedMessage    `json:"rejected"`
+	Error    OptNilBatchSendError `json:"error"`
+}
+
+// GetIndex returns the value of Index.
+func (s *BatchSendResultItem) GetIndex() int {
+	return s.Index
+}
+
+// GetAccepted returns the value of Accepted.
+func (s *BatchSendResultItem) GetAccepted() []AcceptedMessage {
+	return s.Accepted
+}
+
+// GetRejected returns the value of Rejected.
+func (s *BatchSendResultItem) GetRejected() []RejectedMessage {
+	return s.Rejected
+}
+
+// GetError returns the value of Error.
+func (s *BatchSendResultItem) GetError() OptNilBatchSendError {
+	return s.Error
+}
+
+// SetIndex sets the value of Index.
+func (s *BatchSendResultItem) SetIndex(val int) {
+	s.Index = val
+}
+
+// SetAccepted sets the value of Accepted.
+func (s *BatchSendResultItem) SetAccepted(val []AcceptedMessage) {
+	s.Accepted = val
+}
+
+// SetRejected sets the value of Rejected.
+func (s *BatchSendResultItem) SetRejected(val []RejectedMessage) {
+	s.Rejected = val
+}
+
+// SetError sets the value of Error.
+func (s *BatchSendResultItem) SetError(val OptNilBatchSendError) {
+	s.Error = val
+}
+
 type BearerAPIKey struct {
 	Token string
 	Roles []string
@@ -688,14 +910,16 @@ func (s *BearerAPIKey) SetRoles(val []string) {
 
 // Ref: #/components/schemas/Contact
 type Contact struct {
-	ID         UUID              `json:"id"`
-	Email      string            `json:"email"`
-	FirstName  OptNilString      `json:"first_name"`
-	LastName   OptNilString      `json:"last_name"`
-	Subscribed bool              `json:"subscribed"`
+	ID UUID `json:"id"`
+	// Endereço de caixa postal normalizado em minúsculas; nunca contém nome de exibição.
+	Email      string       `json:"email"`
+	FirstName  OptNilString `json:"first_name"`
+	LastName   OptNilString `json:"last_name"`
+	Subscribed bool         `json:"subscribed"`
+	// Objeto JSON livre; nunca é `null` nem array.
 	Properties ContactProperties `json:"properties"`
-	CreatedAt  Timestamp         `json:"created_at"`
-	UpdatedAt  Timestamp         `json:"updated_at"`
+	CreatedAt  SegmentTimestamp  `json:"created_at"`
+	UpdatedAt  SegmentTimestamp  `json:"updated_at"`
 }
 
 // GetID returns the value of ID.
@@ -729,12 +953,12 @@ func (s *Contact) GetProperties() ContactProperties {
 }
 
 // GetCreatedAt returns the value of CreatedAt.
-func (s *Contact) GetCreatedAt() Timestamp {
+func (s *Contact) GetCreatedAt() SegmentTimestamp {
 	return s.CreatedAt
 }
 
 // GetUpdatedAt returns the value of UpdatedAt.
-func (s *Contact) GetUpdatedAt() Timestamp {
+func (s *Contact) GetUpdatedAt() SegmentTimestamp {
 	return s.UpdatedAt
 }
 
@@ -769,12 +993,12 @@ func (s *Contact) SetProperties(val ContactProperties) {
 }
 
 // SetCreatedAt sets the value of CreatedAt.
-func (s *Contact) SetCreatedAt(val Timestamp) {
+func (s *Contact) SetCreatedAt(val SegmentTimestamp) {
 	s.CreatedAt = val
 }
 
 // SetUpdatedAt sets the value of UpdatedAt.
-func (s *Contact) SetUpdatedAt(val Timestamp) {
+func (s *Contact) SetUpdatedAt(val SegmentTimestamp) {
 	s.UpdatedAt = val
 }
 
@@ -782,10 +1006,63 @@ func (*Contact) getContactsIDRes()   {}
 func (*Contact) patchContactsIDRes() {}
 func (*Contact) postContactsRes()    {}
 
+// Ref: #/components/schemas/ContactImportResult
+type ContactImportResult struct {
+	Total   int `json:"total"`
+	Created int `json:"created"`
+	// Contatos já existentes ou que venceram uma corrida concorrente no banco.
+	Skipped int `json:"skipped"`
+	// Linhas duplicadas válidas do arquivo, após a primeira ocorrência.
+	Duplicates int `json:"duplicates"`
+}
+
+// GetTotal returns the value of Total.
+func (s *ContactImportResult) GetTotal() int {
+	return s.Total
+}
+
+// GetCreated returns the value of Created.
+func (s *ContactImportResult) GetCreated() int {
+	return s.Created
+}
+
+// GetSkipped returns the value of Skipped.
+func (s *ContactImportResult) GetSkipped() int {
+	return s.Skipped
+}
+
+// GetDuplicates returns the value of Duplicates.
+func (s *ContactImportResult) GetDuplicates() int {
+	return s.Duplicates
+}
+
+// SetTotal sets the value of Total.
+func (s *ContactImportResult) SetTotal(val int) {
+	s.Total = val
+}
+
+// SetCreated sets the value of Created.
+func (s *ContactImportResult) SetCreated(val int) {
+	s.Created = val
+}
+
+// SetSkipped sets the value of Skipped.
+func (s *ContactImportResult) SetSkipped(val int) {
+	s.Skipped = val
+}
+
+// SetDuplicates sets the value of Duplicates.
+func (s *ContactImportResult) SetDuplicates(val int) {
+	s.Duplicates = val
+}
+
+func (*ContactImportResult) postContactsImportRes() {}
+
 // Ref: #/components/schemas/ContactList
 type ContactList struct {
-	Data       []Contact `json:"data"`
-	NextCursor OptString `json:"next_cursor"`
+	Data []Contact `json:"data"`
+	// Cursor opaco da próxima página; string vazia quando não há próxima página.
+	NextCursor string `json:"next_cursor"`
 }
 
 // GetData returns the value of Data.
@@ -794,7 +1071,7 @@ func (s *ContactList) GetData() []Contact {
 }
 
 // GetNextCursor returns the value of NextCursor.
-func (s *ContactList) GetNextCursor() OptString {
+func (s *ContactList) GetNextCursor() string {
 	return s.NextCursor
 }
 
@@ -804,13 +1081,14 @@ func (s *ContactList) SetData(val []Contact) {
 }
 
 // SetNextCursor sets the value of NextCursor.
-func (s *ContactList) SetNextCursor(val OptString) {
+func (s *ContactList) SetNextCursor(val string) {
 	s.NextCursor = val
 }
 
 func (*ContactList) getContactsRes()           {}
 func (*ContactList) getSegmentsIDContactsRes() {}
 
+// Objeto JSON livre; nunca é `null` nem array.
 type ContactProperties map[string]jx.Raw
 
 func (s *ContactProperties) init() ContactProperties {
@@ -839,10 +1117,12 @@ func (s *CreateAutomationRequest) SetName(val string) {
 
 // Ref: #/components/schemas/CreateContactRequest
 type CreateContactRequest struct {
-	Email      string                            `json:"email"`
-	FirstName  OptString                         `json:"first_name"`
-	LastName   OptString                         `json:"last_name"`
-	Subscribed OptBool                           `json:"subscribed"`
+	// Caixa postal válida, sem nome de exibição ou espaços; é normalizada em minúsculas.
+	Email      string    `json:"email"`
+	FirstName  OptString `json:"first_name"`
+	LastName   OptString `json:"last_name"`
+	Subscribed OptBool   `json:"subscribed"`
+	// Objeto JSON livre; `null` e arrays são inválidos.
 	Properties OptCreateContactRequestProperties `json:"properties"`
 }
 
@@ -896,6 +1176,7 @@ func (s *CreateContactRequest) SetProperties(val OptCreateContactRequestProperti
 	s.Properties = val
 }
 
+// Objeto JSON livre; `null` e arrays são inválidos.
 type CreateContactRequestProperties map[string]jx.Raw
 
 func (s *CreateContactRequestProperties) init() CreateContactRequestProperties {
@@ -988,29 +1269,15 @@ func (s *CreateDomainResponse) SetDNSRecords(val []DNSRecord) {
 func (*CreateDomainResponse) postDomainsRes() {}
 
 // Ref: #/components/schemas/CreateSegmentRequest
-type CreateSegmentRequest struct {
-	Name        string    `json:"name"`
-	Description OptString `json:"description"`
-}
+type CreateSegmentRequest map[string]jx.Raw
 
-// GetName returns the value of Name.
-func (s *CreateSegmentRequest) GetName() string {
-	return s.Name
-}
-
-// GetDescription returns the value of Description.
-func (s *CreateSegmentRequest) GetDescription() OptString {
-	return s.Description
-}
-
-// SetName sets the value of Name.
-func (s *CreateSegmentRequest) SetName(val string) {
-	s.Name = val
-}
-
-// SetDescription sets the value of Description.
-func (s *CreateSegmentRequest) SetDescription(val OptString) {
-	s.Description = val
+func (s *CreateSegmentRequest) init() CreateSegmentRequest {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
 }
 
 // Ref: #/components/schemas/CreateSuppressionRequest
@@ -1207,6 +1474,22 @@ func (s *CreateThemeRequestStyle) init() CreateThemeRequestStyle {
 		*s = m
 	}
 	return m
+}
+
+// Ref: #/components/schemas/CreateTrackingDomainRequest
+type CreateTrackingDomainRequest struct {
+	// Hostname DNS, canonicalizado para ASCII/IDNA.
+	Hostname string `json:"hostname"`
+}
+
+// GetHostname returns the value of Hostname.
+func (s *CreateTrackingDomainRequest) GetHostname() string {
+	return s.Hostname
+}
+
+// SetHostname sets the value of Hostname.
+func (s *CreateTrackingDomainRequest) SetHostname(val string) {
+	s.Hostname = val
 }
 
 // Ref: #/components/schemas/CreateWebhookRequest
@@ -1720,10 +2003,6 @@ type DeleteContactsIDBadRequest Error
 
 func (*DeleteContactsIDBadRequest) deleteContactsIDRes() {}
 
-type DeleteContactsIDConflict Error
-
-func (*DeleteContactsIDConflict) deleteContactsIDRes() {}
-
 type DeleteContactsIDForbidden Error
 
 func (*DeleteContactsIDForbidden) deleteContactsIDRes() {}
@@ -1807,17 +2086,9 @@ type DeleteSegmentsIDBadRequest Error
 
 func (*DeleteSegmentsIDBadRequest) deleteSegmentsIDRes() {}
 
-type DeleteSegmentsIDConflict Error
-
-func (*DeleteSegmentsIDConflict) deleteSegmentsIDRes() {}
-
 type DeleteSegmentsIDContactsContactIDBadRequest Error
 
 func (*DeleteSegmentsIDContactsContactIDBadRequest) deleteSegmentsIDContactsContactIDRes() {}
-
-type DeleteSegmentsIDContactsContactIDConflict Error
-
-func (*DeleteSegmentsIDContactsContactIDConflict) deleteSegmentsIDContactsContactIDRes() {}
 
 type DeleteSegmentsIDContactsContactIDForbidden Error
 
@@ -2043,6 +2314,1057 @@ func (s *Domain) SetCreatedAt(val Timestamp) {
 func (*Domain) getDomainsIDRes()        {}
 func (*Domain) postDomainsIDVerifyRes() {}
 
+// Ref: #/components/schemas/DomainHealth
+type DomainHealth struct {
+	DomainID     UUID                     `json:"domain_id"`
+	DomainName   string                   `json:"domain_name"`
+	DomainStatus DomainHealthDomainStatus `json:"domain_status"`
+	// `null` para domínio desabilitado, configuração DNS incompleta ou amostra insuficiente.
+	Score              NilInt                       `json:"score"`
+	Status             DomainHealthStatus           `json:"status"`
+	CalculationVersion string                       `json:"calculation_version"`
+	EvaluatedAt        Timestamp                    `json:"evaluated_at"`
+	DNSCheckedAt       NilTimestamp                 `json:"dns_checked_at"`
+	Window             DomainHealthWindow           `json:"window"`
+	MinimumSampleSize  int                          `json:"minimum_sample_size"`
+	SampleSize         int64                        `json:"sample_size"`
+	Checks             DomainHealthChecks           `json:"checks"`
+	Recommendations    []DomainHealthRecommendation `json:"recommendations"`
+}
+
+// GetDomainID returns the value of DomainID.
+func (s *DomainHealth) GetDomainID() UUID {
+	return s.DomainID
+}
+
+// GetDomainName returns the value of DomainName.
+func (s *DomainHealth) GetDomainName() string {
+	return s.DomainName
+}
+
+// GetDomainStatus returns the value of DomainStatus.
+func (s *DomainHealth) GetDomainStatus() DomainHealthDomainStatus {
+	return s.DomainStatus
+}
+
+// GetScore returns the value of Score.
+func (s *DomainHealth) GetScore() NilInt {
+	return s.Score
+}
+
+// GetStatus returns the value of Status.
+func (s *DomainHealth) GetStatus() DomainHealthStatus {
+	return s.Status
+}
+
+// GetCalculationVersion returns the value of CalculationVersion.
+func (s *DomainHealth) GetCalculationVersion() string {
+	return s.CalculationVersion
+}
+
+// GetEvaluatedAt returns the value of EvaluatedAt.
+func (s *DomainHealth) GetEvaluatedAt() Timestamp {
+	return s.EvaluatedAt
+}
+
+// GetDNSCheckedAt returns the value of DNSCheckedAt.
+func (s *DomainHealth) GetDNSCheckedAt() NilTimestamp {
+	return s.DNSCheckedAt
+}
+
+// GetWindow returns the value of Window.
+func (s *DomainHealth) GetWindow() DomainHealthWindow {
+	return s.Window
+}
+
+// GetMinimumSampleSize returns the value of MinimumSampleSize.
+func (s *DomainHealth) GetMinimumSampleSize() int {
+	return s.MinimumSampleSize
+}
+
+// GetSampleSize returns the value of SampleSize.
+func (s *DomainHealth) GetSampleSize() int64 {
+	return s.SampleSize
+}
+
+// GetChecks returns the value of Checks.
+func (s *DomainHealth) GetChecks() DomainHealthChecks {
+	return s.Checks
+}
+
+// GetRecommendations returns the value of Recommendations.
+func (s *DomainHealth) GetRecommendations() []DomainHealthRecommendation {
+	return s.Recommendations
+}
+
+// SetDomainID sets the value of DomainID.
+func (s *DomainHealth) SetDomainID(val UUID) {
+	s.DomainID = val
+}
+
+// SetDomainName sets the value of DomainName.
+func (s *DomainHealth) SetDomainName(val string) {
+	s.DomainName = val
+}
+
+// SetDomainStatus sets the value of DomainStatus.
+func (s *DomainHealth) SetDomainStatus(val DomainHealthDomainStatus) {
+	s.DomainStatus = val
+}
+
+// SetScore sets the value of Score.
+func (s *DomainHealth) SetScore(val NilInt) {
+	s.Score = val
+}
+
+// SetStatus sets the value of Status.
+func (s *DomainHealth) SetStatus(val DomainHealthStatus) {
+	s.Status = val
+}
+
+// SetCalculationVersion sets the value of CalculationVersion.
+func (s *DomainHealth) SetCalculationVersion(val string) {
+	s.CalculationVersion = val
+}
+
+// SetEvaluatedAt sets the value of EvaluatedAt.
+func (s *DomainHealth) SetEvaluatedAt(val Timestamp) {
+	s.EvaluatedAt = val
+}
+
+// SetDNSCheckedAt sets the value of DNSCheckedAt.
+func (s *DomainHealth) SetDNSCheckedAt(val NilTimestamp) {
+	s.DNSCheckedAt = val
+}
+
+// SetWindow sets the value of Window.
+func (s *DomainHealth) SetWindow(val DomainHealthWindow) {
+	s.Window = val
+}
+
+// SetMinimumSampleSize sets the value of MinimumSampleSize.
+func (s *DomainHealth) SetMinimumSampleSize(val int) {
+	s.MinimumSampleSize = val
+}
+
+// SetSampleSize sets the value of SampleSize.
+func (s *DomainHealth) SetSampleSize(val int64) {
+	s.SampleSize = val
+}
+
+// SetChecks sets the value of Checks.
+func (s *DomainHealth) SetChecks(val DomainHealthChecks) {
+	s.Checks = val
+}
+
+// SetRecommendations sets the value of Recommendations.
+func (s *DomainHealth) SetRecommendations(val []DomainHealthRecommendation) {
+	s.Recommendations = val
+}
+
+// Ref: #/components/schemas/DomainHealthBounceRateCheck
+type DomainHealthBounceRateCheck struct {
+	Numerator   int64 `json:"numerator"`
+	Denominator int64 `json:"denominator"`
+	// Taxa inteira em basis points; `10000` representa 100%. `null` quando a amostra é insuficiente.
+	RateBasisPoints NilInt                  `json:"rate_basis_points"`
+	Status          DomainHealthCheckStatus `json:"status"`
+	// Pontos do check ou `null` quando a amostra é insuficiente.
+	Points    NilDomainHealthBounceRateCheckPoints `json:"points"`
+	MaxPoints int                                  `json:"max_points"`
+}
+
+// GetNumerator returns the value of Numerator.
+func (s *DomainHealthBounceRateCheck) GetNumerator() int64 {
+	return s.Numerator
+}
+
+// GetDenominator returns the value of Denominator.
+func (s *DomainHealthBounceRateCheck) GetDenominator() int64 {
+	return s.Denominator
+}
+
+// GetRateBasisPoints returns the value of RateBasisPoints.
+func (s *DomainHealthBounceRateCheck) GetRateBasisPoints() NilInt {
+	return s.RateBasisPoints
+}
+
+// GetStatus returns the value of Status.
+func (s *DomainHealthBounceRateCheck) GetStatus() DomainHealthCheckStatus {
+	return s.Status
+}
+
+// GetPoints returns the value of Points.
+func (s *DomainHealthBounceRateCheck) GetPoints() NilDomainHealthBounceRateCheckPoints {
+	return s.Points
+}
+
+// GetMaxPoints returns the value of MaxPoints.
+func (s *DomainHealthBounceRateCheck) GetMaxPoints() int {
+	return s.MaxPoints
+}
+
+// SetNumerator sets the value of Numerator.
+func (s *DomainHealthBounceRateCheck) SetNumerator(val int64) {
+	s.Numerator = val
+}
+
+// SetDenominator sets the value of Denominator.
+func (s *DomainHealthBounceRateCheck) SetDenominator(val int64) {
+	s.Denominator = val
+}
+
+// SetRateBasisPoints sets the value of RateBasisPoints.
+func (s *DomainHealthBounceRateCheck) SetRateBasisPoints(val NilInt) {
+	s.RateBasisPoints = val
+}
+
+// SetStatus sets the value of Status.
+func (s *DomainHealthBounceRateCheck) SetStatus(val DomainHealthCheckStatus) {
+	s.Status = val
+}
+
+// SetPoints sets the value of Points.
+func (s *DomainHealthBounceRateCheck) SetPoints(val NilDomainHealthBounceRateCheckPoints) {
+	s.Points = val
+}
+
+// SetMaxPoints sets the value of MaxPoints.
+func (s *DomainHealthBounceRateCheck) SetMaxPoints(val int) {
+	s.MaxPoints = val
+}
+
+type DomainHealthBounceRateCheckPoints int
+
+const (
+	DomainHealthBounceRateCheckPoints0  DomainHealthBounceRateCheckPoints = 0
+	DomainHealthBounceRateCheckPoints10 DomainHealthBounceRateCheckPoints = 10
+	DomainHealthBounceRateCheckPoints20 DomainHealthBounceRateCheckPoints = 20
+)
+
+// AllValues returns all DomainHealthBounceRateCheckPoints values.
+func (DomainHealthBounceRateCheckPoints) AllValues() []DomainHealthBounceRateCheckPoints {
+	return []DomainHealthBounceRateCheckPoints{
+		DomainHealthBounceRateCheckPoints0,
+		DomainHealthBounceRateCheckPoints10,
+		DomainHealthBounceRateCheckPoints20,
+	}
+}
+
+// Ref: #/components/schemas/DomainHealthCheckStatus
+type DomainHealthCheckStatus string
+
+const (
+	DomainHealthCheckStatusPass             DomainHealthCheckStatus = "pass"
+	DomainHealthCheckStatusWarning          DomainHealthCheckStatus = "warning"
+	DomainHealthCheckStatusFail             DomainHealthCheckStatus = "fail"
+	DomainHealthCheckStatusInsufficientData DomainHealthCheckStatus = "insufficient_data"
+)
+
+// AllValues returns all DomainHealthCheckStatus values.
+func (DomainHealthCheckStatus) AllValues() []DomainHealthCheckStatus {
+	return []DomainHealthCheckStatus{
+		DomainHealthCheckStatusPass,
+		DomainHealthCheckStatusWarning,
+		DomainHealthCheckStatusFail,
+		DomainHealthCheckStatusInsufficientData,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s DomainHealthCheckStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case DomainHealthCheckStatusPass:
+		return []byte(s), nil
+	case DomainHealthCheckStatusWarning:
+		return []byte(s), nil
+	case DomainHealthCheckStatusFail:
+		return []byte(s), nil
+	case DomainHealthCheckStatusInsufficientData:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *DomainHealthCheckStatus) UnmarshalText(data []byte) error {
+	switch DomainHealthCheckStatus(data) {
+	case DomainHealthCheckStatusPass:
+		*s = DomainHealthCheckStatusPass
+		return nil
+	case DomainHealthCheckStatusWarning:
+		*s = DomainHealthCheckStatusWarning
+		return nil
+	case DomainHealthCheckStatusFail:
+		*s = DomainHealthCheckStatusFail
+		return nil
+	case DomainHealthCheckStatusInsufficientData:
+		*s = DomainHealthCheckStatusInsufficientData
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/DomainHealthChecks
+type DomainHealthChecks struct {
+	Spf          DomainHealthSPFCheck          `json:"spf"`
+	Dkim         DomainHealthDKIMCheck         `json:"dkim"`
+	Dmarc        DomainHealthDMARCCheck        `json:"dmarc"`
+	DeliveryRate DomainHealthDeliveryRateCheck `json:"delivery_rate"`
+	BounceRate   DomainHealthBounceRateCheck   `json:"bounce_rate"`
+}
+
+// GetSpf returns the value of Spf.
+func (s *DomainHealthChecks) GetSpf() DomainHealthSPFCheck {
+	return s.Spf
+}
+
+// GetDkim returns the value of Dkim.
+func (s *DomainHealthChecks) GetDkim() DomainHealthDKIMCheck {
+	return s.Dkim
+}
+
+// GetDmarc returns the value of Dmarc.
+func (s *DomainHealthChecks) GetDmarc() DomainHealthDMARCCheck {
+	return s.Dmarc
+}
+
+// GetDeliveryRate returns the value of DeliveryRate.
+func (s *DomainHealthChecks) GetDeliveryRate() DomainHealthDeliveryRateCheck {
+	return s.DeliveryRate
+}
+
+// GetBounceRate returns the value of BounceRate.
+func (s *DomainHealthChecks) GetBounceRate() DomainHealthBounceRateCheck {
+	return s.BounceRate
+}
+
+// SetSpf sets the value of Spf.
+func (s *DomainHealthChecks) SetSpf(val DomainHealthSPFCheck) {
+	s.Spf = val
+}
+
+// SetDkim sets the value of Dkim.
+func (s *DomainHealthChecks) SetDkim(val DomainHealthDKIMCheck) {
+	s.Dkim = val
+}
+
+// SetDmarc sets the value of Dmarc.
+func (s *DomainHealthChecks) SetDmarc(val DomainHealthDMARCCheck) {
+	s.Dmarc = val
+}
+
+// SetDeliveryRate sets the value of DeliveryRate.
+func (s *DomainHealthChecks) SetDeliveryRate(val DomainHealthDeliveryRateCheck) {
+	s.DeliveryRate = val
+}
+
+// SetBounceRate sets the value of BounceRate.
+func (s *DomainHealthChecks) SetBounceRate(val DomainHealthBounceRateCheck) {
+	s.BounceRate = val
+}
+
+// Ref: #/components/schemas/DomainHealthDKIMCheck
+type DomainHealthDKIMCheck struct {
+	Verified  bool                        `json:"verified"`
+	Status    DomainHealthCheckStatus     `json:"status"`
+	Points    DomainHealthDKIMCheckPoints `json:"points"`
+	MaxPoints int                         `json:"max_points"`
+}
+
+// GetVerified returns the value of Verified.
+func (s *DomainHealthDKIMCheck) GetVerified() bool {
+	return s.Verified
+}
+
+// GetStatus returns the value of Status.
+func (s *DomainHealthDKIMCheck) GetStatus() DomainHealthCheckStatus {
+	return s.Status
+}
+
+// GetPoints returns the value of Points.
+func (s *DomainHealthDKIMCheck) GetPoints() DomainHealthDKIMCheckPoints {
+	return s.Points
+}
+
+// GetMaxPoints returns the value of MaxPoints.
+func (s *DomainHealthDKIMCheck) GetMaxPoints() int {
+	return s.MaxPoints
+}
+
+// SetVerified sets the value of Verified.
+func (s *DomainHealthDKIMCheck) SetVerified(val bool) {
+	s.Verified = val
+}
+
+// SetStatus sets the value of Status.
+func (s *DomainHealthDKIMCheck) SetStatus(val DomainHealthCheckStatus) {
+	s.Status = val
+}
+
+// SetPoints sets the value of Points.
+func (s *DomainHealthDKIMCheck) SetPoints(val DomainHealthDKIMCheckPoints) {
+	s.Points = val
+}
+
+// SetMaxPoints sets the value of MaxPoints.
+func (s *DomainHealthDKIMCheck) SetMaxPoints(val int) {
+	s.MaxPoints = val
+}
+
+type DomainHealthDKIMCheckPoints int
+
+const (
+	DomainHealthDKIMCheckPoints0  DomainHealthDKIMCheckPoints = 0
+	DomainHealthDKIMCheckPoints20 DomainHealthDKIMCheckPoints = 20
+)
+
+// AllValues returns all DomainHealthDKIMCheckPoints values.
+func (DomainHealthDKIMCheckPoints) AllValues() []DomainHealthDKIMCheckPoints {
+	return []DomainHealthDKIMCheckPoints{
+		DomainHealthDKIMCheckPoints0,
+		DomainHealthDKIMCheckPoints20,
+	}
+}
+
+// Ref: #/components/schemas/DomainHealthDMARCCheck
+type DomainHealthDMARCCheck struct {
+	Verified  bool                         `json:"verified"`
+	Status    DomainHealthCheckStatus      `json:"status"`
+	Points    DomainHealthDMARCCheckPoints `json:"points"`
+	MaxPoints int                          `json:"max_points"`
+}
+
+// GetVerified returns the value of Verified.
+func (s *DomainHealthDMARCCheck) GetVerified() bool {
+	return s.Verified
+}
+
+// GetStatus returns the value of Status.
+func (s *DomainHealthDMARCCheck) GetStatus() DomainHealthCheckStatus {
+	return s.Status
+}
+
+// GetPoints returns the value of Points.
+func (s *DomainHealthDMARCCheck) GetPoints() DomainHealthDMARCCheckPoints {
+	return s.Points
+}
+
+// GetMaxPoints returns the value of MaxPoints.
+func (s *DomainHealthDMARCCheck) GetMaxPoints() int {
+	return s.MaxPoints
+}
+
+// SetVerified sets the value of Verified.
+func (s *DomainHealthDMARCCheck) SetVerified(val bool) {
+	s.Verified = val
+}
+
+// SetStatus sets the value of Status.
+func (s *DomainHealthDMARCCheck) SetStatus(val DomainHealthCheckStatus) {
+	s.Status = val
+}
+
+// SetPoints sets the value of Points.
+func (s *DomainHealthDMARCCheck) SetPoints(val DomainHealthDMARCCheckPoints) {
+	s.Points = val
+}
+
+// SetMaxPoints sets the value of MaxPoints.
+func (s *DomainHealthDMARCCheck) SetMaxPoints(val int) {
+	s.MaxPoints = val
+}
+
+type DomainHealthDMARCCheckPoints int
+
+const (
+	DomainHealthDMARCCheckPoints0  DomainHealthDMARCCheckPoints = 0
+	DomainHealthDMARCCheckPoints15 DomainHealthDMARCCheckPoints = 15
+)
+
+// AllValues returns all DomainHealthDMARCCheckPoints values.
+func (DomainHealthDMARCCheckPoints) AllValues() []DomainHealthDMARCCheckPoints {
+	return []DomainHealthDMARCCheckPoints{
+		DomainHealthDMARCCheckPoints0,
+		DomainHealthDMARCCheckPoints15,
+	}
+}
+
+// Ref: #/components/schemas/DomainHealthDeliveryRateCheck
+type DomainHealthDeliveryRateCheck struct {
+	Numerator   int64 `json:"numerator"`
+	Denominator int64 `json:"denominator"`
+	// Taxa inteira em basis points; `10000` representa 100%. `null` quando a amostra é insuficiente.
+	RateBasisPoints NilInt                  `json:"rate_basis_points"`
+	Status          DomainHealthCheckStatus `json:"status"`
+	// Pontos do check ou `null` quando a amostra é insuficiente.
+	Points    NilDomainHealthDeliveryRateCheckPoints `json:"points"`
+	MaxPoints int                                    `json:"max_points"`
+}
+
+// GetNumerator returns the value of Numerator.
+func (s *DomainHealthDeliveryRateCheck) GetNumerator() int64 {
+	return s.Numerator
+}
+
+// GetDenominator returns the value of Denominator.
+func (s *DomainHealthDeliveryRateCheck) GetDenominator() int64 {
+	return s.Denominator
+}
+
+// GetRateBasisPoints returns the value of RateBasisPoints.
+func (s *DomainHealthDeliveryRateCheck) GetRateBasisPoints() NilInt {
+	return s.RateBasisPoints
+}
+
+// GetStatus returns the value of Status.
+func (s *DomainHealthDeliveryRateCheck) GetStatus() DomainHealthCheckStatus {
+	return s.Status
+}
+
+// GetPoints returns the value of Points.
+func (s *DomainHealthDeliveryRateCheck) GetPoints() NilDomainHealthDeliveryRateCheckPoints {
+	return s.Points
+}
+
+// GetMaxPoints returns the value of MaxPoints.
+func (s *DomainHealthDeliveryRateCheck) GetMaxPoints() int {
+	return s.MaxPoints
+}
+
+// SetNumerator sets the value of Numerator.
+func (s *DomainHealthDeliveryRateCheck) SetNumerator(val int64) {
+	s.Numerator = val
+}
+
+// SetDenominator sets the value of Denominator.
+func (s *DomainHealthDeliveryRateCheck) SetDenominator(val int64) {
+	s.Denominator = val
+}
+
+// SetRateBasisPoints sets the value of RateBasisPoints.
+func (s *DomainHealthDeliveryRateCheck) SetRateBasisPoints(val NilInt) {
+	s.RateBasisPoints = val
+}
+
+// SetStatus sets the value of Status.
+func (s *DomainHealthDeliveryRateCheck) SetStatus(val DomainHealthCheckStatus) {
+	s.Status = val
+}
+
+// SetPoints sets the value of Points.
+func (s *DomainHealthDeliveryRateCheck) SetPoints(val NilDomainHealthDeliveryRateCheckPoints) {
+	s.Points = val
+}
+
+// SetMaxPoints sets the value of MaxPoints.
+func (s *DomainHealthDeliveryRateCheck) SetMaxPoints(val int) {
+	s.MaxPoints = val
+}
+
+type DomainHealthDeliveryRateCheckPoints int
+
+const (
+	DomainHealthDeliveryRateCheckPoints0  DomainHealthDeliveryRateCheckPoints = 0
+	DomainHealthDeliveryRateCheckPoints14 DomainHealthDeliveryRateCheckPoints = 14
+	DomainHealthDeliveryRateCheckPoints28 DomainHealthDeliveryRateCheckPoints = 28
+	DomainHealthDeliveryRateCheckPoints35 DomainHealthDeliveryRateCheckPoints = 35
+)
+
+// AllValues returns all DomainHealthDeliveryRateCheckPoints values.
+func (DomainHealthDeliveryRateCheckPoints) AllValues() []DomainHealthDeliveryRateCheckPoints {
+	return []DomainHealthDeliveryRateCheckPoints{
+		DomainHealthDeliveryRateCheckPoints0,
+		DomainHealthDeliveryRateCheckPoints14,
+		DomainHealthDeliveryRateCheckPoints28,
+		DomainHealthDeliveryRateCheckPoints35,
+	}
+}
+
+type DomainHealthDomainStatus string
+
+const (
+	DomainHealthDomainStatusPending  DomainHealthDomainStatus = "pending"
+	DomainHealthDomainStatusVerified DomainHealthDomainStatus = "verified"
+	DomainHealthDomainStatusFailed   DomainHealthDomainStatus = "failed"
+	DomainHealthDomainStatusDisabled DomainHealthDomainStatus = "disabled"
+)
+
+// AllValues returns all DomainHealthDomainStatus values.
+func (DomainHealthDomainStatus) AllValues() []DomainHealthDomainStatus {
+	return []DomainHealthDomainStatus{
+		DomainHealthDomainStatusPending,
+		DomainHealthDomainStatusVerified,
+		DomainHealthDomainStatusFailed,
+		DomainHealthDomainStatusDisabled,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s DomainHealthDomainStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case DomainHealthDomainStatusPending:
+		return []byte(s), nil
+	case DomainHealthDomainStatusVerified:
+		return []byte(s), nil
+	case DomainHealthDomainStatusFailed:
+		return []byte(s), nil
+	case DomainHealthDomainStatusDisabled:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *DomainHealthDomainStatus) UnmarshalText(data []byte) error {
+	switch DomainHealthDomainStatus(data) {
+	case DomainHealthDomainStatusPending:
+		*s = DomainHealthDomainStatusPending
+		return nil
+	case DomainHealthDomainStatusVerified:
+		*s = DomainHealthDomainStatusVerified
+		return nil
+	case DomainHealthDomainStatusFailed:
+		*s = DomainHealthDomainStatusFailed
+		return nil
+	case DomainHealthDomainStatusDisabled:
+		*s = DomainHealthDomainStatusDisabled
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// DomainHealthHeaders wraps DomainHealth with response headers.
+type DomainHealthHeaders struct {
+	CacheControl OptString
+	Response     DomainHealth
+}
+
+// GetCacheControl returns the value of CacheControl.
+func (s *DomainHealthHeaders) GetCacheControl() OptString {
+	return s.CacheControl
+}
+
+// GetResponse returns the value of Response.
+func (s *DomainHealthHeaders) GetResponse() DomainHealth {
+	return s.Response
+}
+
+// SetCacheControl sets the value of CacheControl.
+func (s *DomainHealthHeaders) SetCacheControl(val OptString) {
+	s.CacheControl = val
+}
+
+// SetResponse sets the value of Response.
+func (s *DomainHealthHeaders) SetResponse(val DomainHealth) {
+	s.Response = val
+}
+
+func (*DomainHealthHeaders) getDomainsIDHealthRes() {}
+
+// Ref: #/components/schemas/DomainHealthRecommendation
+type DomainHealthRecommendation struct {
+	Code     DomainHealthRecommendationCode     `json:"code"`
+	Check    DomainHealthRecommendationCheck    `json:"check"`
+	Severity DomainHealthRecommendationSeverity `json:"severity"`
+	Message  string                             `json:"message"`
+}
+
+// GetCode returns the value of Code.
+func (s *DomainHealthRecommendation) GetCode() DomainHealthRecommendationCode {
+	return s.Code
+}
+
+// GetCheck returns the value of Check.
+func (s *DomainHealthRecommendation) GetCheck() DomainHealthRecommendationCheck {
+	return s.Check
+}
+
+// GetSeverity returns the value of Severity.
+func (s *DomainHealthRecommendation) GetSeverity() DomainHealthRecommendationSeverity {
+	return s.Severity
+}
+
+// GetMessage returns the value of Message.
+func (s *DomainHealthRecommendation) GetMessage() string {
+	return s.Message
+}
+
+// SetCode sets the value of Code.
+func (s *DomainHealthRecommendation) SetCode(val DomainHealthRecommendationCode) {
+	s.Code = val
+}
+
+// SetCheck sets the value of Check.
+func (s *DomainHealthRecommendation) SetCheck(val DomainHealthRecommendationCheck) {
+	s.Check = val
+}
+
+// SetSeverity sets the value of Severity.
+func (s *DomainHealthRecommendation) SetSeverity(val DomainHealthRecommendationSeverity) {
+	s.Severity = val
+}
+
+// SetMessage sets the value of Message.
+func (s *DomainHealthRecommendation) SetMessage(val string) {
+	s.Message = val
+}
+
+type DomainHealthRecommendationCheck string
+
+const (
+	DomainHealthRecommendationCheckSpf          DomainHealthRecommendationCheck = "spf"
+	DomainHealthRecommendationCheckDkim         DomainHealthRecommendationCheck = "dkim"
+	DomainHealthRecommendationCheckDmarc        DomainHealthRecommendationCheck = "dmarc"
+	DomainHealthRecommendationCheckDeliveryRate DomainHealthRecommendationCheck = "delivery_rate"
+	DomainHealthRecommendationCheckBounceRate   DomainHealthRecommendationCheck = "bounce_rate"
+)
+
+// AllValues returns all DomainHealthRecommendationCheck values.
+func (DomainHealthRecommendationCheck) AllValues() []DomainHealthRecommendationCheck {
+	return []DomainHealthRecommendationCheck{
+		DomainHealthRecommendationCheckSpf,
+		DomainHealthRecommendationCheckDkim,
+		DomainHealthRecommendationCheckDmarc,
+		DomainHealthRecommendationCheckDeliveryRate,
+		DomainHealthRecommendationCheckBounceRate,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s DomainHealthRecommendationCheck) MarshalText() ([]byte, error) {
+	switch s {
+	case DomainHealthRecommendationCheckSpf:
+		return []byte(s), nil
+	case DomainHealthRecommendationCheckDkim:
+		return []byte(s), nil
+	case DomainHealthRecommendationCheckDmarc:
+		return []byte(s), nil
+	case DomainHealthRecommendationCheckDeliveryRate:
+		return []byte(s), nil
+	case DomainHealthRecommendationCheckBounceRate:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *DomainHealthRecommendationCheck) UnmarshalText(data []byte) error {
+	switch DomainHealthRecommendationCheck(data) {
+	case DomainHealthRecommendationCheckSpf:
+		*s = DomainHealthRecommendationCheckSpf
+		return nil
+	case DomainHealthRecommendationCheckDkim:
+		*s = DomainHealthRecommendationCheckDkim
+		return nil
+	case DomainHealthRecommendationCheckDmarc:
+		*s = DomainHealthRecommendationCheckDmarc
+		return nil
+	case DomainHealthRecommendationCheckDeliveryRate:
+		*s = DomainHealthRecommendationCheckDeliveryRate
+		return nil
+	case DomainHealthRecommendationCheckBounceRate:
+		*s = DomainHealthRecommendationCheckBounceRate
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/DomainHealthRecommendationCode
+type DomainHealthRecommendationCode string
+
+const (
+	DomainHealthRecommendationCodeVerifySpf                DomainHealthRecommendationCode = "verify_spf"
+	DomainHealthRecommendationCodeVerifyDkim               DomainHealthRecommendationCode = "verify_dkim"
+	DomainHealthRecommendationCodeVerifyDmarc              DomainHealthRecommendationCode = "verify_dmarc"
+	DomainHealthRecommendationCodeImproveDeliveryRate      DomainHealthRecommendationCode = "improve_delivery_rate"
+	DomainHealthRecommendationCodeReduceBounceRate         DomainHealthRecommendationCode = "reduce_bounce_rate"
+	DomainHealthRecommendationCodeInsufficientDeliveryData DomainHealthRecommendationCode = "insufficient_delivery_data"
+)
+
+// AllValues returns all DomainHealthRecommendationCode values.
+func (DomainHealthRecommendationCode) AllValues() []DomainHealthRecommendationCode {
+	return []DomainHealthRecommendationCode{
+		DomainHealthRecommendationCodeVerifySpf,
+		DomainHealthRecommendationCodeVerifyDkim,
+		DomainHealthRecommendationCodeVerifyDmarc,
+		DomainHealthRecommendationCodeImproveDeliveryRate,
+		DomainHealthRecommendationCodeReduceBounceRate,
+		DomainHealthRecommendationCodeInsufficientDeliveryData,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s DomainHealthRecommendationCode) MarshalText() ([]byte, error) {
+	switch s {
+	case DomainHealthRecommendationCodeVerifySpf:
+		return []byte(s), nil
+	case DomainHealthRecommendationCodeVerifyDkim:
+		return []byte(s), nil
+	case DomainHealthRecommendationCodeVerifyDmarc:
+		return []byte(s), nil
+	case DomainHealthRecommendationCodeImproveDeliveryRate:
+		return []byte(s), nil
+	case DomainHealthRecommendationCodeReduceBounceRate:
+		return []byte(s), nil
+	case DomainHealthRecommendationCodeInsufficientDeliveryData:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *DomainHealthRecommendationCode) UnmarshalText(data []byte) error {
+	switch DomainHealthRecommendationCode(data) {
+	case DomainHealthRecommendationCodeVerifySpf:
+		*s = DomainHealthRecommendationCodeVerifySpf
+		return nil
+	case DomainHealthRecommendationCodeVerifyDkim:
+		*s = DomainHealthRecommendationCodeVerifyDkim
+		return nil
+	case DomainHealthRecommendationCodeVerifyDmarc:
+		*s = DomainHealthRecommendationCodeVerifyDmarc
+		return nil
+	case DomainHealthRecommendationCodeImproveDeliveryRate:
+		*s = DomainHealthRecommendationCodeImproveDeliveryRate
+		return nil
+	case DomainHealthRecommendationCodeReduceBounceRate:
+		*s = DomainHealthRecommendationCodeReduceBounceRate
+		return nil
+	case DomainHealthRecommendationCodeInsufficientDeliveryData:
+		*s = DomainHealthRecommendationCodeInsufficientDeliveryData
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/DomainHealthRecommendationSeverity
+type DomainHealthRecommendationSeverity string
+
+const (
+	DomainHealthRecommendationSeverityInfo     DomainHealthRecommendationSeverity = "info"
+	DomainHealthRecommendationSeverityWarning  DomainHealthRecommendationSeverity = "warning"
+	DomainHealthRecommendationSeverityCritical DomainHealthRecommendationSeverity = "critical"
+)
+
+// AllValues returns all DomainHealthRecommendationSeverity values.
+func (DomainHealthRecommendationSeverity) AllValues() []DomainHealthRecommendationSeverity {
+	return []DomainHealthRecommendationSeverity{
+		DomainHealthRecommendationSeverityInfo,
+		DomainHealthRecommendationSeverityWarning,
+		DomainHealthRecommendationSeverityCritical,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s DomainHealthRecommendationSeverity) MarshalText() ([]byte, error) {
+	switch s {
+	case DomainHealthRecommendationSeverityInfo:
+		return []byte(s), nil
+	case DomainHealthRecommendationSeverityWarning:
+		return []byte(s), nil
+	case DomainHealthRecommendationSeverityCritical:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *DomainHealthRecommendationSeverity) UnmarshalText(data []byte) error {
+	switch DomainHealthRecommendationSeverity(data) {
+	case DomainHealthRecommendationSeverityInfo:
+		*s = DomainHealthRecommendationSeverityInfo
+		return nil
+	case DomainHealthRecommendationSeverityWarning:
+		*s = DomainHealthRecommendationSeverityWarning
+		return nil
+	case DomainHealthRecommendationSeverityCritical:
+		*s = DomainHealthRecommendationSeverityCritical
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/DomainHealthSPFCheck
+type DomainHealthSPFCheck struct {
+	Verified  bool                       `json:"verified"`
+	Status    DomainHealthCheckStatus    `json:"status"`
+	Points    DomainHealthSPFCheckPoints `json:"points"`
+	MaxPoints int                        `json:"max_points"`
+}
+
+// GetVerified returns the value of Verified.
+func (s *DomainHealthSPFCheck) GetVerified() bool {
+	return s.Verified
+}
+
+// GetStatus returns the value of Status.
+func (s *DomainHealthSPFCheck) GetStatus() DomainHealthCheckStatus {
+	return s.Status
+}
+
+// GetPoints returns the value of Points.
+func (s *DomainHealthSPFCheck) GetPoints() DomainHealthSPFCheckPoints {
+	return s.Points
+}
+
+// GetMaxPoints returns the value of MaxPoints.
+func (s *DomainHealthSPFCheck) GetMaxPoints() int {
+	return s.MaxPoints
+}
+
+// SetVerified sets the value of Verified.
+func (s *DomainHealthSPFCheck) SetVerified(val bool) {
+	s.Verified = val
+}
+
+// SetStatus sets the value of Status.
+func (s *DomainHealthSPFCheck) SetStatus(val DomainHealthCheckStatus) {
+	s.Status = val
+}
+
+// SetPoints sets the value of Points.
+func (s *DomainHealthSPFCheck) SetPoints(val DomainHealthSPFCheckPoints) {
+	s.Points = val
+}
+
+// SetMaxPoints sets the value of MaxPoints.
+func (s *DomainHealthSPFCheck) SetMaxPoints(val int) {
+	s.MaxPoints = val
+}
+
+type DomainHealthSPFCheckPoints int
+
+const (
+	DomainHealthSPFCheckPoints0  DomainHealthSPFCheckPoints = 0
+	DomainHealthSPFCheckPoints10 DomainHealthSPFCheckPoints = 10
+)
+
+// AllValues returns all DomainHealthSPFCheckPoints values.
+func (DomainHealthSPFCheckPoints) AllValues() []DomainHealthSPFCheckPoints {
+	return []DomainHealthSPFCheckPoints{
+		DomainHealthSPFCheckPoints0,
+		DomainHealthSPFCheckPoints10,
+	}
+}
+
+// Ref: #/components/schemas/DomainHealthStatus
+type DomainHealthStatus string
+
+const (
+	DomainHealthStatusSetupRequired    DomainHealthStatus = "setup_required"
+	DomainHealthStatusInsufficientData DomainHealthStatus = "insufficient_data"
+	DomainHealthStatusHealthy          DomainHealthStatus = "healthy"
+	DomainHealthStatusNeedsAttention   DomainHealthStatus = "needs_attention"
+	DomainHealthStatusCritical         DomainHealthStatus = "critical"
+	DomainHealthStatusDisabled         DomainHealthStatus = "disabled"
+)
+
+// AllValues returns all DomainHealthStatus values.
+func (DomainHealthStatus) AllValues() []DomainHealthStatus {
+	return []DomainHealthStatus{
+		DomainHealthStatusSetupRequired,
+		DomainHealthStatusInsufficientData,
+		DomainHealthStatusHealthy,
+		DomainHealthStatusNeedsAttention,
+		DomainHealthStatusCritical,
+		DomainHealthStatusDisabled,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s DomainHealthStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case DomainHealthStatusSetupRequired:
+		return []byte(s), nil
+	case DomainHealthStatusInsufficientData:
+		return []byte(s), nil
+	case DomainHealthStatusHealthy:
+		return []byte(s), nil
+	case DomainHealthStatusNeedsAttention:
+		return []byte(s), nil
+	case DomainHealthStatusCritical:
+		return []byte(s), nil
+	case DomainHealthStatusDisabled:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *DomainHealthStatus) UnmarshalText(data []byte) error {
+	switch DomainHealthStatus(data) {
+	case DomainHealthStatusSetupRequired:
+		*s = DomainHealthStatusSetupRequired
+		return nil
+	case DomainHealthStatusInsufficientData:
+		*s = DomainHealthStatusInsufficientData
+		return nil
+	case DomainHealthStatusHealthy:
+		*s = DomainHealthStatusHealthy
+		return nil
+	case DomainHealthStatusNeedsAttention:
+		*s = DomainHealthStatusNeedsAttention
+		return nil
+	case DomainHealthStatusCritical:
+		*s = DomainHealthStatusCritical
+		return nil
+	case DomainHealthStatusDisabled:
+		*s = DomainHealthStatusDisabled
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/DomainHealthWindow
+type DomainHealthWindow struct {
+	Start Timestamp `json:"start"`
+	End   Timestamp `json:"end"`
+	Days  int       `json:"days"`
+}
+
+// GetStart returns the value of Start.
+func (s *DomainHealthWindow) GetStart() Timestamp {
+	return s.Start
+}
+
+// GetEnd returns the value of End.
+func (s *DomainHealthWindow) GetEnd() Timestamp {
+	return s.End
+}
+
+// GetDays returns the value of Days.
+func (s *DomainHealthWindow) GetDays() int {
+	return s.Days
+}
+
+// SetStart sets the value of Start.
+func (s *DomainHealthWindow) SetStart(val Timestamp) {
+	s.Start = val
+}
+
+// SetEnd sets the value of End.
+func (s *DomainHealthWindow) SetEnd(val Timestamp) {
+	s.End = val
+}
+
+// SetDays sets the value of Days.
+func (s *DomainHealthWindow) SetDays(val int) {
+	s.Days = val
+}
+
 // Ref: #/components/schemas/DomainList
 type DomainList struct {
 	Domains []Domain `json:"domains"`
@@ -2183,6 +3505,60 @@ func (s *DomainStatus) UnmarshalText(data []byte) error {
 	default:
 		return errors.Errorf("invalid value: %q", data)
 	}
+}
+
+// Ref: #/components/schemas/DynamicSegmentMembershipError
+type DynamicSegmentMembershipError struct {
+	Error DynamicSegmentMembershipErrorError `json:"error"`
+}
+
+// GetError returns the value of Error.
+func (s *DynamicSegmentMembershipError) GetError() DynamicSegmentMembershipErrorError {
+	return s.Error
+}
+
+// SetError sets the value of Error.
+func (s *DynamicSegmentMembershipError) SetError(val DynamicSegmentMembershipErrorError) {
+	s.Error = val
+}
+
+func (*DynamicSegmentMembershipError) deleteSegmentsIDContactsContactIDRes() {}
+func (*DynamicSegmentMembershipError) postSegmentsIDContactsRes()            {}
+
+type DynamicSegmentMembershipErrorError struct {
+	Code      string `json:"code"`
+	Message   string `json:"message"`
+	RequestID string `json:"request_id"`
+}
+
+// GetCode returns the value of Code.
+func (s *DynamicSegmentMembershipErrorError) GetCode() string {
+	return s.Code
+}
+
+// GetMessage returns the value of Message.
+func (s *DynamicSegmentMembershipErrorError) GetMessage() string {
+	return s.Message
+}
+
+// GetRequestID returns the value of RequestID.
+func (s *DynamicSegmentMembershipErrorError) GetRequestID() string {
+	return s.RequestID
+}
+
+// SetCode sets the value of Code.
+func (s *DynamicSegmentMembershipErrorError) SetCode(val string) {
+	s.Code = val
+}
+
+// SetMessage sets the value of Message.
+func (s *DynamicSegmentMembershipErrorError) SetMessage(val string) {
+	s.Message = val
+}
+
+// SetRequestID sets the value of RequestID.
+func (s *DynamicSegmentMembershipErrorError) SetRequestID(val string) {
+	s.RequestID = val
 }
 
 // Ref: #/components/schemas/EmailTemplate
@@ -2513,11 +3889,18 @@ func (s *Error) SetError(val ErrorDetail) {
 	s.Error = val
 }
 
+func (*Error) getDomainTrackingDomainRes()        {}
+func (*Error) getDomainTrackingDomainsRes()       {}
+func (*Error) postDomainTrackingDomainRevokeRes() {}
+func (*Error) postDomainTrackingDomainVerifyRes() {}
+
 // Ref: #/components/schemas/ErrorDetail
 type ErrorDetail struct {
 	Code      string    `json:"code"`
 	Message   string    `json:"message"`
 	RequestID OptString `json:"request_id"`
+	// Detalhes aditivos de validação, sem valores enviados pelo cliente.
+	Details []ValidationDetail `json:"details"`
 }
 
 // GetCode returns the value of Code.
@@ -2535,6 +3918,11 @@ func (s *ErrorDetail) GetRequestID() OptString {
 	return s.RequestID
 }
 
+// GetDetails returns the value of Details.
+func (s *ErrorDetail) GetDetails() []ValidationDetail {
+	return s.Details
+}
+
 // SetCode sets the value of Code.
 func (s *ErrorDetail) SetCode(val string) {
 	s.Code = val
@@ -2548,6 +3936,11 @@ func (s *ErrorDetail) SetMessage(val string) {
 // SetRequestID sets the value of RequestID.
 func (s *ErrorDetail) SetRequestID(val OptString) {
 	s.RequestID = val
+}
+
+// SetDetails sets the value of Details.
+func (s *ErrorDetail) SetDetails(val []ValidationDetail) {
+	s.Details = val
 }
 
 type GetAutomationsBadRequest Error
@@ -2753,10 +4146,6 @@ type GetContactsBadRequest Error
 
 func (*GetContactsBadRequest) getContactsRes() {}
 
-type GetContactsConflict Error
-
-func (*GetContactsConflict) getContactsRes() {}
-
 type GetContactsForbidden Error
 
 func (*GetContactsForbidden) getContactsRes() {}
@@ -2764,10 +4153,6 @@ func (*GetContactsForbidden) getContactsRes() {}
 type GetContactsIDBadRequest Error
 
 func (*GetContactsIDBadRequest) getContactsIDRes() {}
-
-type GetContactsIDConflict Error
-
-func (*GetContactsIDConflict) getContactsIDRes() {}
 
 type GetContactsIDForbidden Error
 
@@ -2788,10 +4173,6 @@ func (*GetContactsIDUnauthorized) getContactsIDRes() {}
 type GetContactsInternalServerError Error
 
 func (*GetContactsInternalServerError) getContactsRes() {}
-
-type GetContactsNotFound Error
-
-func (*GetContactsNotFound) getContactsRes() {}
 
 type GetContactsUnauthorized Error
 
@@ -2844,6 +4225,54 @@ func (*GetDomainsIDDNSUnauthorized) getDomainsIDDNSRes() {}
 type GetDomainsIDForbidden Error
 
 func (*GetDomainsIDForbidden) getDomainsIDRes() {}
+
+type GetDomainsIDHealthBadRequest Error
+
+func (*GetDomainsIDHealthBadRequest) getDomainsIDHealthRes() {}
+
+type GetDomainsIDHealthConflict Error
+
+func (*GetDomainsIDHealthConflict) getDomainsIDHealthRes() {}
+
+type GetDomainsIDHealthForbidden Error
+
+func (*GetDomainsIDHealthForbidden) getDomainsIDHealthRes() {}
+
+type GetDomainsIDHealthInternalServerError Error
+
+func (*GetDomainsIDHealthInternalServerError) getDomainsIDHealthRes() {}
+
+type GetDomainsIDHealthNotFound Error
+
+func (*GetDomainsIDHealthNotFound) getDomainsIDHealthRes() {}
+
+type GetDomainsIDHealthUnauthorized Error
+
+func (*GetDomainsIDHealthUnauthorized) getDomainsIDHealthRes() {}
+
+type GetDomainsIDInboundBadRequest Error
+
+func (*GetDomainsIDInboundBadRequest) getDomainsIDInboundRes() {}
+
+type GetDomainsIDInboundConflict Error
+
+func (*GetDomainsIDInboundConflict) getDomainsIDInboundRes() {}
+
+type GetDomainsIDInboundForbidden Error
+
+func (*GetDomainsIDInboundForbidden) getDomainsIDInboundRes() {}
+
+type GetDomainsIDInboundInternalServerError Error
+
+func (*GetDomainsIDInboundInternalServerError) getDomainsIDInboundRes() {}
+
+type GetDomainsIDInboundNotFound Error
+
+func (*GetDomainsIDInboundNotFound) getDomainsIDInboundRes() {}
+
+type GetDomainsIDInboundUnauthorized Error
+
+func (*GetDomainsIDInboundUnauthorized) getDomainsIDInboundRes() {}
 
 type GetDomainsIDInternalServerError Error
 
@@ -3154,6 +4583,77 @@ type GetMessagesEngagementUnauthorized Error
 
 func (*GetMessagesEngagementUnauthorized) getMessagesEngagementRes() {}
 
+type GetMessagesEventsBadRequest Error
+
+func (*GetMessagesEventsBadRequest) getMessagesEventsRes() {}
+
+type GetMessagesEventsForbidden Error
+
+func (*GetMessagesEventsForbidden) getMessagesEventsRes() {}
+
+type GetMessagesEventsInternalServerError Error
+
+func (*GetMessagesEventsInternalServerError) getMessagesEventsRes() {}
+
+type GetMessagesEventsPeriod string
+
+const (
+	GetMessagesEventsPeriod24h GetMessagesEventsPeriod = "24h"
+	GetMessagesEventsPeriod7d  GetMessagesEventsPeriod = "7d"
+	GetMessagesEventsPeriod14d GetMessagesEventsPeriod = "14d"
+	GetMessagesEventsPeriod30d GetMessagesEventsPeriod = "30d"
+)
+
+// AllValues returns all GetMessagesEventsPeriod values.
+func (GetMessagesEventsPeriod) AllValues() []GetMessagesEventsPeriod {
+	return []GetMessagesEventsPeriod{
+		GetMessagesEventsPeriod24h,
+		GetMessagesEventsPeriod7d,
+		GetMessagesEventsPeriod14d,
+		GetMessagesEventsPeriod30d,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s GetMessagesEventsPeriod) MarshalText() ([]byte, error) {
+	switch s {
+	case GetMessagesEventsPeriod24h:
+		return []byte(s), nil
+	case GetMessagesEventsPeriod7d:
+		return []byte(s), nil
+	case GetMessagesEventsPeriod14d:
+		return []byte(s), nil
+	case GetMessagesEventsPeriod30d:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *GetMessagesEventsPeriod) UnmarshalText(data []byte) error {
+	switch GetMessagesEventsPeriod(data) {
+	case GetMessagesEventsPeriod24h:
+		*s = GetMessagesEventsPeriod24h
+		return nil
+	case GetMessagesEventsPeriod7d:
+		*s = GetMessagesEventsPeriod7d
+		return nil
+	case GetMessagesEventsPeriod14d:
+		*s = GetMessagesEventsPeriod14d
+		return nil
+	case GetMessagesEventsPeriod30d:
+		*s = GetMessagesEventsPeriod30d
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type GetMessagesEventsUnauthorized Error
+
+func (*GetMessagesEventsUnauthorized) getMessagesEventsRes() {}
+
 type GetMessagesForbidden Error
 
 func (*GetMessagesForbidden) getMessagesRes() {}
@@ -3422,10 +4922,6 @@ type GetSegmentsBadRequest Error
 
 func (*GetSegmentsBadRequest) getSegmentsRes() {}
 
-type GetSegmentsConflict Error
-
-func (*GetSegmentsConflict) getSegmentsRes() {}
-
 type GetSegmentsForbidden Error
 
 func (*GetSegmentsForbidden) getSegmentsRes() {}
@@ -3434,17 +4930,9 @@ type GetSegmentsIDBadRequest Error
 
 func (*GetSegmentsIDBadRequest) getSegmentsIDRes() {}
 
-type GetSegmentsIDConflict Error
-
-func (*GetSegmentsIDConflict) getSegmentsIDRes() {}
-
 type GetSegmentsIDContactsBadRequest Error
 
 func (*GetSegmentsIDContactsBadRequest) getSegmentsIDContactsRes() {}
-
-type GetSegmentsIDContactsConflict Error
-
-func (*GetSegmentsIDContactsConflict) getSegmentsIDContactsRes() {}
 
 type GetSegmentsIDContactsForbidden Error
 
@@ -3481,10 +4969,6 @@ func (*GetSegmentsIDUnauthorized) getSegmentsIDRes() {}
 type GetSegmentsInternalServerError Error
 
 func (*GetSegmentsInternalServerError) getSegmentsRes() {}
-
-type GetSegmentsNotFound Error
-
-func (*GetSegmentsNotFound) getSegmentsRes() {}
 
 type GetSegmentsUnauthorized Error
 
@@ -4000,6 +5484,172 @@ func (s *InboundAttachment) SetDownloadURL(val OptURI) {
 	s.DownloadURL = val
 }
 
+// Ref: #/components/schemas/InboundDomainConfiguration
+type InboundDomainConfiguration struct {
+	// Domínio usado após o `@` em qualquer endereço recebido.
+	RecipientDomain string                           `json:"recipient_domain"`
+	Status          InboundDomainConfigurationStatus `json:"status"`
+	Mx              InboundMXConfiguration           `json:"mx"`
+}
+
+// GetRecipientDomain returns the value of RecipientDomain.
+func (s *InboundDomainConfiguration) GetRecipientDomain() string {
+	return s.RecipientDomain
+}
+
+// GetStatus returns the value of Status.
+func (s *InboundDomainConfiguration) GetStatus() InboundDomainConfigurationStatus {
+	return s.Status
+}
+
+// GetMx returns the value of Mx.
+func (s *InboundDomainConfiguration) GetMx() InboundMXConfiguration {
+	return s.Mx
+}
+
+// SetRecipientDomain sets the value of RecipientDomain.
+func (s *InboundDomainConfiguration) SetRecipientDomain(val string) {
+	s.RecipientDomain = val
+}
+
+// SetStatus sets the value of Status.
+func (s *InboundDomainConfiguration) SetStatus(val InboundDomainConfigurationStatus) {
+	s.Status = val
+}
+
+// SetMx sets the value of Mx.
+func (s *InboundDomainConfiguration) SetMx(val InboundMXConfiguration) {
+	s.Mx = val
+}
+
+func (*InboundDomainConfiguration) getDomainsIDInboundRes() {}
+
+type InboundDomainConfigurationStatus string
+
+const (
+	InboundDomainConfigurationStatusReady                      InboundDomainConfigurationStatus = "ready"
+	InboundDomainConfigurationStatusAwaitingDomainVerification InboundDomainConfigurationStatus = "awaiting_domain_verification"
+)
+
+// AllValues returns all InboundDomainConfigurationStatus values.
+func (InboundDomainConfigurationStatus) AllValues() []InboundDomainConfigurationStatus {
+	return []InboundDomainConfigurationStatus{
+		InboundDomainConfigurationStatusReady,
+		InboundDomainConfigurationStatusAwaitingDomainVerification,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s InboundDomainConfigurationStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case InboundDomainConfigurationStatusReady:
+		return []byte(s), nil
+	case InboundDomainConfigurationStatusAwaitingDomainVerification:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *InboundDomainConfigurationStatus) UnmarshalText(data []byte) error {
+	switch InboundDomainConfigurationStatus(data) {
+	case InboundDomainConfigurationStatusReady:
+		*s = InboundDomainConfigurationStatusReady
+		return nil
+	case InboundDomainConfigurationStatusAwaitingDomainVerification:
+		*s = InboundDomainConfigurationStatusAwaitingDomainVerification
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/InboundMXConfiguration
+type InboundMXConfiguration struct {
+	Host     string                       `json:"host"`
+	Priority int                          `json:"priority"`
+	Status   InboundMXConfigurationStatus `json:"status"`
+}
+
+// GetHost returns the value of Host.
+func (s *InboundMXConfiguration) GetHost() string {
+	return s.Host
+}
+
+// GetPriority returns the value of Priority.
+func (s *InboundMXConfiguration) GetPriority() int {
+	return s.Priority
+}
+
+// GetStatus returns the value of Status.
+func (s *InboundMXConfiguration) GetStatus() InboundMXConfigurationStatus {
+	return s.Status
+}
+
+// SetHost sets the value of Host.
+func (s *InboundMXConfiguration) SetHost(val string) {
+	s.Host = val
+}
+
+// SetPriority sets the value of Priority.
+func (s *InboundMXConfiguration) SetPriority(val int) {
+	s.Priority = val
+}
+
+// SetStatus sets the value of Status.
+func (s *InboundMXConfiguration) SetStatus(val InboundMXConfigurationStatus) {
+	s.Status = val
+}
+
+type InboundMXConfigurationStatus string
+
+const (
+	InboundMXConfigurationStatusConfigured    InboundMXConfigurationStatus = "configured"
+	InboundMXConfigurationStatusNotConfigured InboundMXConfigurationStatus = "not_configured"
+	InboundMXConfigurationStatusUnavailable   InboundMXConfigurationStatus = "unavailable"
+)
+
+// AllValues returns all InboundMXConfigurationStatus values.
+func (InboundMXConfigurationStatus) AllValues() []InboundMXConfigurationStatus {
+	return []InboundMXConfigurationStatus{
+		InboundMXConfigurationStatusConfigured,
+		InboundMXConfigurationStatusNotConfigured,
+		InboundMXConfigurationStatusUnavailable,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s InboundMXConfigurationStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case InboundMXConfigurationStatusConfigured:
+		return []byte(s), nil
+	case InboundMXConfigurationStatusNotConfigured:
+		return []byte(s), nil
+	case InboundMXConfigurationStatusUnavailable:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *InboundMXConfigurationStatus) UnmarshalText(data []byte) error {
+	switch InboundMXConfigurationStatus(data) {
+	case InboundMXConfigurationStatusConfigured:
+		*s = InboundMXConfigurationStatusConfigured
+		return nil
+	case InboundMXConfigurationStatusNotConfigured:
+		*s = InboundMXConfigurationStatusNotConfigured
+		return nil
+	case InboundMXConfigurationStatusUnavailable:
+		*s = InboundMXConfigurationStatusUnavailable
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Ref: #/components/schemas/InboundMessage
 type InboundMessage struct {
 	ID               UUID      `json:"id"`
@@ -4474,22 +6124,25 @@ func (*InboundMessageList) getInboundMessagesRes() {}
 
 // Ref: #/components/schemas/Message
 type Message struct {
-	ID              UUID          `json:"id"`
-	Status          string        `json:"status"`
-	Stream          MessageStream `json:"stream"`
-	FromAddress     string        `json:"from_address"`
-	ToAddress       string        `json:"to_address"`
-	Subject         OptNilString  `json:"subject"`
-	RecipientDomain string        `json:"recipient_domain"`
-	APIKeyID        OptString     `json:"api_key_id"`
-	CreatedAt       Timestamp     `json:"created_at"`
-	QueuedAt        OptTimestamp  `json:"queued_at"`
-	SentAt          OptTimestamp  `json:"sent_at"`
-	DeliveredAt     OptTimestamp  `json:"delivered_at"`
-	FailedAt        OptTimestamp  `json:"failed_at"`
-	FirstOpenedAt   OptTimestamp  `json:"first_opened_at"`
-	FirstClickedAt  OptTimestamp  `json:"first_clicked_at"`
-	LastError       OptNilString  `json:"last_error"`
+	ID              UUID            `json:"id"`
+	Status          MessageStatus   `json:"status"`
+	Stream          MessageStream   `json:"stream"`
+	FromAddress     string          `json:"from_address"`
+	ToAddress       string          `json:"to_address"`
+	Subject         OptNilString    `json:"subject"`
+	RecipientDomain string          `json:"recipient_domain"`
+	APIKeyID        OptString       `json:"api_key_id"`
+	CreatedAt       Timestamp       `json:"created_at"`
+	ScheduledAt     OptNilTimestamp `json:"scheduled_at"`
+	CancelledAt     OptNilTimestamp `json:"cancelled_at"`
+	QueuedAt        OptTimestamp    `json:"queued_at"`
+	SentAt          OptTimestamp    `json:"sent_at"`
+	DeliveredAt     OptTimestamp    `json:"delivered_at"`
+	FailedAt        OptTimestamp    `json:"failed_at"`
+	SuppressedAt    OptTimestamp    `json:"suppressed_at"`
+	FirstOpenedAt   OptTimestamp    `json:"first_opened_at"`
+	FirstClickedAt  OptTimestamp    `json:"first_clicked_at"`
+	LastError       OptNilString    `json:"last_error"`
 }
 
 // GetID returns the value of ID.
@@ -4498,7 +6151,7 @@ func (s *Message) GetID() UUID {
 }
 
 // GetStatus returns the value of Status.
-func (s *Message) GetStatus() string {
+func (s *Message) GetStatus() MessageStatus {
 	return s.Status
 }
 
@@ -4537,6 +6190,16 @@ func (s *Message) GetCreatedAt() Timestamp {
 	return s.CreatedAt
 }
 
+// GetScheduledAt returns the value of ScheduledAt.
+func (s *Message) GetScheduledAt() OptNilTimestamp {
+	return s.ScheduledAt
+}
+
+// GetCancelledAt returns the value of CancelledAt.
+func (s *Message) GetCancelledAt() OptNilTimestamp {
+	return s.CancelledAt
+}
+
 // GetQueuedAt returns the value of QueuedAt.
 func (s *Message) GetQueuedAt() OptTimestamp {
 	return s.QueuedAt
@@ -4555,6 +6218,11 @@ func (s *Message) GetDeliveredAt() OptTimestamp {
 // GetFailedAt returns the value of FailedAt.
 func (s *Message) GetFailedAt() OptTimestamp {
 	return s.FailedAt
+}
+
+// GetSuppressedAt returns the value of SuppressedAt.
+func (s *Message) GetSuppressedAt() OptTimestamp {
+	return s.SuppressedAt
 }
 
 // GetFirstOpenedAt returns the value of FirstOpenedAt.
@@ -4578,7 +6246,7 @@ func (s *Message) SetID(val UUID) {
 }
 
 // SetStatus sets the value of Status.
-func (s *Message) SetStatus(val string) {
+func (s *Message) SetStatus(val MessageStatus) {
 	s.Status = val
 }
 
@@ -4617,6 +6285,16 @@ func (s *Message) SetCreatedAt(val Timestamp) {
 	s.CreatedAt = val
 }
 
+// SetScheduledAt sets the value of ScheduledAt.
+func (s *Message) SetScheduledAt(val OptNilTimestamp) {
+	s.ScheduledAt = val
+}
+
+// SetCancelledAt sets the value of CancelledAt.
+func (s *Message) SetCancelledAt(val OptNilTimestamp) {
+	s.CancelledAt = val
+}
+
 // SetQueuedAt sets the value of QueuedAt.
 func (s *Message) SetQueuedAt(val OptTimestamp) {
 	s.QueuedAt = val
@@ -4637,6 +6315,11 @@ func (s *Message) SetFailedAt(val OptTimestamp) {
 	s.FailedAt = val
 }
 
+// SetSuppressedAt sets the value of SuppressedAt.
+func (s *Message) SetSuppressedAt(val OptTimestamp) {
+	s.SuppressedAt = val
+}
+
 // SetFirstOpenedAt sets the value of FirstOpenedAt.
 func (s *Message) SetFirstOpenedAt(val OptTimestamp) {
 	s.FirstOpenedAt = val
@@ -4652,11 +6335,13 @@ func (s *Message) SetLastError(val OptNilString) {
 	s.LastError = val
 }
 
+func (*Message) postMessagesIDCancelRes() {}
+
 // Merged schema.
 // Ref: #/components/schemas/MessageDetail
 type MessageDetail struct {
 	ID              UUID                `json:"id"`
-	Status          string              `json:"status"`
+	Status          MessageDetailStatus `json:"status"`
 	Stream          MessageDetailStream `json:"stream"`
 	FromAddress     string              `json:"from_address"`
 	ToAddress       string              `json:"to_address"`
@@ -4664,10 +6349,13 @@ type MessageDetail struct {
 	RecipientDomain string              `json:"recipient_domain"`
 	APIKeyID        OptString           `json:"api_key_id"`
 	CreatedAt       Timestamp           `json:"created_at"`
+	ScheduledAt     OptNilTimestamp     `json:"scheduled_at"`
+	CancelledAt     OptNilTimestamp     `json:"cancelled_at"`
 	QueuedAt        OptTimestamp        `json:"queued_at"`
 	SentAt          OptTimestamp        `json:"sent_at"`
 	DeliveredAt     OptTimestamp        `json:"delivered_at"`
 	FailedAt        OptTimestamp        `json:"failed_at"`
+	SuppressedAt    OptTimestamp        `json:"suppressed_at"`
 	FirstOpenedAt   OptTimestamp        `json:"first_opened_at"`
 	FirstClickedAt  OptTimestamp        `json:"first_clicked_at"`
 	LastError       OptNilString        `json:"last_error"`
@@ -4691,7 +6379,7 @@ func (s *MessageDetail) GetID() UUID {
 }
 
 // GetStatus returns the value of Status.
-func (s *MessageDetail) GetStatus() string {
+func (s *MessageDetail) GetStatus() MessageDetailStatus {
 	return s.Status
 }
 
@@ -4730,6 +6418,16 @@ func (s *MessageDetail) GetCreatedAt() Timestamp {
 	return s.CreatedAt
 }
 
+// GetScheduledAt returns the value of ScheduledAt.
+func (s *MessageDetail) GetScheduledAt() OptNilTimestamp {
+	return s.ScheduledAt
+}
+
+// GetCancelledAt returns the value of CancelledAt.
+func (s *MessageDetail) GetCancelledAt() OptNilTimestamp {
+	return s.CancelledAt
+}
+
 // GetQueuedAt returns the value of QueuedAt.
 func (s *MessageDetail) GetQueuedAt() OptTimestamp {
 	return s.QueuedAt
@@ -4748,6 +6446,11 @@ func (s *MessageDetail) GetDeliveredAt() OptTimestamp {
 // GetFailedAt returns the value of FailedAt.
 func (s *MessageDetail) GetFailedAt() OptTimestamp {
 	return s.FailedAt
+}
+
+// GetSuppressedAt returns the value of SuppressedAt.
+func (s *MessageDetail) GetSuppressedAt() OptTimestamp {
+	return s.SuppressedAt
 }
 
 // GetFirstOpenedAt returns the value of FirstOpenedAt.
@@ -4796,7 +6499,7 @@ func (s *MessageDetail) SetID(val UUID) {
 }
 
 // SetStatus sets the value of Status.
-func (s *MessageDetail) SetStatus(val string) {
+func (s *MessageDetail) SetStatus(val MessageDetailStatus) {
 	s.Status = val
 }
 
@@ -4835,6 +6538,16 @@ func (s *MessageDetail) SetCreatedAt(val Timestamp) {
 	s.CreatedAt = val
 }
 
+// SetScheduledAt sets the value of ScheduledAt.
+func (s *MessageDetail) SetScheduledAt(val OptNilTimestamp) {
+	s.ScheduledAt = val
+}
+
+// SetCancelledAt sets the value of CancelledAt.
+func (s *MessageDetail) SetCancelledAt(val OptNilTimestamp) {
+	s.CancelledAt = val
+}
+
 // SetQueuedAt sets the value of QueuedAt.
 func (s *MessageDetail) SetQueuedAt(val OptTimestamp) {
 	s.QueuedAt = val
@@ -4853,6 +6566,11 @@ func (s *MessageDetail) SetDeliveredAt(val OptTimestamp) {
 // SetFailedAt sets the value of FailedAt.
 func (s *MessageDetail) SetFailedAt(val OptTimestamp) {
 	s.FailedAt = val
+}
+
+// SetSuppressedAt sets the value of SuppressedAt.
+func (s *MessageDetail) SetSuppressedAt(val OptTimestamp) {
+	s.SuppressedAt = val
 }
 
 // SetFirstOpenedAt sets the value of FirstOpenedAt.
@@ -4941,6 +6659,117 @@ func (s *MessageDetailContentStatus) UnmarshalText(data []byte) error {
 		return nil
 	case MessageDetailContentStatusUnavailable:
 		*s = MessageDetailContentStatusUnavailable
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type MessageDetailStatus string
+
+const (
+	MessageDetailStatusScheduled  MessageDetailStatus = "scheduled"
+	MessageDetailStatusQueued     MessageDetailStatus = "queued"
+	MessageDetailStatusProcessing MessageDetailStatus = "processing"
+	MessageDetailStatusSent       MessageDetailStatus = "sent"
+	MessageDetailStatusDelivered  MessageDetailStatus = "delivered"
+	MessageDetailStatusDeferred   MessageDetailStatus = "deferred"
+	MessageDetailStatusBounced    MessageDetailStatus = "bounced"
+	MessageDetailStatusFailed     MessageDetailStatus = "failed"
+	MessageDetailStatusSuppressed MessageDetailStatus = "suppressed"
+	MessageDetailStatusRejected   MessageDetailStatus = "rejected"
+	MessageDetailStatusCancelled  MessageDetailStatus = "cancelled"
+	MessageDetailStatusComplained MessageDetailStatus = "complained"
+)
+
+// AllValues returns all MessageDetailStatus values.
+func (MessageDetailStatus) AllValues() []MessageDetailStatus {
+	return []MessageDetailStatus{
+		MessageDetailStatusScheduled,
+		MessageDetailStatusQueued,
+		MessageDetailStatusProcessing,
+		MessageDetailStatusSent,
+		MessageDetailStatusDelivered,
+		MessageDetailStatusDeferred,
+		MessageDetailStatusBounced,
+		MessageDetailStatusFailed,
+		MessageDetailStatusSuppressed,
+		MessageDetailStatusRejected,
+		MessageDetailStatusCancelled,
+		MessageDetailStatusComplained,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s MessageDetailStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case MessageDetailStatusScheduled:
+		return []byte(s), nil
+	case MessageDetailStatusQueued:
+		return []byte(s), nil
+	case MessageDetailStatusProcessing:
+		return []byte(s), nil
+	case MessageDetailStatusSent:
+		return []byte(s), nil
+	case MessageDetailStatusDelivered:
+		return []byte(s), nil
+	case MessageDetailStatusDeferred:
+		return []byte(s), nil
+	case MessageDetailStatusBounced:
+		return []byte(s), nil
+	case MessageDetailStatusFailed:
+		return []byte(s), nil
+	case MessageDetailStatusSuppressed:
+		return []byte(s), nil
+	case MessageDetailStatusRejected:
+		return []byte(s), nil
+	case MessageDetailStatusCancelled:
+		return []byte(s), nil
+	case MessageDetailStatusComplained:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *MessageDetailStatus) UnmarshalText(data []byte) error {
+	switch MessageDetailStatus(data) {
+	case MessageDetailStatusScheduled:
+		*s = MessageDetailStatusScheduled
+		return nil
+	case MessageDetailStatusQueued:
+		*s = MessageDetailStatusQueued
+		return nil
+	case MessageDetailStatusProcessing:
+		*s = MessageDetailStatusProcessing
+		return nil
+	case MessageDetailStatusSent:
+		*s = MessageDetailStatusSent
+		return nil
+	case MessageDetailStatusDelivered:
+		*s = MessageDetailStatusDelivered
+		return nil
+	case MessageDetailStatusDeferred:
+		*s = MessageDetailStatusDeferred
+		return nil
+	case MessageDetailStatusBounced:
+		*s = MessageDetailStatusBounced
+		return nil
+	case MessageDetailStatusFailed:
+		*s = MessageDetailStatusFailed
+		return nil
+	case MessageDetailStatusSuppressed:
+		*s = MessageDetailStatusSuppressed
+		return nil
+	case MessageDetailStatusRejected:
+		*s = MessageDetailStatusRejected
+		return nil
+	case MessageDetailStatusCancelled:
+		*s = MessageDetailStatusCancelled
+		return nil
+	case MessageDetailStatusComplained:
+		*s = MessageDetailStatusComplained
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
@@ -5133,6 +6962,117 @@ func (*MessageResponse) postStatusSubscriptionsConfirmRes()     {}
 func (*MessageResponse) postStatusSubscriptionsRes()            {}
 func (*MessageResponse) postStatusSubscriptionsUnsubscribeRes() {}
 
+type MessageStatus string
+
+const (
+	MessageStatusScheduled  MessageStatus = "scheduled"
+	MessageStatusQueued     MessageStatus = "queued"
+	MessageStatusProcessing MessageStatus = "processing"
+	MessageStatusSent       MessageStatus = "sent"
+	MessageStatusDelivered  MessageStatus = "delivered"
+	MessageStatusDeferred   MessageStatus = "deferred"
+	MessageStatusBounced    MessageStatus = "bounced"
+	MessageStatusFailed     MessageStatus = "failed"
+	MessageStatusSuppressed MessageStatus = "suppressed"
+	MessageStatusRejected   MessageStatus = "rejected"
+	MessageStatusCancelled  MessageStatus = "cancelled"
+	MessageStatusComplained MessageStatus = "complained"
+)
+
+// AllValues returns all MessageStatus values.
+func (MessageStatus) AllValues() []MessageStatus {
+	return []MessageStatus{
+		MessageStatusScheduled,
+		MessageStatusQueued,
+		MessageStatusProcessing,
+		MessageStatusSent,
+		MessageStatusDelivered,
+		MessageStatusDeferred,
+		MessageStatusBounced,
+		MessageStatusFailed,
+		MessageStatusSuppressed,
+		MessageStatusRejected,
+		MessageStatusCancelled,
+		MessageStatusComplained,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s MessageStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case MessageStatusScheduled:
+		return []byte(s), nil
+	case MessageStatusQueued:
+		return []byte(s), nil
+	case MessageStatusProcessing:
+		return []byte(s), nil
+	case MessageStatusSent:
+		return []byte(s), nil
+	case MessageStatusDelivered:
+		return []byte(s), nil
+	case MessageStatusDeferred:
+		return []byte(s), nil
+	case MessageStatusBounced:
+		return []byte(s), nil
+	case MessageStatusFailed:
+		return []byte(s), nil
+	case MessageStatusSuppressed:
+		return []byte(s), nil
+	case MessageStatusRejected:
+		return []byte(s), nil
+	case MessageStatusCancelled:
+		return []byte(s), nil
+	case MessageStatusComplained:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *MessageStatus) UnmarshalText(data []byte) error {
+	switch MessageStatus(data) {
+	case MessageStatusScheduled:
+		*s = MessageStatusScheduled
+		return nil
+	case MessageStatusQueued:
+		*s = MessageStatusQueued
+		return nil
+	case MessageStatusProcessing:
+		*s = MessageStatusProcessing
+		return nil
+	case MessageStatusSent:
+		*s = MessageStatusSent
+		return nil
+	case MessageStatusDelivered:
+		*s = MessageStatusDelivered
+		return nil
+	case MessageStatusDeferred:
+		*s = MessageStatusDeferred
+		return nil
+	case MessageStatusBounced:
+		*s = MessageStatusBounced
+		return nil
+	case MessageStatusFailed:
+		*s = MessageStatusFailed
+		return nil
+	case MessageStatusSuppressed:
+		*s = MessageStatusSuppressed
+		return nil
+	case MessageStatusRejected:
+		*s = MessageStatusRejected
+		return nil
+	case MessageStatusCancelled:
+		*s = MessageStatusCancelled
+		return nil
+	case MessageStatusComplained:
+		*s = MessageStatusComplained
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 type MessageStream string
 
 const (
@@ -5174,9 +7114,180 @@ func (s *MessageStream) UnmarshalText(data []byte) error {
 	}
 }
 
+// Ref: #/components/schemas/MessageTimelineEvent
+type MessageTimelineEvent struct {
+	// UUID estável do evento persistido (`event_uuid`).
+	ID           UUID                     `json:"id"`
+	MessageID    UUID                     `json:"message_id"`
+	Type         OutboundMessageEventType `json:"type"`
+	OccurredAt   Timestamp                `json:"occurred_at"`
+	Recipient    OptString                `json:"recipient"`
+	SMTPCode     OptInt                   `json:"smtp_code"`
+	EnhancedCode OptString                `json:"enhanced_code"`
+	Diagnostic   OptString                `json:"diagnostic"`
+	MxHost       OptString                `json:"mx_host"`
+	ClickURL     OptURI                   `json:"click_url"`
+}
+
+// GetID returns the value of ID.
+func (s *MessageTimelineEvent) GetID() UUID {
+	return s.ID
+}
+
+// GetMessageID returns the value of MessageID.
+func (s *MessageTimelineEvent) GetMessageID() UUID {
+	return s.MessageID
+}
+
+// GetType returns the value of Type.
+func (s *MessageTimelineEvent) GetType() OutboundMessageEventType {
+	return s.Type
+}
+
+// GetOccurredAt returns the value of OccurredAt.
+func (s *MessageTimelineEvent) GetOccurredAt() Timestamp {
+	return s.OccurredAt
+}
+
+// GetRecipient returns the value of Recipient.
+func (s *MessageTimelineEvent) GetRecipient() OptString {
+	return s.Recipient
+}
+
+// GetSMTPCode returns the value of SMTPCode.
+func (s *MessageTimelineEvent) GetSMTPCode() OptInt {
+	return s.SMTPCode
+}
+
+// GetEnhancedCode returns the value of EnhancedCode.
+func (s *MessageTimelineEvent) GetEnhancedCode() OptString {
+	return s.EnhancedCode
+}
+
+// GetDiagnostic returns the value of Diagnostic.
+func (s *MessageTimelineEvent) GetDiagnostic() OptString {
+	return s.Diagnostic
+}
+
+// GetMxHost returns the value of MxHost.
+func (s *MessageTimelineEvent) GetMxHost() OptString {
+	return s.MxHost
+}
+
+// GetClickURL returns the value of ClickURL.
+func (s *MessageTimelineEvent) GetClickURL() OptURI {
+	return s.ClickURL
+}
+
+// SetID sets the value of ID.
+func (s *MessageTimelineEvent) SetID(val UUID) {
+	s.ID = val
+}
+
+// SetMessageID sets the value of MessageID.
+func (s *MessageTimelineEvent) SetMessageID(val UUID) {
+	s.MessageID = val
+}
+
+// SetType sets the value of Type.
+func (s *MessageTimelineEvent) SetType(val OutboundMessageEventType) {
+	s.Type = val
+}
+
+// SetOccurredAt sets the value of OccurredAt.
+func (s *MessageTimelineEvent) SetOccurredAt(val Timestamp) {
+	s.OccurredAt = val
+}
+
+// SetRecipient sets the value of Recipient.
+func (s *MessageTimelineEvent) SetRecipient(val OptString) {
+	s.Recipient = val
+}
+
+// SetSMTPCode sets the value of SMTPCode.
+func (s *MessageTimelineEvent) SetSMTPCode(val OptInt) {
+	s.SMTPCode = val
+}
+
+// SetEnhancedCode sets the value of EnhancedCode.
+func (s *MessageTimelineEvent) SetEnhancedCode(val OptString) {
+	s.EnhancedCode = val
+}
+
+// SetDiagnostic sets the value of Diagnostic.
+func (s *MessageTimelineEvent) SetDiagnostic(val OptString) {
+	s.Diagnostic = val
+}
+
+// SetMxHost sets the value of MxHost.
+func (s *MessageTimelineEvent) SetMxHost(val OptString) {
+	s.MxHost = val
+}
+
+// SetClickURL sets the value of ClickURL.
+func (s *MessageTimelineEvent) SetClickURL(val OptURI) {
+	s.ClickURL = val
+}
+
+// Ref: #/components/schemas/MessageTimelinePage
+type MessageTimelinePage struct {
+	Data []MessageTimelineEvent `json:"data"`
+	// Cursor opaco para a página seguinte; ausente quando não há mais eventos no período.
+	NextCursor OptString `json:"next_cursor"`
+}
+
+// GetData returns the value of Data.
+func (s *MessageTimelinePage) GetData() []MessageTimelineEvent {
+	return s.Data
+}
+
+// GetNextCursor returns the value of NextCursor.
+func (s *MessageTimelinePage) GetNextCursor() OptString {
+	return s.NextCursor
+}
+
+// SetData sets the value of Data.
+func (s *MessageTimelinePage) SetData(val []MessageTimelineEvent) {
+	s.Data = val
+}
+
+// SetNextCursor sets the value of NextCursor.
+func (s *MessageTimelinePage) SetNextCursor(val OptString) {
+	s.NextCursor = val
+}
+
+// MessageTimelinePageHeaders wraps MessageTimelinePage with response headers.
+type MessageTimelinePageHeaders struct {
+	CacheControl OptString
+	Response     MessageTimelinePage
+}
+
+// GetCacheControl returns the value of CacheControl.
+func (s *MessageTimelinePageHeaders) GetCacheControl() OptString {
+	return s.CacheControl
+}
+
+// GetResponse returns the value of Response.
+func (s *MessageTimelinePageHeaders) GetResponse() MessageTimelinePage {
+	return s.Response
+}
+
+// SetCacheControl sets the value of CacheControl.
+func (s *MessageTimelinePageHeaders) SetCacheControl(val OptString) {
+	s.CacheControl = val
+}
+
+// SetResponse sets the value of Response.
+func (s *MessageTimelinePageHeaders) SetResponse(val MessageTimelinePage) {
+	s.Response = val
+}
+
+func (*MessageTimelinePageHeaders) getMessagesEventsRes() {}
+
 // Ref: #/components/schemas/MessageTimeseriesDay
 type MessageTimeseriesDay struct {
 	Date       time.Time `json:"date"`
+	Scheduled  int       `json:"scheduled"`
 	Queued     int       `json:"queued"`
 	Processing int       `json:"processing"`
 	Sent       int       `json:"sent"`
@@ -5184,13 +7295,20 @@ type MessageTimeseriesDay struct {
 	Deferred   int       `json:"deferred"`
 	Bounced    int       `json:"bounced"`
 	Failed     int       `json:"failed"`
+	Suppressed int       `json:"suppressed"`
 	Rejected   int       `json:"rejected"`
 	Complained int       `json:"complained"`
+	Cancelled  int       `json:"cancelled"`
 }
 
 // GetDate returns the value of Date.
 func (s *MessageTimeseriesDay) GetDate() time.Time {
 	return s.Date
+}
+
+// GetScheduled returns the value of Scheduled.
+func (s *MessageTimeseriesDay) GetScheduled() int {
+	return s.Scheduled
 }
 
 // GetQueued returns the value of Queued.
@@ -5228,6 +7346,11 @@ func (s *MessageTimeseriesDay) GetFailed() int {
 	return s.Failed
 }
 
+// GetSuppressed returns the value of Suppressed.
+func (s *MessageTimeseriesDay) GetSuppressed() int {
+	return s.Suppressed
+}
+
 // GetRejected returns the value of Rejected.
 func (s *MessageTimeseriesDay) GetRejected() int {
 	return s.Rejected
@@ -5238,9 +7361,19 @@ func (s *MessageTimeseriesDay) GetComplained() int {
 	return s.Complained
 }
 
+// GetCancelled returns the value of Cancelled.
+func (s *MessageTimeseriesDay) GetCancelled() int {
+	return s.Cancelled
+}
+
 // SetDate sets the value of Date.
 func (s *MessageTimeseriesDay) SetDate(val time.Time) {
 	s.Date = val
+}
+
+// SetScheduled sets the value of Scheduled.
+func (s *MessageTimeseriesDay) SetScheduled(val int) {
+	s.Scheduled = val
 }
 
 // SetQueued sets the value of Queued.
@@ -5278,6 +7411,11 @@ func (s *MessageTimeseriesDay) SetFailed(val int) {
 	s.Failed = val
 }
 
+// SetSuppressed sets the value of Suppressed.
+func (s *MessageTimeseriesDay) SetSuppressed(val int) {
+	s.Suppressed = val
+}
+
 // SetRejected sets the value of Rejected.
 func (s *MessageTimeseriesDay) SetRejected(val int) {
 	s.Rejected = val
@@ -5286,6 +7424,11 @@ func (s *MessageTimeseriesDay) SetRejected(val int) {
 // SetComplained sets the value of Complained.
 func (s *MessageTimeseriesDay) SetComplained(val int) {
 	s.Complained = val
+}
+
+// SetCancelled sets the value of Cancelled.
+func (s *MessageTimeseriesDay) SetCancelled(val int) {
+	s.Cancelled = val
 }
 
 // Ref: #/components/schemas/MetricsResponse
@@ -5571,6 +7714,96 @@ func (s *MonthlyUsage) SetUnlimited(val bool) {
 }
 
 func (*MonthlyUsage) getUsageRes() {}
+
+// NewNilDomainHealthBounceRateCheckPoints returns new NilDomainHealthBounceRateCheckPoints with value set to v.
+func NewNilDomainHealthBounceRateCheckPoints(v DomainHealthBounceRateCheckPoints) NilDomainHealthBounceRateCheckPoints {
+	return NilDomainHealthBounceRateCheckPoints{
+		Value: v,
+	}
+}
+
+// NilDomainHealthBounceRateCheckPoints is nullable DomainHealthBounceRateCheckPoints.
+type NilDomainHealthBounceRateCheckPoints struct {
+	Value DomainHealthBounceRateCheckPoints
+	Null  bool
+}
+
+// SetTo sets value to v.
+func (o *NilDomainHealthBounceRateCheckPoints) SetTo(v DomainHealthBounceRateCheckPoints) {
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o NilDomainHealthBounceRateCheckPoints) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *NilDomainHealthBounceRateCheckPoints) SetToNull() {
+	o.Null = true
+	var v DomainHealthBounceRateCheckPoints
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o NilDomainHealthBounceRateCheckPoints) Get() (v DomainHealthBounceRateCheckPoints, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o NilDomainHealthBounceRateCheckPoints) Or(d DomainHealthBounceRateCheckPoints) DomainHealthBounceRateCheckPoints {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewNilDomainHealthDeliveryRateCheckPoints returns new NilDomainHealthDeliveryRateCheckPoints with value set to v.
+func NewNilDomainHealthDeliveryRateCheckPoints(v DomainHealthDeliveryRateCheckPoints) NilDomainHealthDeliveryRateCheckPoints {
+	return NilDomainHealthDeliveryRateCheckPoints{
+		Value: v,
+	}
+}
+
+// NilDomainHealthDeliveryRateCheckPoints is nullable DomainHealthDeliveryRateCheckPoints.
+type NilDomainHealthDeliveryRateCheckPoints struct {
+	Value DomainHealthDeliveryRateCheckPoints
+	Null  bool
+}
+
+// SetTo sets value to v.
+func (o *NilDomainHealthDeliveryRateCheckPoints) SetTo(v DomainHealthDeliveryRateCheckPoints) {
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o NilDomainHealthDeliveryRateCheckPoints) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *NilDomainHealthDeliveryRateCheckPoints) SetToNull() {
+	o.Null = true
+	var v DomainHealthDeliveryRateCheckPoints
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o NilDomainHealthDeliveryRateCheckPoints) Get() (v DomainHealthDeliveryRateCheckPoints, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o NilDomainHealthDeliveryRateCheckPoints) Or(d DomainHealthDeliveryRateCheckPoints) DomainHealthDeliveryRateCheckPoints {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
 
 // NewNilInt returns new NilInt with value set to v.
 func NewNilInt(v int) NilInt {
@@ -6166,6 +8399,52 @@ func (o OptGetInboundMessagesPeriod) Or(d GetInboundMessagesPeriod) GetInboundMe
 	return d
 }
 
+// NewOptGetMessagesEventsPeriod returns new OptGetMessagesEventsPeriod with value set to v.
+func NewOptGetMessagesEventsPeriod(v GetMessagesEventsPeriod) OptGetMessagesEventsPeriod {
+	return OptGetMessagesEventsPeriod{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptGetMessagesEventsPeriod is optional GetMessagesEventsPeriod.
+type OptGetMessagesEventsPeriod struct {
+	Value GetMessagesEventsPeriod
+	Set   bool
+}
+
+// IsSet returns true if OptGetMessagesEventsPeriod was set.
+func (o OptGetMessagesEventsPeriod) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptGetMessagesEventsPeriod) Reset() {
+	var v GetMessagesEventsPeriod
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptGetMessagesEventsPeriod) SetTo(v GetMessagesEventsPeriod) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptGetMessagesEventsPeriod) Get() (v GetMessagesEventsPeriod, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptGetMessagesEventsPeriod) Or(d GetMessagesEventsPeriod) GetMessagesEventsPeriod {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptGetMessagesPeriod returns new OptGetMessagesPeriod with value set to v.
 func NewOptGetMessagesPeriod(v GetMessagesPeriod) OptGetMessagesPeriod {
 	return OptGetMessagesPeriod{
@@ -6390,6 +8669,74 @@ func (o OptMessageDetailContentStatus) Get() (v MessageDetailContentStatus, ok b
 
 // Or returns value if set, or given parameter if does not.
 func (o OptMessageDetailContentStatus) Or(d MessageDetailContentStatus) MessageDetailContentStatus {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilBatchSendError returns new OptNilBatchSendError with value set to v.
+func NewOptNilBatchSendError(v BatchSendError) OptNilBatchSendError {
+	return OptNilBatchSendError{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilBatchSendError is optional nullable BatchSendError.
+type OptNilBatchSendError struct {
+	Value BatchSendError
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilBatchSendError was set.
+func (o OptNilBatchSendError) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilBatchSendError) Reset() {
+	var v BatchSendError
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilBatchSendError) SetTo(v BatchSendError) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilBatchSendError) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilBatchSendError) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v BatchSendError
+	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilBatchSendError) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilBatchSendError) Get() (v BatchSendError, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilBatchSendError) Or(d BatchSendError) BatchSendError {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -6872,6 +9219,52 @@ func (o OptNilUUID) Or(d UUID) UUID {
 	return d
 }
 
+// NewOptOutboundMessageEventType returns new OptOutboundMessageEventType with value set to v.
+func NewOptOutboundMessageEventType(v OutboundMessageEventType) OptOutboundMessageEventType {
+	return OptOutboundMessageEventType{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptOutboundMessageEventType is optional OutboundMessageEventType.
+type OptOutboundMessageEventType struct {
+	Value OutboundMessageEventType
+	Set   bool
+}
+
+// IsSet returns true if OptOutboundMessageEventType was set.
+func (o OptOutboundMessageEventType) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptOutboundMessageEventType) Reset() {
+	var v OutboundMessageEventType
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptOutboundMessageEventType) SetTo(v OutboundMessageEventType) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptOutboundMessageEventType) Get() (v OutboundMessageEventType, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptOutboundMessageEventType) Or(d OutboundMessageEventType) OutboundMessageEventType {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptPreviewTemplateRequestVariables returns new OptPreviewTemplateRequestVariables with value set to v.
 func NewOptPreviewTemplateRequestVariables(v PreviewTemplateRequestVariables) OptPreviewTemplateRequestVariables {
 	return OptPreviewTemplateRequestVariables{
@@ -6958,6 +9351,52 @@ func (o OptSPFAuthenticationResult) Get() (v SPFAuthenticationResult, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptSPFAuthenticationResult) Or(d SPFAuthenticationResult) SPFAuthenticationResult {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptSegmentDefinition returns new OptSegmentDefinition with value set to v.
+func NewOptSegmentDefinition(v SegmentDefinition) OptSegmentDefinition {
+	return OptSegmentDefinition{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptSegmentDefinition is optional SegmentDefinition.
+type OptSegmentDefinition struct {
+	Value SegmentDefinition
+	Set   bool
+}
+
+// IsSet returns true if OptSegmentDefinition was set.
+func (o OptSegmentDefinition) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptSegmentDefinition) Reset() {
+	var v SegmentDefinition
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptSegmentDefinition) SetTo(v SegmentDefinition) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptSegmentDefinition) Get() (v SegmentDefinition, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptSegmentDefinition) Or(d SegmentDefinition) SegmentDefinition {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -7608,6 +10047,125 @@ func (o OptWebhookDeliveryStatus) Or(d WebhookDeliveryStatus) WebhookDeliverySta
 	return d
 }
 
+// Ref: #/components/schemas/OutboundMessageEventType
+type OutboundMessageEventType string
+
+const (
+	OutboundMessageEventTypeQueued      OutboundMessageEventType = "queued"
+	OutboundMessageEventTypeSent        OutboundMessageEventType = "sent"
+	OutboundMessageEventTypeDelivered   OutboundMessageEventType = "delivered"
+	OutboundMessageEventTypeDeferred    OutboundMessageEventType = "deferred"
+	OutboundMessageEventTypeSoftBounce  OutboundMessageEventType = "soft_bounce"
+	OutboundMessageEventTypeHardBounce  OutboundMessageEventType = "hard_bounce"
+	OutboundMessageEventTypeComplaint   OutboundMessageEventType = "complaint"
+	OutboundMessageEventTypeOpen        OutboundMessageEventType = "open"
+	OutboundMessageEventTypeClick       OutboundMessageEventType = "click"
+	OutboundMessageEventTypeUnsubscribe OutboundMessageEventType = "unsubscribe"
+	OutboundMessageEventTypeRejected    OutboundMessageEventType = "rejected"
+	OutboundMessageEventTypeFailed      OutboundMessageEventType = "failed"
+	OutboundMessageEventTypeSuppressed  OutboundMessageEventType = "suppressed"
+)
+
+// AllValues returns all OutboundMessageEventType values.
+func (OutboundMessageEventType) AllValues() []OutboundMessageEventType {
+	return []OutboundMessageEventType{
+		OutboundMessageEventTypeQueued,
+		OutboundMessageEventTypeSent,
+		OutboundMessageEventTypeDelivered,
+		OutboundMessageEventTypeDeferred,
+		OutboundMessageEventTypeSoftBounce,
+		OutboundMessageEventTypeHardBounce,
+		OutboundMessageEventTypeComplaint,
+		OutboundMessageEventTypeOpen,
+		OutboundMessageEventTypeClick,
+		OutboundMessageEventTypeUnsubscribe,
+		OutboundMessageEventTypeRejected,
+		OutboundMessageEventTypeFailed,
+		OutboundMessageEventTypeSuppressed,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s OutboundMessageEventType) MarshalText() ([]byte, error) {
+	switch s {
+	case OutboundMessageEventTypeQueued:
+		return []byte(s), nil
+	case OutboundMessageEventTypeSent:
+		return []byte(s), nil
+	case OutboundMessageEventTypeDelivered:
+		return []byte(s), nil
+	case OutboundMessageEventTypeDeferred:
+		return []byte(s), nil
+	case OutboundMessageEventTypeSoftBounce:
+		return []byte(s), nil
+	case OutboundMessageEventTypeHardBounce:
+		return []byte(s), nil
+	case OutboundMessageEventTypeComplaint:
+		return []byte(s), nil
+	case OutboundMessageEventTypeOpen:
+		return []byte(s), nil
+	case OutboundMessageEventTypeClick:
+		return []byte(s), nil
+	case OutboundMessageEventTypeUnsubscribe:
+		return []byte(s), nil
+	case OutboundMessageEventTypeRejected:
+		return []byte(s), nil
+	case OutboundMessageEventTypeFailed:
+		return []byte(s), nil
+	case OutboundMessageEventTypeSuppressed:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *OutboundMessageEventType) UnmarshalText(data []byte) error {
+	switch OutboundMessageEventType(data) {
+	case OutboundMessageEventTypeQueued:
+		*s = OutboundMessageEventTypeQueued
+		return nil
+	case OutboundMessageEventTypeSent:
+		*s = OutboundMessageEventTypeSent
+		return nil
+	case OutboundMessageEventTypeDelivered:
+		*s = OutboundMessageEventTypeDelivered
+		return nil
+	case OutboundMessageEventTypeDeferred:
+		*s = OutboundMessageEventTypeDeferred
+		return nil
+	case OutboundMessageEventTypeSoftBounce:
+		*s = OutboundMessageEventTypeSoftBounce
+		return nil
+	case OutboundMessageEventTypeHardBounce:
+		*s = OutboundMessageEventTypeHardBounce
+		return nil
+	case OutboundMessageEventTypeComplaint:
+		*s = OutboundMessageEventTypeComplaint
+		return nil
+	case OutboundMessageEventTypeOpen:
+		*s = OutboundMessageEventTypeOpen
+		return nil
+	case OutboundMessageEventTypeClick:
+		*s = OutboundMessageEventTypeClick
+		return nil
+	case OutboundMessageEventTypeUnsubscribe:
+		*s = OutboundMessageEventTypeUnsubscribe
+		return nil
+	case OutboundMessageEventTypeRejected:
+		*s = OutboundMessageEventTypeRejected
+		return nil
+	case OutboundMessageEventTypeFailed:
+		*s = OutboundMessageEventTypeFailed
+		return nil
+	case OutboundMessageEventTypeSuppressed:
+		*s = OutboundMessageEventTypeSuppressed
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 type PatchAutomationsIDBadRequest Error
 
 func (*PatchAutomationsIDBadRequest) patchAutomationsIDRes() {}
@@ -7913,17 +10471,75 @@ type PostContactsForbidden Error
 
 func (*PostContactsForbidden) postContactsRes() {}
 
+type PostContactsImportBadRequest Error
+
+func (*PostContactsImportBadRequest) postContactsImportRes() {}
+
+type PostContactsImportForbidden Error
+
+func (*PostContactsImportForbidden) postContactsImportRes() {}
+
+type PostContactsImportInternalServerError Error
+
+func (*PostContactsImportInternalServerError) postContactsImportRes() {}
+
+type PostContactsImportReq struct {
+	Data io.Reader
+}
+
+// Read reads data from the Data reader.
+//
+// Kept to satisfy the io.Reader interface.
+func (s PostContactsImportReq) Read(p []byte) (n int, err error) {
+	if s.Data == nil {
+		return 0, io.EOF
+	}
+	return s.Data.Read(p)
+}
+
+type PostContactsImportRequestEntityTooLarge Error
+
+func (*PostContactsImportRequestEntityTooLarge) postContactsImportRes() {}
+
+type PostContactsImportUnauthorized Error
+
+func (*PostContactsImportUnauthorized) postContactsImportRes() {}
+
 type PostContactsInternalServerError Error
 
 func (*PostContactsInternalServerError) postContactsRes() {}
 
-type PostContactsNotFound Error
-
-func (*PostContactsNotFound) postContactsRes() {}
-
 type PostContactsUnauthorized Error
 
 func (*PostContactsUnauthorized) postContactsRes() {}
+
+type PostDomainTrackingDomainActivateConflict Error
+
+func (*PostDomainTrackingDomainActivateConflict) postDomainTrackingDomainActivateRes() {}
+
+type PostDomainTrackingDomainActivateNotFound Error
+
+func (*PostDomainTrackingDomainActivateNotFound) postDomainTrackingDomainActivateRes() {}
+
+type PostDomainTrackingDomainProofRotateConflict Error
+
+func (*PostDomainTrackingDomainProofRotateConflict) postDomainTrackingDomainProofRotateRes() {}
+
+type PostDomainTrackingDomainProofRotateNotFound Error
+
+func (*PostDomainTrackingDomainProofRotateNotFound) postDomainTrackingDomainProofRotateRes() {}
+
+type PostDomainTrackingDomainsBadRequest Error
+
+func (*PostDomainTrackingDomainsBadRequest) postDomainTrackingDomainsRes() {}
+
+type PostDomainTrackingDomainsConflict Error
+
+func (*PostDomainTrackingDomainsConflict) postDomainTrackingDomainsRes() {}
+
+type PostDomainTrackingDomainsNotFound Error
+
+func (*PostDomainTrackingDomainsNotFound) postDomainTrackingDomainsRes() {}
 
 type PostDomainsBadRequest Error
 
@@ -8045,6 +10661,30 @@ type PostEventsUnauthorized Error
 
 func (*PostEventsUnauthorized) postEventsRes() {}
 
+type PostMessagesIDCancelBadRequest Error
+
+func (*PostMessagesIDCancelBadRequest) postMessagesIDCancelRes() {}
+
+type PostMessagesIDCancelConflict Error
+
+func (*PostMessagesIDCancelConflict) postMessagesIDCancelRes() {}
+
+type PostMessagesIDCancelForbidden Error
+
+func (*PostMessagesIDCancelForbidden) postMessagesIDCancelRes() {}
+
+type PostMessagesIDCancelInternalServerError Error
+
+func (*PostMessagesIDCancelInternalServerError) postMessagesIDCancelRes() {}
+
+type PostMessagesIDCancelNotFound Error
+
+func (*PostMessagesIDCancelNotFound) postMessagesIDCancelRes() {}
+
+type PostMessagesIDCancelUnauthorized Error
+
+func (*PostMessagesIDCancelUnauthorized) postMessagesIDCancelRes() {}
+
 type PostSegmentsBadRequest Error
 
 func (*PostSegmentsBadRequest) postSegmentsRes() {}
@@ -8060,10 +10700,6 @@ func (*PostSegmentsForbidden) postSegmentsRes() {}
 type PostSegmentsIDContactsBadRequest Error
 
 func (*PostSegmentsIDContactsBadRequest) postSegmentsIDContactsRes() {}
-
-type PostSegmentsIDContactsConflict Error
-
-func (*PostSegmentsIDContactsConflict) postSegmentsIDContactsRes() {}
 
 type PostSegmentsIDContactsForbidden Error
 
@@ -8090,9 +10726,21 @@ type PostSegmentsInternalServerError Error
 
 func (*PostSegmentsInternalServerError) postSegmentsRes() {}
 
-type PostSegmentsNotFound Error
+type PostSegmentsPreviewBadRequest Error
 
-func (*PostSegmentsNotFound) postSegmentsRes() {}
+func (*PostSegmentsPreviewBadRequest) postSegmentsPreviewRes() {}
+
+type PostSegmentsPreviewForbidden Error
+
+func (*PostSegmentsPreviewForbidden) postSegmentsPreviewRes() {}
+
+type PostSegmentsPreviewInternalServerError Error
+
+func (*PostSegmentsPreviewInternalServerError) postSegmentsPreviewRes() {}
+
+type PostSegmentsPreviewUnauthorized Error
+
+func (*PostSegmentsPreviewUnauthorized) postSegmentsPreviewRes() {}
 
 type PostSegmentsUnauthorized Error
 
@@ -8101,6 +10749,22 @@ func (*PostSegmentsUnauthorized) postSegmentsRes() {}
 type PostSendBadRequest Error
 
 func (*PostSendBadRequest) postSendRes() {}
+
+type PostSendBatchBadRequest Error
+
+func (*PostSendBatchBadRequest) postSendBatchRes() {}
+
+type PostSendBatchForbidden Error
+
+func (*PostSendBatchForbidden) postSendBatchRes() {}
+
+type PostSendBatchInternalServerError Error
+
+func (*PostSendBatchInternalServerError) postSendBatchRes() {}
+
+type PostSendBatchUnauthorized Error
+
+func (*PostSendBatchUnauthorized) postSendBatchRes() {}
 
 type PostSendConflict Error
 
@@ -9498,73 +12162,15 @@ func (s *SPFAuthenticationResult) UnmarshalText(data []byte) error {
 }
 
 // Ref: #/components/schemas/Segment
-type Segment struct {
-	ID           UUID         `json:"id"`
-	Name         string       `json:"name"`
-	Description  OptNilString `json:"description"`
-	ContactCount OptInt       `json:"contact_count"`
-	CreatedAt    Timestamp    `json:"created_at"`
-	UpdatedAt    Timestamp    `json:"updated_at"`
-}
+type Segment map[string]jx.Raw
 
-// GetID returns the value of ID.
-func (s *Segment) GetID() UUID {
-	return s.ID
-}
-
-// GetName returns the value of Name.
-func (s *Segment) GetName() string {
-	return s.Name
-}
-
-// GetDescription returns the value of Description.
-func (s *Segment) GetDescription() OptNilString {
-	return s.Description
-}
-
-// GetContactCount returns the value of ContactCount.
-func (s *Segment) GetContactCount() OptInt {
-	return s.ContactCount
-}
-
-// GetCreatedAt returns the value of CreatedAt.
-func (s *Segment) GetCreatedAt() Timestamp {
-	return s.CreatedAt
-}
-
-// GetUpdatedAt returns the value of UpdatedAt.
-func (s *Segment) GetUpdatedAt() Timestamp {
-	return s.UpdatedAt
-}
-
-// SetID sets the value of ID.
-func (s *Segment) SetID(val UUID) {
-	s.ID = val
-}
-
-// SetName sets the value of Name.
-func (s *Segment) SetName(val string) {
-	s.Name = val
-}
-
-// SetDescription sets the value of Description.
-func (s *Segment) SetDescription(val OptNilString) {
-	s.Description = val
-}
-
-// SetContactCount sets the value of ContactCount.
-func (s *Segment) SetContactCount(val OptInt) {
-	s.ContactCount = val
-}
-
-// SetCreatedAt sets the value of CreatedAt.
-func (s *Segment) SetCreatedAt(val Timestamp) {
-	s.CreatedAt = val
-}
-
-// SetUpdatedAt sets the value of UpdatedAt.
-func (s *Segment) SetUpdatedAt(val Timestamp) {
-	s.UpdatedAt = val
+func (s *Segment) init() Segment {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
 }
 
 func (*Segment) getSegmentsIDRes()   {}
@@ -9586,10 +12192,23 @@ func (s *SegmentContactRequest) SetContactID(val UUID) {
 	s.ContactID = val
 }
 
+// Ref: #/components/schemas/SegmentDefinition
+type SegmentDefinition map[string]jx.Raw
+
+func (s *SegmentDefinition) init() SegmentDefinition {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
 // Ref: #/components/schemas/SegmentList
 type SegmentList struct {
-	Data       []Segment `json:"data"`
-	NextCursor OptString `json:"next_cursor"`
+	Data []Segment `json:"data"`
+	// Cursor opaco; string vazia quando não houver próxima página.
+	NextCursor string `json:"next_cursor"`
 }
 
 // GetData returns the value of Data.
@@ -9598,7 +12217,7 @@ func (s *SegmentList) GetData() []Segment {
 }
 
 // GetNextCursor returns the value of NextCursor.
-func (s *SegmentList) GetNextCursor() OptString {
+func (s *SegmentList) GetNextCursor() string {
 	return s.NextCursor
 }
 
@@ -9608,11 +12227,67 @@ func (s *SegmentList) SetData(val []Segment) {
 }
 
 // SetNextCursor sets the value of NextCursor.
-func (s *SegmentList) SetNextCursor(val OptString) {
+func (s *SegmentList) SetNextCursor(val string) {
 	s.NextCursor = val
 }
 
 func (*SegmentList) getSegmentsRes() {}
+
+// Ref: #/components/schemas/SegmentPreview
+type SegmentPreview struct {
+	ContactCount int       `json:"contact_count"`
+	Data         []Contact `json:"data"`
+}
+
+// GetContactCount returns the value of ContactCount.
+func (s *SegmentPreview) GetContactCount() int {
+	return s.ContactCount
+}
+
+// GetData returns the value of Data.
+func (s *SegmentPreview) GetData() []Contact {
+	return s.Data
+}
+
+// SetContactCount sets the value of ContactCount.
+func (s *SegmentPreview) SetContactCount(val int) {
+	s.ContactCount = val
+}
+
+// SetData sets the value of Data.
+func (s *SegmentPreview) SetData(val []Contact) {
+	s.Data = val
+}
+
+func (*SegmentPreview) postSegmentsPreviewRes() {}
+
+// Ref: #/components/schemas/SegmentPreviewRequest
+type SegmentPreviewRequest struct {
+	Definition SegmentDefinition `json:"definition"`
+	Limit      OptInt            `json:"limit"`
+}
+
+// GetDefinition returns the value of Definition.
+func (s *SegmentPreviewRequest) GetDefinition() SegmentDefinition {
+	return s.Definition
+}
+
+// GetLimit returns the value of Limit.
+func (s *SegmentPreviewRequest) GetLimit() OptInt {
+	return s.Limit
+}
+
+// SetDefinition sets the value of Definition.
+func (s *SegmentPreviewRequest) SetDefinition(val SegmentDefinition) {
+	s.Definition = val
+}
+
+// SetLimit sets the value of Limit.
+func (s *SegmentPreviewRequest) SetLimit(val OptInt) {
+	s.Limit = val
+}
+
+type SegmentTimestamp time.Time
 
 // Ref: #/components/schemas/SendCustomEventRequest
 type SendCustomEventRequest struct {
@@ -9664,18 +12339,20 @@ func (s *SendCustomEventRequestProperties) init() SendCustomEventRequestProperti
 
 // Ref: #/components/schemas/SendRequest
 type SendRequest struct {
-	From        string                  `json:"from"`
-	FromName    OptString               `json:"from_name"`
-	ReplyTo     OptString               `json:"reply_to"`
-	To          []string                `json:"to"`
-	Cc          []string                `json:"cc"`
-	Bcc         []string                `json:"bcc"`
-	Subject     OptString               `json:"subject"`
-	HTML        OptString               `json:"html"`
-	Text        OptString               `json:"text"`
-	Stream      OptSendRequestStream    `json:"stream"`
-	Tags        []string                `json:"tags"`
-	Metadata    OptSendRequestMetadata  `json:"metadata"`
+	From     string                 `json:"from"`
+	FromName OptString              `json:"from_name"`
+	ReplyTo  OptString              `json:"reply_to"`
+	To       []string               `json:"to"`
+	Cc       []string               `json:"cc"`
+	Bcc      []string               `json:"bcc"`
+	Subject  OptString              `json:"subject"`
+	HTML     OptString              `json:"html"`
+	Text     OptString              `json:"text"`
+	Stream   OptSendRequestStream   `json:"stream"`
+	Tags     []string               `json:"tags"`
+	Metadata OptSendRequestMetadata `json:"metadata"`
+	// Horário UTC de despacho; deve estar estritamente no futuro e em até 72 horas.
+	ScheduledAt OptNilTimestamp         `json:"scheduled_at"`
 	TemplateID  OptNilUUID              `json:"template_id"`
 	Variables   OptSendRequestVariables `json:"variables"`
 	Attachments []Attachment            `json:"attachments"`
@@ -9739,6 +12416,11 @@ func (s *SendRequest) GetTags() []string {
 // GetMetadata returns the value of Metadata.
 func (s *SendRequest) GetMetadata() OptSendRequestMetadata {
 	return s.Metadata
+}
+
+// GetScheduledAt returns the value of ScheduledAt.
+func (s *SendRequest) GetScheduledAt() OptNilTimestamp {
+	return s.ScheduledAt
 }
 
 // GetTemplateID returns the value of TemplateID.
@@ -9814,6 +12496,11 @@ func (s *SendRequest) SetTags(val []string) {
 // SetMetadata sets the value of Metadata.
 func (s *SendRequest) SetMetadata(val OptSendRequestMetadata) {
 	s.Metadata = val
+}
+
+// SetScheduledAt sets the value of ScheduledAt.
+func (s *SendRequest) SetScheduledAt(val OptNilTimestamp) {
+	s.ScheduledAt = val
 }
 
 // SetTemplateID sets the value of TemplateID.
@@ -11067,6 +13754,8 @@ func (*TooManyRequestsHeaders) getAutomationsRes()                           {}
 func (*TooManyRequestsHeaders) getContactsIDRes()                            {}
 func (*TooManyRequestsHeaders) getContactsRes()                              {}
 func (*TooManyRequestsHeaders) getDomainsIDDNSRes()                          {}
+func (*TooManyRequestsHeaders) getDomainsIDHealthRes()                       {}
+func (*TooManyRequestsHeaders) getDomainsIDInboundRes()                      {}
 func (*TooManyRequestsHeaders) getDomainsIDRes()                             {}
 func (*TooManyRequestsHeaders) getDomainsRes()                               {}
 func (*TooManyRequestsHeaders) getEventsRes()                                {}
@@ -11076,6 +13765,7 @@ func (*TooManyRequestsHeaders) getInboundMessagesIDRawRes()                  {}
 func (*TooManyRequestsHeaders) getInboundMessagesIDRes()                     {}
 func (*TooManyRequestsHeaders) getInboundMessagesRes()                       {}
 func (*TooManyRequestsHeaders) getMessagesEngagementRes()                    {}
+func (*TooManyRequestsHeaders) getMessagesEventsRes()                        {}
 func (*TooManyRequestsHeaders) getMessagesIDEventsRes()                      {}
 func (*TooManyRequestsHeaders) getMessagesIDRawRes()                         {}
 func (*TooManyRequestsHeaders) getMessagesIDRes()                            {}
@@ -11109,14 +13799,18 @@ func (*TooManyRequestsHeaders) postAutomationsIDDisableRes()                 {}
 func (*TooManyRequestsHeaders) postAutomationsIDDuplicateRes()               {}
 func (*TooManyRequestsHeaders) postAutomationsIDRunsRunIDCancelRes()         {}
 func (*TooManyRequestsHeaders) postAutomationsRes()                          {}
+func (*TooManyRequestsHeaders) postContactsImportRes()                       {}
 func (*TooManyRequestsHeaders) postContactsRes()                             {}
 func (*TooManyRequestsHeaders) postDomainsIDDkimRotateRes()                  {}
 func (*TooManyRequestsHeaders) postDomainsIDVerifyRes()                      {}
 func (*TooManyRequestsHeaders) postDomainsRes()                              {}
 func (*TooManyRequestsHeaders) postEventsRes()                               {}
 func (*TooManyRequestsHeaders) postEventsSendRes()                           {}
+func (*TooManyRequestsHeaders) postMessagesIDCancelRes()                     {}
 func (*TooManyRequestsHeaders) postSegmentsIDContactsRes()                   {}
+func (*TooManyRequestsHeaders) postSegmentsPreviewRes()                      {}
 func (*TooManyRequestsHeaders) postSegmentsRes()                             {}
+func (*TooManyRequestsHeaders) postSendBatchRes()                            {}
 func (*TooManyRequestsHeaders) postSendRes()                                 {}
 func (*TooManyRequestsHeaders) postStatusSubscriptionsConfirmRes()           {}
 func (*TooManyRequestsHeaders) postStatusSubscriptionsRes()                  {}
@@ -11136,6 +13830,329 @@ func (*TooManyRequestsHeaders) postWebhooksIDDeliveriesDeliveryIDReplayRes() {}
 func (*TooManyRequestsHeaders) postWebhooksIDSecretRotateRes()               {}
 func (*TooManyRequestsHeaders) postWebhooksIDTestRes()                       {}
 func (*TooManyRequestsHeaders) postWebhooksRes()                             {}
+
+// Ref: #/components/schemas/TrackingDomain
+type TrackingDomain struct {
+	ID              UUID                `json:"id"`
+	Hostname        string              `json:"hostname"`
+	State           TrackingDomainState `json:"state"`
+	ProofExpiresAt  NilTimestamp        `json:"proof_expires_at"`
+	ProofVerifiedAt NilTimestamp        `json:"proof_verified_at"`
+	LastCheckedAt   NilTimestamp        `json:"last_checked_at"`
+	ActivatedAt     NilTimestamp        `json:"activated_at"`
+	SuspendedAt     NilTimestamp        `json:"suspended_at"`
+	RevokedAt       NilTimestamp        `json:"revoked_at"`
+	CreatedAt       Timestamp           `json:"created_at"`
+	UpdatedAt       Timestamp           `json:"updated_at"`
+}
+
+// GetID returns the value of ID.
+func (s *TrackingDomain) GetID() UUID {
+	return s.ID
+}
+
+// GetHostname returns the value of Hostname.
+func (s *TrackingDomain) GetHostname() string {
+	return s.Hostname
+}
+
+// GetState returns the value of State.
+func (s *TrackingDomain) GetState() TrackingDomainState {
+	return s.State
+}
+
+// GetProofExpiresAt returns the value of ProofExpiresAt.
+func (s *TrackingDomain) GetProofExpiresAt() NilTimestamp {
+	return s.ProofExpiresAt
+}
+
+// GetProofVerifiedAt returns the value of ProofVerifiedAt.
+func (s *TrackingDomain) GetProofVerifiedAt() NilTimestamp {
+	return s.ProofVerifiedAt
+}
+
+// GetLastCheckedAt returns the value of LastCheckedAt.
+func (s *TrackingDomain) GetLastCheckedAt() NilTimestamp {
+	return s.LastCheckedAt
+}
+
+// GetActivatedAt returns the value of ActivatedAt.
+func (s *TrackingDomain) GetActivatedAt() NilTimestamp {
+	return s.ActivatedAt
+}
+
+// GetSuspendedAt returns the value of SuspendedAt.
+func (s *TrackingDomain) GetSuspendedAt() NilTimestamp {
+	return s.SuspendedAt
+}
+
+// GetRevokedAt returns the value of RevokedAt.
+func (s *TrackingDomain) GetRevokedAt() NilTimestamp {
+	return s.RevokedAt
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *TrackingDomain) GetCreatedAt() Timestamp {
+	return s.CreatedAt
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *TrackingDomain) GetUpdatedAt() Timestamp {
+	return s.UpdatedAt
+}
+
+// SetID sets the value of ID.
+func (s *TrackingDomain) SetID(val UUID) {
+	s.ID = val
+}
+
+// SetHostname sets the value of Hostname.
+func (s *TrackingDomain) SetHostname(val string) {
+	s.Hostname = val
+}
+
+// SetState sets the value of State.
+func (s *TrackingDomain) SetState(val TrackingDomainState) {
+	s.State = val
+}
+
+// SetProofExpiresAt sets the value of ProofExpiresAt.
+func (s *TrackingDomain) SetProofExpiresAt(val NilTimestamp) {
+	s.ProofExpiresAt = val
+}
+
+// SetProofVerifiedAt sets the value of ProofVerifiedAt.
+func (s *TrackingDomain) SetProofVerifiedAt(val NilTimestamp) {
+	s.ProofVerifiedAt = val
+}
+
+// SetLastCheckedAt sets the value of LastCheckedAt.
+func (s *TrackingDomain) SetLastCheckedAt(val NilTimestamp) {
+	s.LastCheckedAt = val
+}
+
+// SetActivatedAt sets the value of ActivatedAt.
+func (s *TrackingDomain) SetActivatedAt(val NilTimestamp) {
+	s.ActivatedAt = val
+}
+
+// SetSuspendedAt sets the value of SuspendedAt.
+func (s *TrackingDomain) SetSuspendedAt(val NilTimestamp) {
+	s.SuspendedAt = val
+}
+
+// SetRevokedAt sets the value of RevokedAt.
+func (s *TrackingDomain) SetRevokedAt(val NilTimestamp) {
+	s.RevokedAt = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *TrackingDomain) SetCreatedAt(val Timestamp) {
+	s.CreatedAt = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *TrackingDomain) SetUpdatedAt(val Timestamp) {
+	s.UpdatedAt = val
+}
+
+// Ref: #/components/schemas/TrackingDomainList
+type TrackingDomainList struct {
+	TrackingDomains []TrackingDomain `json:"tracking_domains"`
+}
+
+// GetTrackingDomains returns the value of TrackingDomains.
+func (s *TrackingDomainList) GetTrackingDomains() []TrackingDomain {
+	return s.TrackingDomains
+}
+
+// SetTrackingDomains sets the value of TrackingDomains.
+func (s *TrackingDomainList) SetTrackingDomains(val []TrackingDomain) {
+	s.TrackingDomains = val
+}
+
+func (*TrackingDomainList) getDomainTrackingDomainsRes() {}
+
+// Ref: #/components/schemas/TrackingDomainProofResponse
+type TrackingDomainProofResponse struct {
+	TrackingDomain TrackingDomain                   `json:"tracking_domain"`
+	Proof          TrackingDomainProofResponseProof `json:"proof"`
+}
+
+// GetTrackingDomain returns the value of TrackingDomain.
+func (s *TrackingDomainProofResponse) GetTrackingDomain() TrackingDomain {
+	return s.TrackingDomain
+}
+
+// GetProof returns the value of Proof.
+func (s *TrackingDomainProofResponse) GetProof() TrackingDomainProofResponseProof {
+	return s.Proof
+}
+
+// SetTrackingDomain sets the value of TrackingDomain.
+func (s *TrackingDomainProofResponse) SetTrackingDomain(val TrackingDomain) {
+	s.TrackingDomain = val
+}
+
+// SetProof sets the value of Proof.
+func (s *TrackingDomainProofResponse) SetProof(val TrackingDomainProofResponseProof) {
+	s.Proof = val
+}
+
+// TrackingDomainProofResponseHeaders wraps TrackingDomainProofResponse with response headers.
+type TrackingDomainProofResponseHeaders struct {
+	CacheControl OptString
+	Response     TrackingDomainProofResponse
+}
+
+// GetCacheControl returns the value of CacheControl.
+func (s *TrackingDomainProofResponseHeaders) GetCacheControl() OptString {
+	return s.CacheControl
+}
+
+// GetResponse returns the value of Response.
+func (s *TrackingDomainProofResponseHeaders) GetResponse() TrackingDomainProofResponse {
+	return s.Response
+}
+
+// SetCacheControl sets the value of CacheControl.
+func (s *TrackingDomainProofResponseHeaders) SetCacheControl(val OptString) {
+	s.CacheControl = val
+}
+
+// SetResponse sets the value of Response.
+func (s *TrackingDomainProofResponseHeaders) SetResponse(val TrackingDomainProofResponse) {
+	s.Response = val
+}
+
+func (*TrackingDomainProofResponseHeaders) postDomainTrackingDomainProofRotateRes() {}
+func (*TrackingDomainProofResponseHeaders) postDomainTrackingDomainsRes()           {}
+
+type TrackingDomainProofResponseProof struct {
+	Type string `json:"type"`
+	Name string `json:"name"`
+	// Valor retornado somente nas respostas de reserva e rotação; nunca em leituras.
+	Value string `json:"value"`
+}
+
+// GetType returns the value of Type.
+func (s *TrackingDomainProofResponseProof) GetType() string {
+	return s.Type
+}
+
+// GetName returns the value of Name.
+func (s *TrackingDomainProofResponseProof) GetName() string {
+	return s.Name
+}
+
+// GetValue returns the value of Value.
+func (s *TrackingDomainProofResponseProof) GetValue() string {
+	return s.Value
+}
+
+// SetType sets the value of Type.
+func (s *TrackingDomainProofResponseProof) SetType(val string) {
+	s.Type = val
+}
+
+// SetName sets the value of Name.
+func (s *TrackingDomainProofResponseProof) SetName(val string) {
+	s.Name = val
+}
+
+// SetValue sets the value of Value.
+func (s *TrackingDomainProofResponseProof) SetValue(val string) {
+	s.Value = val
+}
+
+// Ref: #/components/schemas/TrackingDomainResponse
+type TrackingDomainResponse struct {
+	TrackingDomain TrackingDomain `json:"tracking_domain"`
+}
+
+// GetTrackingDomain returns the value of TrackingDomain.
+func (s *TrackingDomainResponse) GetTrackingDomain() TrackingDomain {
+	return s.TrackingDomain
+}
+
+// SetTrackingDomain sets the value of TrackingDomain.
+func (s *TrackingDomainResponse) SetTrackingDomain(val TrackingDomain) {
+	s.TrackingDomain = val
+}
+
+func (*TrackingDomainResponse) getDomainTrackingDomainRes()          {}
+func (*TrackingDomainResponse) postDomainTrackingDomainActivateRes() {}
+func (*TrackingDomainResponse) postDomainTrackingDomainRevokeRes()   {}
+func (*TrackingDomainResponse) postDomainTrackingDomainVerifyRes()   {}
+
+type TrackingDomainState string
+
+const (
+	TrackingDomainStatePendingProof TrackingDomainState = "pending_proof"
+	TrackingDomainStateVerified     TrackingDomainState = "verified"
+	TrackingDomainStateProvisioning TrackingDomainState = "provisioning"
+	TrackingDomainStateActive       TrackingDomainState = "active"
+	TrackingDomainStateSuspended    TrackingDomainState = "suspended"
+	TrackingDomainStateRevoked      TrackingDomainState = "revoked"
+)
+
+// AllValues returns all TrackingDomainState values.
+func (TrackingDomainState) AllValues() []TrackingDomainState {
+	return []TrackingDomainState{
+		TrackingDomainStatePendingProof,
+		TrackingDomainStateVerified,
+		TrackingDomainStateProvisioning,
+		TrackingDomainStateActive,
+		TrackingDomainStateSuspended,
+		TrackingDomainStateRevoked,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s TrackingDomainState) MarshalText() ([]byte, error) {
+	switch s {
+	case TrackingDomainStatePendingProof:
+		return []byte(s), nil
+	case TrackingDomainStateVerified:
+		return []byte(s), nil
+	case TrackingDomainStateProvisioning:
+		return []byte(s), nil
+	case TrackingDomainStateActive:
+		return []byte(s), nil
+	case TrackingDomainStateSuspended:
+		return []byte(s), nil
+	case TrackingDomainStateRevoked:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *TrackingDomainState) UnmarshalText(data []byte) error {
+	switch TrackingDomainState(data) {
+	case TrackingDomainStatePendingProof:
+		*s = TrackingDomainStatePendingProof
+		return nil
+	case TrackingDomainStateVerified:
+		*s = TrackingDomainStateVerified
+		return nil
+	case TrackingDomainStateProvisioning:
+		*s = TrackingDomainStateProvisioning
+		return nil
+	case TrackingDomainStateActive:
+		*s = TrackingDomainStateActive
+		return nil
+	case TrackingDomainStateSuspended:
+		*s = TrackingDomainStateSuspended
+		return nil
+	case TrackingDomainStateRevoked:
+		*s = TrackingDomainStateRevoked
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
 
 type UUID uuid.UUID
 
@@ -11179,10 +14196,12 @@ func (s *UpdateAutomationDraftRequestGraph) init() UpdateAutomationDraftRequestG
 
 // Ref: #/components/schemas/UpdateContactRequest
 type UpdateContactRequest struct {
-	Email      OptString                         `json:"email"`
-	FirstName  OptNilString                      `json:"first_name"`
-	LastName   OptNilString                      `json:"last_name"`
-	Subscribed OptBool                           `json:"subscribed"`
+	// Caixa postal válida, sem nome de exibição ou espaços; é normalizada em minúsculas.
+	Email      OptString    `json:"email"`
+	FirstName  OptNilString `json:"first_name"`
+	LastName   OptNilString `json:"last_name"`
+	Subscribed OptBool      `json:"subscribed"`
+	// Substituição integral do objeto de propriedades; `null` e arrays são inválidos.
 	Properties OptUpdateContactRequestProperties `json:"properties"`
 }
 
@@ -11236,6 +14255,7 @@ func (s *UpdateContactRequest) SetProperties(val OptUpdateContactRequestProperti
 	s.Properties = val
 }
 
+// Substituição integral do objeto de propriedades; `null` e arrays são inválidos.
 type UpdateContactRequestProperties map[string]jx.Raw
 
 func (s *UpdateContactRequestProperties) init() UpdateContactRequestProperties {
@@ -11275,8 +14295,9 @@ func (s *UpdateCustomEventRequestSchema) init() UpdateCustomEventRequestSchema {
 
 // Ref: #/components/schemas/UpdateSegmentRequest
 type UpdateSegmentRequest struct {
-	Name        OptString    `json:"name"`
-	Description OptNilString `json:"description"`
+	Name        OptString            `json:"name"`
+	Description OptNilString         `json:"description"`
+	Definition  OptSegmentDefinition `json:"definition"`
 }
 
 // GetName returns the value of Name.
@@ -11289,6 +14310,11 @@ func (s *UpdateSegmentRequest) GetDescription() OptNilString {
 	return s.Description
 }
 
+// GetDefinition returns the value of Definition.
+func (s *UpdateSegmentRequest) GetDefinition() OptSegmentDefinition {
+	return s.Definition
+}
+
 // SetName sets the value of Name.
 func (s *UpdateSegmentRequest) SetName(val OptString) {
 	s.Name = val
@@ -11297,6 +14323,11 @@ func (s *UpdateSegmentRequest) SetName(val OptString) {
 // SetDescription sets the value of Description.
 func (s *UpdateSegmentRequest) SetDescription(val OptNilString) {
 	s.Description = val
+}
+
+// SetDefinition sets the value of Definition.
+func (s *UpdateSegmentRequest) SetDefinition(val OptSegmentDefinition) {
+	s.Definition = val
 }
 
 // Ref: #/components/schemas/UpdateTemplateDraftRequest
@@ -11491,6 +14522,188 @@ func (s *UsagePeriod) SetEnd(val Timestamp) {
 // SetTimezone sets the value of Timezone.
 func (s *UsagePeriod) SetTimezone(val string) {
 	s.Timezone = val
+}
+
+// Ref: #/components/schemas/ValidationDetail
+type ValidationDetail struct {
+	Line  int                   `json:"line"`
+	Field ValidationDetailField `json:"field"`
+	Code  ValidationDetailCode  `json:"code"`
+}
+
+// GetLine returns the value of Line.
+func (s *ValidationDetail) GetLine() int {
+	return s.Line
+}
+
+// GetField returns the value of Field.
+func (s *ValidationDetail) GetField() ValidationDetailField {
+	return s.Field
+}
+
+// GetCode returns the value of Code.
+func (s *ValidationDetail) GetCode() ValidationDetailCode {
+	return s.Code
+}
+
+// SetLine sets the value of Line.
+func (s *ValidationDetail) SetLine(val int) {
+	s.Line = val
+}
+
+// SetField sets the value of Field.
+func (s *ValidationDetail) SetField(val ValidationDetailField) {
+	s.Field = val
+}
+
+// SetCode sets the value of Code.
+func (s *ValidationDetail) SetCode(val ValidationDetailCode) {
+	s.Code = val
+}
+
+type ValidationDetailCode string
+
+const (
+	ValidationDetailCodeInvalidEncoding ValidationDetailCode = "invalid_encoding"
+	ValidationDetailCodeInvalidHeader   ValidationDetailCode = "invalid_header"
+	ValidationDetailCodeInvalidRow      ValidationDetailCode = "invalid_row"
+	ValidationDetailCodeTooManyRows     ValidationDetailCode = "too_many_rows"
+	ValidationDetailCodeInvalidRowCount ValidationDetailCode = "invalid_row_count"
+	ValidationDetailCodeInvalidEmail    ValidationDetailCode = "invalid_email"
+	ValidationDetailCodeInvalidBoolean  ValidationDetailCode = "invalid_boolean"
+	ValidationDetailCodeInvalidObject   ValidationDetailCode = "invalid_object"
+)
+
+// AllValues returns all ValidationDetailCode values.
+func (ValidationDetailCode) AllValues() []ValidationDetailCode {
+	return []ValidationDetailCode{
+		ValidationDetailCodeInvalidEncoding,
+		ValidationDetailCodeInvalidHeader,
+		ValidationDetailCodeInvalidRow,
+		ValidationDetailCodeTooManyRows,
+		ValidationDetailCodeInvalidRowCount,
+		ValidationDetailCodeInvalidEmail,
+		ValidationDetailCodeInvalidBoolean,
+		ValidationDetailCodeInvalidObject,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ValidationDetailCode) MarshalText() ([]byte, error) {
+	switch s {
+	case ValidationDetailCodeInvalidEncoding:
+		return []byte(s), nil
+	case ValidationDetailCodeInvalidHeader:
+		return []byte(s), nil
+	case ValidationDetailCodeInvalidRow:
+		return []byte(s), nil
+	case ValidationDetailCodeTooManyRows:
+		return []byte(s), nil
+	case ValidationDetailCodeInvalidRowCount:
+		return []byte(s), nil
+	case ValidationDetailCodeInvalidEmail:
+		return []byte(s), nil
+	case ValidationDetailCodeInvalidBoolean:
+		return []byte(s), nil
+	case ValidationDetailCodeInvalidObject:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ValidationDetailCode) UnmarshalText(data []byte) error {
+	switch ValidationDetailCode(data) {
+	case ValidationDetailCodeInvalidEncoding:
+		*s = ValidationDetailCodeInvalidEncoding
+		return nil
+	case ValidationDetailCodeInvalidHeader:
+		*s = ValidationDetailCodeInvalidHeader
+		return nil
+	case ValidationDetailCodeInvalidRow:
+		*s = ValidationDetailCodeInvalidRow
+		return nil
+	case ValidationDetailCodeTooManyRows:
+		*s = ValidationDetailCodeTooManyRows
+		return nil
+	case ValidationDetailCodeInvalidRowCount:
+		*s = ValidationDetailCodeInvalidRowCount
+		return nil
+	case ValidationDetailCodeInvalidEmail:
+		*s = ValidationDetailCodeInvalidEmail
+		return nil
+	case ValidationDetailCodeInvalidBoolean:
+		*s = ValidationDetailCodeInvalidBoolean
+		return nil
+	case ValidationDetailCodeInvalidObject:
+		*s = ValidationDetailCodeInvalidObject
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type ValidationDetailField string
+
+const (
+	ValidationDetailFieldCsv        ValidationDetailField = "csv"
+	ValidationDetailFieldHeader     ValidationDetailField = "header"
+	ValidationDetailFieldEmail      ValidationDetailField = "email"
+	ValidationDetailFieldSubscribed ValidationDetailField = "subscribed"
+	ValidationDetailFieldProperties ValidationDetailField = "properties"
+)
+
+// AllValues returns all ValidationDetailField values.
+func (ValidationDetailField) AllValues() []ValidationDetailField {
+	return []ValidationDetailField{
+		ValidationDetailFieldCsv,
+		ValidationDetailFieldHeader,
+		ValidationDetailFieldEmail,
+		ValidationDetailFieldSubscribed,
+		ValidationDetailFieldProperties,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ValidationDetailField) MarshalText() ([]byte, error) {
+	switch s {
+	case ValidationDetailFieldCsv:
+		return []byte(s), nil
+	case ValidationDetailFieldHeader:
+		return []byte(s), nil
+	case ValidationDetailFieldEmail:
+		return []byte(s), nil
+	case ValidationDetailFieldSubscribed:
+		return []byte(s), nil
+	case ValidationDetailFieldProperties:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ValidationDetailField) UnmarshalText(data []byte) error {
+	switch ValidationDetailField(data) {
+	case ValidationDetailFieldCsv:
+		*s = ValidationDetailFieldCsv
+		return nil
+	case ValidationDetailFieldHeader:
+		*s = ValidationDetailFieldHeader
+		return nil
+	case ValidationDetailFieldEmail:
+		*s = ValidationDetailFieldEmail
+		return nil
+	case ValidationDetailFieldSubscribed:
+		*s = ValidationDetailFieldSubscribed
+		return nil
+	case ValidationDetailFieldProperties:
+		*s = ValidationDetailFieldProperties
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // Ref: #/components/schemas/WebhookDeliveryAttempt
@@ -12216,6 +15429,7 @@ const (
 	WebhookSubscribableEventTypeUnsubscribe     WebhookSubscribableEventType = "unsubscribe"
 	WebhookSubscribableEventTypeRejected        WebhookSubscribableEventType = "rejected"
 	WebhookSubscribableEventTypeFailed          WebhookSubscribableEventType = "failed"
+	WebhookSubscribableEventTypeSuppressed      WebhookSubscribableEventType = "suppressed"
 	WebhookSubscribableEventTypeInboundReceived WebhookSubscribableEventType = "inbound.received"
 )
 
@@ -12234,6 +15448,7 @@ func (WebhookSubscribableEventType) AllValues() []WebhookSubscribableEventType {
 		WebhookSubscribableEventTypeUnsubscribe,
 		WebhookSubscribableEventTypeRejected,
 		WebhookSubscribableEventTypeFailed,
+		WebhookSubscribableEventTypeSuppressed,
 		WebhookSubscribableEventTypeInboundReceived,
 	}
 }
@@ -12264,6 +15479,8 @@ func (s WebhookSubscribableEventType) MarshalText() ([]byte, error) {
 	case WebhookSubscribableEventTypeRejected:
 		return []byte(s), nil
 	case WebhookSubscribableEventTypeFailed:
+		return []byte(s), nil
+	case WebhookSubscribableEventTypeSuppressed:
 		return []byte(s), nil
 	case WebhookSubscribableEventTypeInboundReceived:
 		return []byte(s), nil
@@ -12310,6 +15527,9 @@ func (s *WebhookSubscribableEventType) UnmarshalText(data []byte) error {
 		return nil
 	case WebhookSubscribableEventTypeFailed:
 		*s = WebhookSubscribableEventTypeFailed
+		return nil
+	case WebhookSubscribableEventTypeSuppressed:
+		*s = WebhookSubscribableEventTypeSuppressed
 		return nil
 	case WebhookSubscribableEventTypeInboundReceived:
 		*s = WebhookSubscribableEventTypeInboundReceived

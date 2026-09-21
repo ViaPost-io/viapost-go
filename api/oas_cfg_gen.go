@@ -11,7 +11,8 @@ import (
 
 var regexMap = map[string]ogenregex.Regexp{
 	"^/v1/.+/raw$": ogenregex.MustCompile("^/v1/.+/raw$"),
-	"^https://":    ogenregex.MustCompile("^https://"),
+	"^\\\\d{4}-\\\\d{2}-\\\\d{2}T\\\\d{2}:\\\\d{2}:\\\\d{2}(?:\\\\.\\\\d{1,9})?Z$": ogenregex.MustCompile("^\\\\d{4}-\\\\d{2}-\\\\d{2}T\\\\d{2}:\\\\d{2}:\\\\d{2}(?:\\\\.\\\\d{1,9})?Z$"),
+	"^https://": ogenregex.MustCompile("^https://"),
 }
 
 type (
