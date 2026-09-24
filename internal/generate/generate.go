@@ -16,17 +16,18 @@ import (
 //go:generate go run ../cmd/generate ../../openapi.yaml ../../api
 
 var (
-	unsupportedItems        = regexp.MustCompile(`(?m)^[\t ]*items: false[\t ]*\r?\n`)
-	canonicalUUIDBlock      = regexp.MustCompile(`(?m)^    UUID:\r?\n      type: string\r?\n      format: uuid[\t ]*$`)
-	uuidFormatLine          = regexp.MustCompile(`(?m)^[\t ]*format: uuid[\t ]*\r?\n`)
-	sessionReference        = regexp.MustCompile(`(?m)^[\t ]*- sessionCookie: \[\][\t ]*\r?\n`)
-	csrfListReference       = regexp.MustCompile(`(?m)^[\t ]*- \$ref: '#/components/parameters/CsrfHeader'[\t ]*\r?\n`)
-	csrfInlineParameters    = regexp.MustCompile(`(?m)^[\t ]*parameters: \[\{ \$ref: '#/components/parameters/CsrfHeader' \}\][\t ]*\r?\n`)
-	csrfComponent           = regexp.MustCompile(`(?ms)^    CsrfHeader:\r?\n.*?(^  securitySchemes:)`)
-	sessionScheme           = regexp.MustCompile(`(?ms)^    sessionCookie:\r?\n.*?(^  schemas:)`)
-	webhookDeliveryEvent    = regexp.MustCompile(`(?ms)^    WebhookDeliveryEventType:\r?\n      anyOf:\r?\n        - \$ref: '#/components/schemas/WebhookSubscribableEventType'\r?\n        - type: string\r?\n          const: webhook\.test[\t ]*$`)
-	propertyComparisonValue = regexp.MustCompile(`(?m)^        value:\r?\n          type:\r?\n            - string\r?\n            - number\r?\n            - boolean\r?\n`)
-	untypedConst            = regexp.MustCompile(`(?m)^([ \t]+)([[:alnum:]_]+):\r?\n([ \t]+)const: ([^\r\n]+)[\t ]*$`)
+	unsupportedItems         = regexp.MustCompile(`(?m)^[\t ]*items: false[\t ]*\r?\n`)
+	canonicalUUIDBlock       = regexp.MustCompile(`(?m)^    UUID:\r?\n      type: string\r?\n      format: uuid[\t ]*$`)
+	uuidFormatLine           = regexp.MustCompile(`(?m)^[\t ]*format: uuid[\t ]*\r?\n`)
+	sessionReference         = regexp.MustCompile(`(?m)^[\t ]*- sessionCookie: \[\][\t ]*\r?\n`)
+	csrfListReference        = regexp.MustCompile(`(?m)^[\t ]*- \$ref: '#/components/parameters/CsrfHeader'[\t ]*\r?\n`)
+	csrfInlineParameters     = regexp.MustCompile(`(?m)^[\t ]*parameters: \[\{ \$ref: '#/components/parameters/CsrfHeader' \}\][\t ]*\r?\n`)
+	csrfComponent            = regexp.MustCompile(`(?ms)^    CsrfHeader:\r?\n.*?(^  securitySchemes:)`)
+	sessionScheme            = regexp.MustCompile(`(?ms)^    sessionCookie:\r?\n.*?(^  schemas:)`)
+	webhookDeliveryEvent     = regexp.MustCompile(`(?ms)^    WebhookDeliveryEventType:\r?\n      anyOf:\r?\n        - \$ref: '#/components/schemas/WebhookSubscribableEventType'\r?\n        - type: string\r?\n          const: webhook\.test[\t ]*$`)
+	propertyComparisonValue  = regexp.MustCompile(`(?m)^        value:\r?\n          type:\r?\n            - string\r?\n            - number\r?\n            - boolean\r?\n`)
+	untypedConst             = regexp.MustCompile(`(?m)^([ \t]+)([[:alnum:]_]+):\r?\n([ \t]+)const: ([^\r\n]+)[\t ]*$`)
+	sendCustomEventSelection = regexp.MustCompile(`(?ms)(^    SendCustomEventRequest:\r?\n.*?)(^      anyOf:\r?\n.*?)(^      properties:\r?\n.*?)(^    [[:alnum:]_]+:|\z)`)
 )
 
 const (
@@ -75,11 +76,30 @@ func normalizeCodegenSpec(source []byte) ([]byte, error) {
 		return fmt.Sprintf("%s%s:\n%stype: %s\n%sconst: %s", parts[1], parts[2], parts[3], typ, parts[3], value)
 	})
 	var err error
+	normalized, err = relaxSendCustomEventSelection(normalized)
+	if err != nil {
+		return nil, err
+	}
 	normalized, err = rawSegmentObjectUnions(normalized)
 	if err != nil {
 		return nil, err
 	}
 	return []byte(normalized), nil
+}
+
+func relaxSendCustomEventSelection(source string) (string, error) {
+	matches := sendCustomEventSelection.FindAllStringSubmatchIndex(source, -1)
+	if len(matches) == 0 {
+		return source, nil
+	}
+	if len(matches) != 1 {
+		return "", fmt.Errorf("expected exactly one SendCustomEventRequest selection union, found %d", len(matches))
+	}
+	// ogen v1.24 cannot generate an object anyOf that selects between required
+	// fields. Remove only that selection rule in the temporary input: the
+	// versioned OpenAPI snapshot retains the exact API validation contract, and
+	// the generated client still exposes every wire field for both variants.
+	return sendCustomEventSelection.ReplaceAllString(source, "$1$3$4"), nil
 }
 
 func rawSegmentObjectUnions(source string) (string, error) {

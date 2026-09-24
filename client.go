@@ -20,7 +20,7 @@ import (
 
 const (
 	// Version is the semantic version of this SDK.
-	Version = "0.4.0"
+	Version = "0.5.0"
 	// DefaultBaseURL is the production ViaPost API endpoint.
 	DefaultBaseURL = "https://api.viapost.io"
 	// DefaultPublicStatusURL is the canonical unauthenticated status endpoint.

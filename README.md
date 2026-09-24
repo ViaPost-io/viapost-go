@@ -1,6 +1,6 @@
 # ViaPost Go SDK
 
-SDK oficial, server-side, para a API pública do ViaPost. A versão `v0.4.0` cobre envio de e-mails,
+SDK oficial, server-side, para a API pública do ViaPost. A versão `v0.5.0` cobre envio de e-mails,
 mensagens e métricas, domínios, templates, webhooks, automações e consumo mensal.
 
 > Nunca coloque uma API key no frontend, em logs ou no repositório. Leia a chave de um secret ou
@@ -9,7 +9,7 @@ mensagens e métricas, domínios, templates, webhooks, automações e consumo me
 ## Instalação
 
 ```bash
-go get github.com/ViaPost-io/viapost-go@v0.4.0
+go get github.com/ViaPost-io/viapost-go@v0.5.0
 ```
 
 O SDK requer Go 1.25 ou posterior. Desenvolvimento, CI e releases usam o toolchain
@@ -63,7 +63,7 @@ Um programa executável está em [`examples/send`](./examples/send).
 ## Configuração
 
 `NewClient` usa autenticação Bearer, `https://api.viapost.io`, timeout de 60 segundos e o
-User-Agent `viapost-go/0.4.0`. Use `WithBaseURL`, `WithTimeout`, `WithUserAgent`,
+User-Agent `viapost-go/0.5.0`. Use `WithBaseURL`, `WithTimeout`, `WithUserAgent`,
 `WithHTTPClient` ou `WithMaxRawResponseBytes` para customizar. Todo método recebe
 `context.Context`; o primeiro limite atingido
 entre o contexto e o timeout do cliente encerra a requisição. Mutações não são repetidas
@@ -138,7 +138,7 @@ Consulte [CONTRIBUTING.md](./CONTRIBUTING.md), [SECURITY.md](./SECURITY.md) e
 The official server-side Go SDK for the ViaPost public API. Install it with:
 
 ```bash
-go get github.com/ViaPost-io/viapost-go@v0.4.0
+go get github.com/ViaPost-io/viapost-go@v0.5.0
 ```
 
 Create a client with `viapost.NewClient(os.Getenv("VIAPOST_API_KEY"))`, then call the resource
