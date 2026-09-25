@@ -197,7 +197,8 @@ type GetMessagesIDRawParams struct {
 // GetMessagesMetricsParams is parameters of getMessagesMetrics operation.
 type GetMessagesMetricsParams struct {
 	// Valores não positivos ou inválidos usam 14; valores acima de 90 são limitados a 90.
-	Days     OptInt    `json:",omitempty,omitzero"`
+	Days OptInt `json:",omitempty,omitzero"`
+	// Filtra as métricas, inclusive `deliverability`, pelo UUID do domínio remetente.
 	DomainID OptString `json:",omitempty,omitzero"`
 }
 
@@ -400,6 +401,15 @@ type PostDomainsIDDkimRotateParams struct {
 // PostDomainsIDVerifyParams is parameters of postDomainsIdVerify operation.
 type PostDomainsIDVerifyParams struct {
 	ID string
+}
+
+// PostEventsSendParams is parameters of postEventsSend operation.
+type PostEventsSendParams struct {
+	// Chave opcional por tenant; espaços nas pontas são removidos e valor vazio equivale à ausência. O
+	// schema ativo do evento é revalidado antes da consulta à chave, portanto mesmo uma repetição
+	// idêntica pode retornar 400 após mudança de schema. Se a validação passar, conteúdo divergente
+	// para a mesma chave retorna 409.
+	IdempotencyKey OptString `json:",omitempty,omitzero"`
 }
 
 // PostMessagesIDCancelParams is parameters of postMessagesIdCancel operation.

@@ -3,6 +3,15 @@
 All notable changes to this project are documented in this file. This project follows
 [Semantic Versioning](https://semver.org/).
 
+## [0.5.0] - Unreleased
+
+### Fixed
+
+- Normalize only the `SendCustomEventRequest` identifier-selection `anyOf` in the temporary
+  ogen input. This keeps the versioned OpenAPI snapshot and public wire contract exact while
+  allowing the pinned ogen `v1.24.0` generator to produce both `contact_id` and `email` fields
+  when the reviewed public contract is synchronized.
+
 ## [0.4.0] - 2026-09-21
 
 ### Breaking changes

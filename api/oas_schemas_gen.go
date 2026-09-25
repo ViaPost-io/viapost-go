@@ -2219,6 +2219,393 @@ type DeleteWebhooksIDUnauthorized Error
 
 func (*DeleteWebhooksIDUnauthorized) deleteWebhooksIDRes() {}
 
+// Ref: #/components/schemas/DeliverabilityMetrics
+type DeliverabilityMetrics struct {
+	Providers  []DeliverabilityProviderMetrics `json:"providers"`
+	Rejections DeliverabilityRejections        `json:"rejections"`
+	// Mesmas contagens disjuntas para a janela imediatamente anterior, usada nos deltas.
+	PreviousRejections DeliverabilityRejections `json:"previous_rejections"`
+	// Até cinco domínios de destinatário com mais problemas.
+	ProblemDomains []DeliverabilityProblemDomain `json:"problem_domains"`
+	// Volume diário agrupado por dia civil em UTC.
+	Volume []DeliverabilityVolumeDay `json:"volume"`
+}
+
+// GetProviders returns the value of Providers.
+func (s *DeliverabilityMetrics) GetProviders() []DeliverabilityProviderMetrics {
+	return s.Providers
+}
+
+// GetRejections returns the value of Rejections.
+func (s *DeliverabilityMetrics) GetRejections() DeliverabilityRejections {
+	return s.Rejections
+}
+
+// GetPreviousRejections returns the value of PreviousRejections.
+func (s *DeliverabilityMetrics) GetPreviousRejections() DeliverabilityRejections {
+	return s.PreviousRejections
+}
+
+// GetProblemDomains returns the value of ProblemDomains.
+func (s *DeliverabilityMetrics) GetProblemDomains() []DeliverabilityProblemDomain {
+	return s.ProblemDomains
+}
+
+// GetVolume returns the value of Volume.
+func (s *DeliverabilityMetrics) GetVolume() []DeliverabilityVolumeDay {
+	return s.Volume
+}
+
+// SetProviders sets the value of Providers.
+func (s *DeliverabilityMetrics) SetProviders(val []DeliverabilityProviderMetrics) {
+	s.Providers = val
+}
+
+// SetRejections sets the value of Rejections.
+func (s *DeliverabilityMetrics) SetRejections(val DeliverabilityRejections) {
+	s.Rejections = val
+}
+
+// SetPreviousRejections sets the value of PreviousRejections.
+func (s *DeliverabilityMetrics) SetPreviousRejections(val DeliverabilityRejections) {
+	s.PreviousRejections = val
+}
+
+// SetProblemDomains sets the value of ProblemDomains.
+func (s *DeliverabilityMetrics) SetProblemDomains(val []DeliverabilityProblemDomain) {
+	s.ProblemDomains = val
+}
+
+// SetVolume sets the value of Volume.
+func (s *DeliverabilityMetrics) SetVolume(val []DeliverabilityVolumeDay) {
+	s.Volume = val
+}
+
+// Ref: #/components/schemas/DeliverabilityProblemDomain
+type DeliverabilityProblemDomain struct {
+	RecipientDomain string `json:"recipient_domain"`
+	// Volume de mensagens considerado para o domínio de destinatário.
+	Sent int `json:"sent"`
+	// Quantidade classificada como rejeição.
+	Rejected int `json:"rejected"`
+	// Categoria de rejeição predominante no domínio.
+	PrimaryReason DeliverabilityRejectionCause `json:"primary_reason"`
+}
+
+// GetRecipientDomain returns the value of RecipientDomain.
+func (s *DeliverabilityProblemDomain) GetRecipientDomain() string {
+	return s.RecipientDomain
+}
+
+// GetSent returns the value of Sent.
+func (s *DeliverabilityProblemDomain) GetSent() int {
+	return s.Sent
+}
+
+// GetRejected returns the value of Rejected.
+func (s *DeliverabilityProblemDomain) GetRejected() int {
+	return s.Rejected
+}
+
+// GetPrimaryReason returns the value of PrimaryReason.
+func (s *DeliverabilityProblemDomain) GetPrimaryReason() DeliverabilityRejectionCause {
+	return s.PrimaryReason
+}
+
+// SetRecipientDomain sets the value of RecipientDomain.
+func (s *DeliverabilityProblemDomain) SetRecipientDomain(val string) {
+	s.RecipientDomain = val
+}
+
+// SetSent sets the value of Sent.
+func (s *DeliverabilityProblemDomain) SetSent(val int) {
+	s.Sent = val
+}
+
+// SetRejected sets the value of Rejected.
+func (s *DeliverabilityProblemDomain) SetRejected(val int) {
+	s.Rejected = val
+}
+
+// SetPrimaryReason sets the value of PrimaryReason.
+func (s *DeliverabilityProblemDomain) SetPrimaryReason(val DeliverabilityRejectionCause) {
+	s.PrimaryReason = val
+}
+
+// Ref: #/components/schemas/DeliverabilityProviderMetrics
+type DeliverabilityProviderMetrics struct {
+	Provider DeliverabilityProviderName `json:"provider"`
+	// Total terminal em `delivered`, `complained`, `bounced`, `failed` ou `rejected`.
+	Total int `json:"total"`
+	// Mensagens em `delivered` ou `complained`; reclamações pressupõem entrega anterior.
+	Delivered int `json:"delivered"`
+}
+
+// GetProvider returns the value of Provider.
+func (s *DeliverabilityProviderMetrics) GetProvider() DeliverabilityProviderName {
+	return s.Provider
+}
+
+// GetTotal returns the value of Total.
+func (s *DeliverabilityProviderMetrics) GetTotal() int {
+	return s.Total
+}
+
+// GetDelivered returns the value of Delivered.
+func (s *DeliverabilityProviderMetrics) GetDelivered() int {
+	return s.Delivered
+}
+
+// SetProvider sets the value of Provider.
+func (s *DeliverabilityProviderMetrics) SetProvider(val DeliverabilityProviderName) {
+	s.Provider = val
+}
+
+// SetTotal sets the value of Total.
+func (s *DeliverabilityProviderMetrics) SetTotal(val int) {
+	s.Total = val
+}
+
+// SetDelivered sets the value of Delivered.
+func (s *DeliverabilityProviderMetrics) SetDelivered(val int) {
+	s.Delivered = val
+}
+
+// Provedor inferido exclusivamente de `recipient_domain` na v1, sem consulta ao MX. Domínios
+// personalizados ou não reconhecidos são classificados como `other`.
+// Ref: #/components/schemas/DeliverabilityProviderName
+type DeliverabilityProviderName string
+
+const (
+	DeliverabilityProviderNameGmail     DeliverabilityProviderName = "gmail"
+	DeliverabilityProviderNameOutlook   DeliverabilityProviderName = "outlook"
+	DeliverabilityProviderNameYahoo     DeliverabilityProviderName = "yahoo"
+	DeliverabilityProviderNameAppleMail DeliverabilityProviderName = "apple_mail"
+	DeliverabilityProviderNameUol       DeliverabilityProviderName = "uol"
+	DeliverabilityProviderNameOther     DeliverabilityProviderName = "other"
+)
+
+// AllValues returns all DeliverabilityProviderName values.
+func (DeliverabilityProviderName) AllValues() []DeliverabilityProviderName {
+	return []DeliverabilityProviderName{
+		DeliverabilityProviderNameGmail,
+		DeliverabilityProviderNameOutlook,
+		DeliverabilityProviderNameYahoo,
+		DeliverabilityProviderNameAppleMail,
+		DeliverabilityProviderNameUol,
+		DeliverabilityProviderNameOther,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s DeliverabilityProviderName) MarshalText() ([]byte, error) {
+	switch s {
+	case DeliverabilityProviderNameGmail:
+		return []byte(s), nil
+	case DeliverabilityProviderNameOutlook:
+		return []byte(s), nil
+	case DeliverabilityProviderNameYahoo:
+		return []byte(s), nil
+	case DeliverabilityProviderNameAppleMail:
+		return []byte(s), nil
+	case DeliverabilityProviderNameUol:
+		return []byte(s), nil
+	case DeliverabilityProviderNameOther:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *DeliverabilityProviderName) UnmarshalText(data []byte) error {
+	switch DeliverabilityProviderName(data) {
+	case DeliverabilityProviderNameGmail:
+		*s = DeliverabilityProviderNameGmail
+		return nil
+	case DeliverabilityProviderNameOutlook:
+		*s = DeliverabilityProviderNameOutlook
+		return nil
+	case DeliverabilityProviderNameYahoo:
+		*s = DeliverabilityProviderNameYahoo
+		return nil
+	case DeliverabilityProviderNameAppleMail:
+		*s = DeliverabilityProviderNameAppleMail
+		return nil
+	case DeliverabilityProviderNameUol:
+		*s = DeliverabilityProviderNameUol
+		return nil
+	case DeliverabilityProviderNameOther:
+		*s = DeliverabilityProviderNameOther
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/DeliverabilityRejectionCause
+type DeliverabilityRejectionCause string
+
+const (
+	DeliverabilityRejectionCauseSoftBounce        DeliverabilityRejectionCause = "soft_bounce"
+	DeliverabilityRejectionCauseHardBounce        DeliverabilityRejectionCause = "hard_bounce"
+	DeliverabilityRejectionCausePolicyBlock       DeliverabilityRejectionCause = "policy_block"
+	DeliverabilityRejectionCauseNonexistentDomain DeliverabilityRejectionCause = "nonexistent_domain"
+	DeliverabilityRejectionCauseOther             DeliverabilityRejectionCause = "other"
+)
+
+// AllValues returns all DeliverabilityRejectionCause values.
+func (DeliverabilityRejectionCause) AllValues() []DeliverabilityRejectionCause {
+	return []DeliverabilityRejectionCause{
+		DeliverabilityRejectionCauseSoftBounce,
+		DeliverabilityRejectionCauseHardBounce,
+		DeliverabilityRejectionCausePolicyBlock,
+		DeliverabilityRejectionCauseNonexistentDomain,
+		DeliverabilityRejectionCauseOther,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s DeliverabilityRejectionCause) MarshalText() ([]byte, error) {
+	switch s {
+	case DeliverabilityRejectionCauseSoftBounce:
+		return []byte(s), nil
+	case DeliverabilityRejectionCauseHardBounce:
+		return []byte(s), nil
+	case DeliverabilityRejectionCausePolicyBlock:
+		return []byte(s), nil
+	case DeliverabilityRejectionCauseNonexistentDomain:
+		return []byte(s), nil
+	case DeliverabilityRejectionCauseOther:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *DeliverabilityRejectionCause) UnmarshalText(data []byte) error {
+	switch DeliverabilityRejectionCause(data) {
+	case DeliverabilityRejectionCauseSoftBounce:
+		*s = DeliverabilityRejectionCauseSoftBounce
+		return nil
+	case DeliverabilityRejectionCauseHardBounce:
+		*s = DeliverabilityRejectionCauseHardBounce
+		return nil
+	case DeliverabilityRejectionCausePolicyBlock:
+		*s = DeliverabilityRejectionCausePolicyBlock
+		return nil
+	case DeliverabilityRejectionCauseNonexistentDomain:
+		*s = DeliverabilityRejectionCauseNonexistentDomain
+		return nil
+	case DeliverabilityRejectionCauseOther:
+		*s = DeliverabilityRejectionCauseOther
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Contagens disjuntas classificadas por estado e código estruturado. `soft_bounce` inclui eventos
+// `deferred`. Registros legados sem código estruturado que indiquem ausência de MX podem ser
+// classificados como `hard_bounce`; `nonexistent_domain` exige código estruturado.
+// Ref: #/components/schemas/DeliverabilityRejections
+type DeliverabilityRejections struct {
+	SoftBounce        int `json:"soft_bounce"`
+	HardBounce        int `json:"hard_bounce"`
+	PolicyBlock       int `json:"policy_block"`
+	NonexistentDomain int `json:"nonexistent_domain"`
+	Other             int `json:"other"`
+}
+
+// GetSoftBounce returns the value of SoftBounce.
+func (s *DeliverabilityRejections) GetSoftBounce() int {
+	return s.SoftBounce
+}
+
+// GetHardBounce returns the value of HardBounce.
+func (s *DeliverabilityRejections) GetHardBounce() int {
+	return s.HardBounce
+}
+
+// GetPolicyBlock returns the value of PolicyBlock.
+func (s *DeliverabilityRejections) GetPolicyBlock() int {
+	return s.PolicyBlock
+}
+
+// GetNonexistentDomain returns the value of NonexistentDomain.
+func (s *DeliverabilityRejections) GetNonexistentDomain() int {
+	return s.NonexistentDomain
+}
+
+// GetOther returns the value of Other.
+func (s *DeliverabilityRejections) GetOther() int {
+	return s.Other
+}
+
+// SetSoftBounce sets the value of SoftBounce.
+func (s *DeliverabilityRejections) SetSoftBounce(val int) {
+	s.SoftBounce = val
+}
+
+// SetHardBounce sets the value of HardBounce.
+func (s *DeliverabilityRejections) SetHardBounce(val int) {
+	s.HardBounce = val
+}
+
+// SetPolicyBlock sets the value of PolicyBlock.
+func (s *DeliverabilityRejections) SetPolicyBlock(val int) {
+	s.PolicyBlock = val
+}
+
+// SetNonexistentDomain sets the value of NonexistentDomain.
+func (s *DeliverabilityRejections) SetNonexistentDomain(val int) {
+	s.NonexistentDomain = val
+}
+
+// SetOther sets the value of Other.
+func (s *DeliverabilityRejections) SetOther(val int) {
+	s.Other = val
+}
+
+// Ref: #/components/schemas/DeliverabilityVolumeDay
+type DeliverabilityVolumeDay struct {
+	// Dia civil em UTC.
+	Date     time.Time `json:"date"`
+	Sent     int       `json:"sent"`
+	Rejected int       `json:"rejected"`
+}
+
+// GetDate returns the value of Date.
+func (s *DeliverabilityVolumeDay) GetDate() time.Time {
+	return s.Date
+}
+
+// GetSent returns the value of Sent.
+func (s *DeliverabilityVolumeDay) GetSent() int {
+	return s.Sent
+}
+
+// GetRejected returns the value of Rejected.
+func (s *DeliverabilityVolumeDay) GetRejected() int {
+	return s.Rejected
+}
+
+// SetDate sets the value of Date.
+func (s *DeliverabilityVolumeDay) SetDate(val time.Time) {
+	s.Date = val
+}
+
+// SetSent sets the value of Sent.
+func (s *DeliverabilityVolumeDay) SetSent(val int) {
+	s.Sent = val
+}
+
+// SetRejected sets the value of Rejected.
+func (s *DeliverabilityVolumeDay) SetRejected(val int) {
+	s.Rejected = val
+}
+
 // Ref: #/components/schemas/Domain
 type Domain struct {
 	ID                  UUID         `json:"id"`
@@ -7433,12 +7820,13 @@ func (s *MessageTimeseriesDay) SetCancelled(val int) {
 
 // Ref: #/components/schemas/MetricsResponse
 type MetricsResponse struct {
-	Since      Timestamp              `json:"since"`
-	Until      Timestamp              `json:"until"`
-	Current    MetricsSummary         `json:"current"`
-	Previous   MetricsSummary         `json:"previous"`
-	Timeseries []MetricsTimeseriesDay `json:"timeseries"`
-	ByDomain   []DomainMetrics        `json:"by_domain"`
+	Since          Timestamp              `json:"since"`
+	Until          Timestamp              `json:"until"`
+	Current        MetricsSummary         `json:"current"`
+	Previous       MetricsSummary         `json:"previous"`
+	Timeseries     []MetricsTimeseriesDay `json:"timeseries"`
+	ByDomain       []DomainMetrics        `json:"by_domain"`
+	Deliverability DeliverabilityMetrics  `json:"deliverability"`
 }
 
 // GetSince returns the value of Since.
@@ -7471,6 +7859,11 @@ func (s *MetricsResponse) GetByDomain() []DomainMetrics {
 	return s.ByDomain
 }
 
+// GetDeliverability returns the value of Deliverability.
+func (s *MetricsResponse) GetDeliverability() DeliverabilityMetrics {
+	return s.Deliverability
+}
+
 // SetSince sets the value of Since.
 func (s *MetricsResponse) SetSince(val Timestamp) {
 	s.Since = val
@@ -7501,7 +7894,38 @@ func (s *MetricsResponse) SetByDomain(val []DomainMetrics) {
 	s.ByDomain = val
 }
 
-func (*MetricsResponse) getMessagesMetricsRes() {}
+// SetDeliverability sets the value of Deliverability.
+func (s *MetricsResponse) SetDeliverability(val DeliverabilityMetrics) {
+	s.Deliverability = val
+}
+
+// MetricsResponseHeaders wraps MetricsResponse with response headers.
+type MetricsResponseHeaders struct {
+	CacheControl OptString
+	Response     MetricsResponse
+}
+
+// GetCacheControl returns the value of CacheControl.
+func (s *MetricsResponseHeaders) GetCacheControl() OptString {
+	return s.CacheControl
+}
+
+// GetResponse returns the value of Response.
+func (s *MetricsResponseHeaders) GetResponse() MetricsResponse {
+	return s.Response
+}
+
+// SetCacheControl sets the value of CacheControl.
+func (s *MetricsResponseHeaders) SetCacheControl(val OptString) {
+	s.CacheControl = val
+}
+
+// SetResponse sets the value of Response.
+func (s *MetricsResponseHeaders) SetResponse(val MetricsResponse) {
+	s.Response = val
+}
+
+func (*MetricsResponseHeaders) getMessagesMetricsRes() {}
 
 // Ref: #/components/schemas/MetricsSummary
 type MetricsSummary struct {
@@ -9403,38 +9827,38 @@ func (o OptSegmentDefinition) Or(d SegmentDefinition) SegmentDefinition {
 	return d
 }
 
-// NewOptSendCustomEventRequestProperties returns new OptSendCustomEventRequestProperties with value set to v.
-func NewOptSendCustomEventRequestProperties(v SendCustomEventRequestProperties) OptSendCustomEventRequestProperties {
-	return OptSendCustomEventRequestProperties{
+// NewOptSendCustomEventRequestPayload returns new OptSendCustomEventRequestPayload with value set to v.
+func NewOptSendCustomEventRequestPayload(v SendCustomEventRequestPayload) OptSendCustomEventRequestPayload {
+	return OptSendCustomEventRequestPayload{
 		Value: v,
 		Set:   true,
 	}
 }
 
-// OptSendCustomEventRequestProperties is optional SendCustomEventRequestProperties.
-type OptSendCustomEventRequestProperties struct {
-	Value SendCustomEventRequestProperties
+// OptSendCustomEventRequestPayload is optional SendCustomEventRequestPayload.
+type OptSendCustomEventRequestPayload struct {
+	Value SendCustomEventRequestPayload
 	Set   bool
 }
 
-// IsSet returns true if OptSendCustomEventRequestProperties was set.
-func (o OptSendCustomEventRequestProperties) IsSet() bool { return o.Set }
+// IsSet returns true if OptSendCustomEventRequestPayload was set.
+func (o OptSendCustomEventRequestPayload) IsSet() bool { return o.Set }
 
 // Reset unsets value.
-func (o *OptSendCustomEventRequestProperties) Reset() {
-	var v SendCustomEventRequestProperties
+func (o *OptSendCustomEventRequestPayload) Reset() {
+	var v SendCustomEventRequestPayload
 	o.Value = v
 	o.Set = false
 }
 
 // SetTo sets value to v.
-func (o *OptSendCustomEventRequestProperties) SetTo(v SendCustomEventRequestProperties) {
+func (o *OptSendCustomEventRequestPayload) SetTo(v SendCustomEventRequestPayload) {
 	o.Set = true
 	o.Value = v
 }
 
 // Get returns value and boolean that denotes whether value was set.
-func (o OptSendCustomEventRequestProperties) Get() (v SendCustomEventRequestProperties, ok bool) {
+func (o OptSendCustomEventRequestPayload) Get() (v SendCustomEventRequestPayload, ok bool) {
 	if !o.Set {
 		return v, false
 	}
@@ -9442,7 +9866,7 @@ func (o OptSendCustomEventRequestProperties) Get() (v SendCustomEventRequestProp
 }
 
 // Or returns value if set, or given parameter if does not.
-func (o OptSendCustomEventRequestProperties) Or(d SendCustomEventRequestProperties) SendCustomEventRequestProperties {
+func (o OptSendCustomEventRequestPayload) Or(d SendCustomEventRequestPayload) SendCustomEventRequestPayload {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -12289,11 +12713,19 @@ func (s *SegmentPreviewRequest) SetLimit(val OptInt) {
 
 type SegmentTimestamp time.Time
 
+// Exatamente um identificador efetivo. contact_id null equivale à ausência; email null ou
+// literalmente vazio é aceito somente junto de contact_id válido. Email contendo apenas espaços é
+// rejeitado pela validação do mailbox.
 // Ref: #/components/schemas/SendCustomEventRequest
 type SendCustomEventRequest struct {
-	Event      string                              `json:"event"`
-	ContactID  UUID                                `json:"contact_id"`
-	Properties OptSendCustomEventRequestProperties `json:"properties"`
+	Event     string     `json:"event"`
+	ContactID OptNilUUID `json:"contact_id"`
+	// Mailbox simples do contato no tenant ativo, validado pelo serviço após trim, com máximo de 254
+	// bytes; se não existir, cria contato não inscrito.
+	Email OptNilString `json:"email"`
+	// Objeto JSON opcional; máximo de 64 KiB no JSON recebido. Persistido; não inclua segredos ou dados
+	// pessoais desnecessários.
+	Payload OptSendCustomEventRequestPayload `json:"payload"`
 }
 
 // GetEvent returns the value of Event.
@@ -12302,13 +12734,18 @@ func (s *SendCustomEventRequest) GetEvent() string {
 }
 
 // GetContactID returns the value of ContactID.
-func (s *SendCustomEventRequest) GetContactID() UUID {
+func (s *SendCustomEventRequest) GetContactID() OptNilUUID {
 	return s.ContactID
 }
 
-// GetProperties returns the value of Properties.
-func (s *SendCustomEventRequest) GetProperties() OptSendCustomEventRequestProperties {
-	return s.Properties
+// GetEmail returns the value of Email.
+func (s *SendCustomEventRequest) GetEmail() OptNilString {
+	return s.Email
+}
+
+// GetPayload returns the value of Payload.
+func (s *SendCustomEventRequest) GetPayload() OptSendCustomEventRequestPayload {
+	return s.Payload
 }
 
 // SetEvent sets the value of Event.
@@ -12317,18 +12754,25 @@ func (s *SendCustomEventRequest) SetEvent(val string) {
 }
 
 // SetContactID sets the value of ContactID.
-func (s *SendCustomEventRequest) SetContactID(val UUID) {
+func (s *SendCustomEventRequest) SetContactID(val OptNilUUID) {
 	s.ContactID = val
 }
 
-// SetProperties sets the value of Properties.
-func (s *SendCustomEventRequest) SetProperties(val OptSendCustomEventRequestProperties) {
-	s.Properties = val
+// SetEmail sets the value of Email.
+func (s *SendCustomEventRequest) SetEmail(val OptNilString) {
+	s.Email = val
 }
 
-type SendCustomEventRequestProperties map[string]jx.Raw
+// SetPayload sets the value of Payload.
+func (s *SendCustomEventRequest) SetPayload(val OptSendCustomEventRequestPayload) {
+	s.Payload = val
+}
 
-func (s *SendCustomEventRequestProperties) init() SendCustomEventRequestProperties {
+// Objeto JSON opcional; máximo de 64 KiB no JSON recebido. Persistido; não inclua segredos ou dados
+// pessoais desnecessários.
+type SendCustomEventRequestPayload map[string]jx.Raw
+
+func (s *SendCustomEventRequestPayload) init() SendCustomEventRequestPayload {
 	m := *s
 	if m == nil {
 		m = map[string]jx.Raw{}

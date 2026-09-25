@@ -7315,6 +7315,857 @@ func (s *DeleteWebhooksIDUnauthorized) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
+func (s *DeliverabilityMetrics) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *DeliverabilityMetrics) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("providers")
+		e.ArrStart()
+		for _, elem := range s.Providers {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("rejections")
+		s.Rejections.Encode(e)
+	}
+	{
+		e.FieldStart("previous_rejections")
+		s.PreviousRejections.Encode(e)
+	}
+	{
+		e.FieldStart("problem_domains")
+		e.ArrStart()
+		for _, elem := range s.ProblemDomains {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("volume")
+		e.ArrStart()
+		for _, elem := range s.Volume {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+}
+
+var jsonFieldsNameOfDeliverabilityMetrics = [5]string{
+	0: "providers",
+	1: "rejections",
+	2: "previous_rejections",
+	3: "problem_domains",
+	4: "volume",
+}
+
+// Decode decodes DeliverabilityMetrics from json.
+func (s *DeliverabilityMetrics) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode DeliverabilityMetrics to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "providers":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				s.Providers = make([]DeliverabilityProviderMetrics, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem DeliverabilityProviderMetrics
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Providers = append(s.Providers, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"providers\"")
+			}
+		case "rejections":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				if err := s.Rejections.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"rejections\"")
+			}
+		case "previous_rejections":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				if err := s.PreviousRejections.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"previous_rejections\"")
+			}
+		case "problem_domains":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				s.ProblemDomains = make([]DeliverabilityProblemDomain, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem DeliverabilityProblemDomain
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.ProblemDomains = append(s.ProblemDomains, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"problem_domains\"")
+			}
+		case "volume":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				s.Volume = make([]DeliverabilityVolumeDay, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem DeliverabilityVolumeDay
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Volume = append(s.Volume, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"volume\"")
+			}
+		default:
+			return errors.Errorf("unexpected field %q", k)
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode DeliverabilityMetrics")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00011111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfDeliverabilityMetrics) {
+					name = jsonFieldsNameOfDeliverabilityMetrics[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *DeliverabilityMetrics) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *DeliverabilityMetrics) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *DeliverabilityProblemDomain) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *DeliverabilityProblemDomain) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("recipient_domain")
+		e.Str(s.RecipientDomain)
+	}
+	{
+		e.FieldStart("sent")
+		e.Int(s.Sent)
+	}
+	{
+		e.FieldStart("rejected")
+		e.Int(s.Rejected)
+	}
+	{
+		e.FieldStart("primary_reason")
+		s.PrimaryReason.Encode(e)
+	}
+}
+
+var jsonFieldsNameOfDeliverabilityProblemDomain = [4]string{
+	0: "recipient_domain",
+	1: "sent",
+	2: "rejected",
+	3: "primary_reason",
+}
+
+// Decode decodes DeliverabilityProblemDomain from json.
+func (s *DeliverabilityProblemDomain) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode DeliverabilityProblemDomain to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "recipient_domain":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.RecipientDomain = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"recipient_domain\"")
+			}
+		case "sent":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Int()
+				s.Sent = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"sent\"")
+			}
+		case "rejected":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Int()
+				s.Rejected = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"rejected\"")
+			}
+		case "primary_reason":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				if err := s.PrimaryReason.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"primary_reason\"")
+			}
+		default:
+			return errors.Errorf("unexpected field %q", k)
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode DeliverabilityProblemDomain")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00001111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfDeliverabilityProblemDomain) {
+					name = jsonFieldsNameOfDeliverabilityProblemDomain[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *DeliverabilityProblemDomain) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *DeliverabilityProblemDomain) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *DeliverabilityProviderMetrics) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *DeliverabilityProviderMetrics) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("provider")
+		s.Provider.Encode(e)
+	}
+	{
+		e.FieldStart("total")
+		e.Int(s.Total)
+	}
+	{
+		e.FieldStart("delivered")
+		e.Int(s.Delivered)
+	}
+}
+
+var jsonFieldsNameOfDeliverabilityProviderMetrics = [3]string{
+	0: "provider",
+	1: "total",
+	2: "delivered",
+}
+
+// Decode decodes DeliverabilityProviderMetrics from json.
+func (s *DeliverabilityProviderMetrics) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode DeliverabilityProviderMetrics to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "provider":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				if err := s.Provider.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"provider\"")
+			}
+		case "total":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Int()
+				s.Total = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"total\"")
+			}
+		case "delivered":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Int()
+				s.Delivered = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"delivered\"")
+			}
+		default:
+			return errors.Errorf("unexpected field %q", k)
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode DeliverabilityProviderMetrics")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfDeliverabilityProviderMetrics) {
+					name = jsonFieldsNameOfDeliverabilityProviderMetrics[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *DeliverabilityProviderMetrics) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *DeliverabilityProviderMetrics) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes DeliverabilityProviderName as json.
+func (s DeliverabilityProviderName) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes DeliverabilityProviderName from json.
+func (s *DeliverabilityProviderName) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode DeliverabilityProviderName to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch DeliverabilityProviderName(v) {
+	case DeliverabilityProviderNameGmail:
+		*s = DeliverabilityProviderNameGmail
+	case DeliverabilityProviderNameOutlook:
+		*s = DeliverabilityProviderNameOutlook
+	case DeliverabilityProviderNameYahoo:
+		*s = DeliverabilityProviderNameYahoo
+	case DeliverabilityProviderNameAppleMail:
+		*s = DeliverabilityProviderNameAppleMail
+	case DeliverabilityProviderNameUol:
+		*s = DeliverabilityProviderNameUol
+	case DeliverabilityProviderNameOther:
+		*s = DeliverabilityProviderNameOther
+	default:
+		*s = DeliverabilityProviderName(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s DeliverabilityProviderName) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *DeliverabilityProviderName) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes DeliverabilityRejectionCause as json.
+func (s DeliverabilityRejectionCause) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes DeliverabilityRejectionCause from json.
+func (s *DeliverabilityRejectionCause) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode DeliverabilityRejectionCause to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch DeliverabilityRejectionCause(v) {
+	case DeliverabilityRejectionCauseSoftBounce:
+		*s = DeliverabilityRejectionCauseSoftBounce
+	case DeliverabilityRejectionCauseHardBounce:
+		*s = DeliverabilityRejectionCauseHardBounce
+	case DeliverabilityRejectionCausePolicyBlock:
+		*s = DeliverabilityRejectionCausePolicyBlock
+	case DeliverabilityRejectionCauseNonexistentDomain:
+		*s = DeliverabilityRejectionCauseNonexistentDomain
+	case DeliverabilityRejectionCauseOther:
+		*s = DeliverabilityRejectionCauseOther
+	default:
+		*s = DeliverabilityRejectionCause(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s DeliverabilityRejectionCause) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *DeliverabilityRejectionCause) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *DeliverabilityRejections) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *DeliverabilityRejections) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("soft_bounce")
+		e.Int(s.SoftBounce)
+	}
+	{
+		e.FieldStart("hard_bounce")
+		e.Int(s.HardBounce)
+	}
+	{
+		e.FieldStart("policy_block")
+		e.Int(s.PolicyBlock)
+	}
+	{
+		e.FieldStart("nonexistent_domain")
+		e.Int(s.NonexistentDomain)
+	}
+	{
+		e.FieldStart("other")
+		e.Int(s.Other)
+	}
+}
+
+var jsonFieldsNameOfDeliverabilityRejections = [5]string{
+	0: "soft_bounce",
+	1: "hard_bounce",
+	2: "policy_block",
+	3: "nonexistent_domain",
+	4: "other",
+}
+
+// Decode decodes DeliverabilityRejections from json.
+func (s *DeliverabilityRejections) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode DeliverabilityRejections to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "soft_bounce":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Int()
+				s.SoftBounce = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"soft_bounce\"")
+			}
+		case "hard_bounce":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Int()
+				s.HardBounce = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"hard_bounce\"")
+			}
+		case "policy_block":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Int()
+				s.PolicyBlock = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"policy_block\"")
+			}
+		case "nonexistent_domain":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Int()
+				s.NonexistentDomain = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"nonexistent_domain\"")
+			}
+		case "other":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				v, err := d.Int()
+				s.Other = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"other\"")
+			}
+		default:
+			return errors.Errorf("unexpected field %q", k)
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode DeliverabilityRejections")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00011111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfDeliverabilityRejections) {
+					name = jsonFieldsNameOfDeliverabilityRejections[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *DeliverabilityRejections) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *DeliverabilityRejections) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *DeliverabilityVolumeDay) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *DeliverabilityVolumeDay) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("date")
+		json.EncodeDate(e, s.Date)
+	}
+	{
+		e.FieldStart("sent")
+		e.Int(s.Sent)
+	}
+	{
+		e.FieldStart("rejected")
+		e.Int(s.Rejected)
+	}
+}
+
+var jsonFieldsNameOfDeliverabilityVolumeDay = [3]string{
+	0: "date",
+	1: "sent",
+	2: "rejected",
+}
+
+// Decode decodes DeliverabilityVolumeDay from json.
+func (s *DeliverabilityVolumeDay) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode DeliverabilityVolumeDay to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "date":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := json.DecodeDate(d)
+				s.Date = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"date\"")
+			}
+		case "sent":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Int()
+				s.Sent = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"sent\"")
+			}
+		case "rejected":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Int()
+				s.Rejected = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"rejected\"")
+			}
+		default:
+			return errors.Errorf("unexpected field %q", k)
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode DeliverabilityVolumeDay")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfDeliverabilityVolumeDay) {
+					name = jsonFieldsNameOfDeliverabilityVolumeDay[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *DeliverabilityVolumeDay) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *DeliverabilityVolumeDay) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
 func (s *Domain) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -23365,15 +24216,20 @@ func (s *MetricsResponse) encodeFields(e *jx.Encoder) {
 		}
 		e.ArrEnd()
 	}
+	{
+		e.FieldStart("deliverability")
+		s.Deliverability.Encode(e)
+	}
 }
 
-var jsonFieldsNameOfMetricsResponse = [6]string{
+var jsonFieldsNameOfMetricsResponse = [7]string{
 	0: "since",
 	1: "until",
 	2: "current",
 	3: "previous",
 	4: "timeseries",
 	5: "by_domain",
+	6: "deliverability",
 }
 
 // Decode decodes MetricsResponse from json.
@@ -23461,6 +24317,16 @@ func (s *MetricsResponse) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"by_domain\"")
 			}
+		case "deliverability":
+			requiredBitSet[0] |= 1 << 6
+			if err := func() error {
+				if err := s.Deliverability.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"deliverability\"")
+			}
 		default:
 			return errors.Errorf("unexpected field %q", k)
 		}
@@ -23471,7 +24337,7 @@ func (s *MetricsResponse) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00111111,
+		0b01111111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -25059,21 +25925,21 @@ func (s *OptSegmentDefinition) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode encodes SendCustomEventRequestProperties as json.
-func (o OptSendCustomEventRequestProperties) Encode(e *jx.Encoder) {
+// Encode encodes SendCustomEventRequestPayload as json.
+func (o OptSendCustomEventRequestPayload) Encode(e *jx.Encoder) {
 	if !o.Set {
 		return
 	}
 	o.Value.Encode(e)
 }
 
-// Decode decodes SendCustomEventRequestProperties from json.
-func (o *OptSendCustomEventRequestProperties) Decode(d *jx.Decoder) error {
+// Decode decodes SendCustomEventRequestPayload from json.
+func (o *OptSendCustomEventRequestPayload) Decode(d *jx.Decoder) error {
 	if o == nil {
-		return errors.New("invalid: unable to decode OptSendCustomEventRequestProperties to nil")
+		return errors.New("invalid: unable to decode OptSendCustomEventRequestPayload to nil")
 	}
 	o.Set = true
-	o.Value = make(SendCustomEventRequestProperties)
+	o.Value = make(SendCustomEventRequestPayload)
 	if err := o.Value.Decode(d); err != nil {
 		return err
 	}
@@ -25081,14 +25947,14 @@ func (o *OptSendCustomEventRequestProperties) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s OptSendCustomEventRequestProperties) MarshalJSON() ([]byte, error) {
+func (s OptSendCustomEventRequestPayload) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptSendCustomEventRequestProperties) UnmarshalJSON(data []byte) error {
+func (s *OptSendCustomEventRequestPayload) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -37348,21 +38214,30 @@ func (s *SendCustomEventRequest) encodeFields(e *jx.Encoder) {
 		e.Str(s.Event)
 	}
 	{
-		e.FieldStart("contact_id")
-		s.ContactID.Encode(e)
+		if s.ContactID.Set {
+			e.FieldStart("contact_id")
+			s.ContactID.Encode(e)
+		}
 	}
 	{
-		if s.Properties.Set {
-			e.FieldStart("properties")
-			s.Properties.Encode(e)
+		if s.Email.Set {
+			e.FieldStart("email")
+			s.Email.Encode(e)
+		}
+	}
+	{
+		if s.Payload.Set {
+			e.FieldStart("payload")
+			s.Payload.Encode(e)
 		}
 	}
 }
 
-var jsonFieldsNameOfSendCustomEventRequest = [3]string{
+var jsonFieldsNameOfSendCustomEventRequest = [4]string{
 	0: "event",
 	1: "contact_id",
-	2: "properties",
+	2: "email",
+	3: "payload",
 }
 
 // Decode decodes SendCustomEventRequest from json.
@@ -37387,8 +38262,8 @@ func (s *SendCustomEventRequest) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"event\"")
 			}
 		case "contact_id":
-			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
+				s.ContactID.Reset()
 				if err := s.ContactID.Decode(d); err != nil {
 					return err
 				}
@@ -37396,15 +38271,25 @@ func (s *SendCustomEventRequest) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"contact_id\"")
 			}
-		case "properties":
+		case "email":
 			if err := func() error {
-				s.Properties.Reset()
-				if err := s.Properties.Decode(d); err != nil {
+				s.Email.Reset()
+				if err := s.Email.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"properties\"")
+				return errors.Wrap(err, "decode field \"email\"")
+			}
+		case "payload":
+			if err := func() error {
+				s.Payload.Reset()
+				if err := s.Payload.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"payload\"")
 			}
 		default:
 			return errors.Errorf("unexpected field %q", k)
@@ -37416,7 +38301,7 @@ func (s *SendCustomEventRequest) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000011,
+		0b00000001,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -37463,14 +38348,14 @@ func (s *SendCustomEventRequest) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s SendCustomEventRequestProperties) Encode(e *jx.Encoder) {
+func (s SendCustomEventRequestPayload) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields implements json.Marshaler.
-func (s SendCustomEventRequestProperties) encodeFields(e *jx.Encoder) {
+func (s SendCustomEventRequestPayload) encodeFields(e *jx.Encoder) {
 	for k, elem := range s {
 		e.FieldStart(k)
 
@@ -37480,10 +38365,10 @@ func (s SendCustomEventRequestProperties) encodeFields(e *jx.Encoder) {
 	}
 }
 
-// Decode decodes SendCustomEventRequestProperties from json.
-func (s *SendCustomEventRequestProperties) Decode(d *jx.Decoder) error {
+// Decode decodes SendCustomEventRequestPayload from json.
+func (s *SendCustomEventRequestPayload) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode SendCustomEventRequestProperties to nil")
+		return errors.New("invalid: unable to decode SendCustomEventRequestPayload to nil")
 	}
 	m := s.init()
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
@@ -37501,21 +38386,21 @@ func (s *SendCustomEventRequestProperties) Decode(d *jx.Decoder) error {
 		m[string(k)] = elem
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode SendCustomEventRequestProperties")
+		return errors.Wrap(err, "decode SendCustomEventRequestPayload")
 	}
 
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s SendCustomEventRequestProperties) MarshalJSON() ([]byte, error) {
+func (s SendCustomEventRequestPayload) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *SendCustomEventRequestProperties) UnmarshalJSON(data []byte) error {
+func (s *SendCustomEventRequestPayload) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
