@@ -262,7 +262,9 @@ type Invoker interface {
 	GetMessagesIDRaw(ctx context.Context, params GetMessagesIDRawParams) (GetMessagesIDRawRes, error)
 	// GetMessagesMetrics invokes getMessagesMetrics operation.
 	//
-	// GET /v1/messages/metrics.
+	// Retorna as métricas atuais e anteriores, séries temporais, agregação por domínio remetente e as
+	// agregações de entregabilidade. A extensão `deliverability` é aditiva; os campos existentes
+	// permanecem inalterados.
 	//
 	// GET /v1/messages/metrics
 	GetMessagesMetrics(ctx context.Context, params GetMessagesMetricsParams) (GetMessagesMetricsRes, error)
@@ -544,7 +546,7 @@ type Invoker interface {
 	// POST /v1/events/send.
 	//
 	// POST /v1/events/send
-	PostEventsSend(ctx context.Context, request *SendCustomEventRequest) (PostEventsSendRes, error)
+	PostEventsSend(ctx context.Context, request *SendCustomEventRequest, params PostEventsSendParams) (PostEventsSendRes, error)
 	// PostMessagesIDCancel invokes postMessagesIdCancel operation.
 	//
 	// Faz a transição atômica de `scheduled` para `cancelled` somente para o tenant autenticado. Se o
@@ -4279,7 +4281,9 @@ func (c *Client) sendGetMessagesIDRaw(ctx context.Context, params GetMessagesIDR
 
 // GetMessagesMetrics invokes getMessagesMetrics operation.
 //
-// GET /v1/messages/metrics.
+// Retorna as métricas atuais e anteriores, séries temporais, agregação por domínio remetente e as
+// agregações de entregabilidade. A extensão `deliverability` é aditiva; os campos existentes
+// permanecem inalterados.
 //
 // GET /v1/messages/metrics
 func (c *Client) GetMessagesMetrics(ctx context.Context, params GetMessagesMetricsParams) (GetMessagesMetricsRes, error) {
@@ -8660,12 +8664,21 @@ func (c *Client) sendPostEvents(ctx context.Context, request *CreateCustomEventR
 // POST /v1/events/send.
 //
 // POST /v1/events/send
-func (c *Client) PostEventsSend(ctx context.Context, request *SendCustomEventRequest) (PostEventsSendRes, error) {
-	res, err := c.sendPostEventsSend(ctx, request)
+func (c *Client) PostEventsSend(ctx context.Context, request *SendCustomEventRequest, params PostEventsSendParams) (PostEventsSendRes, error) {
+	res, err := c.sendPostEventsSend(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendPostEventsSend(ctx context.Context, request *SendCustomEventRequest) (res PostEventsSendRes, err error) {
+func (c *Client) sendPostEventsSend(ctx context.Context, request *SendCustomEventRequest, params PostEventsSendParams) (res PostEventsSendRes, err error) {
+	// Validate request before sending.
+	if err := func() error {
+		if err := request.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return res, errors.Wrap(err, "validate")
+	}
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
@@ -8678,6 +8691,22 @@ func (c *Client) sendPostEventsSend(ctx context.Context, request *SendCustomEven
 	}
 	if err := encodePostEventsSendRequest(request, r); err != nil {
 		return res, errors.Wrap(err, "encode request")
+	}
+
+	h := uri.NewHeaderEncoder(r.Header)
+	{
+		cfg := uri.HeaderParameterEncodingConfig{
+			Name:    "Idempotency-Key",
+			Explode: false,
+		}
+		if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.IdempotencyKey.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode header")
+		}
 	}
 
 	{

@@ -170,6 +170,20 @@ func addSegmentBoundaryValidation(targetPath string) error {
 		return fmt.Errorf("read generated segment request encoders: %w", err)
 	}
 	replacements := map[string]string{
+		`func encodePostEventsSendRequest(
+	req *SendCustomEventRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+`: `func encodePostEventsSendRequest(
+	req *SendCustomEventRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	if err := validateSendCustomEventRequest(req); err != nil {
+		return err
+	}
+`,
 		`func encodePatchSegmentsIDRequest(
 	req *UpdateSegmentRequest,
 	r *http.Request,
@@ -219,6 +233,24 @@ func addSegmentBoundaryValidation(targetPath string) error {
 		}
 		content = bytes.Replace(content, []byte(original), []byte(replacement), 1)
 	}
+	if bytes.Count(content, []byte("import (\n")) != 1 {
+		return fmt.Errorf("expected exactly one generated request encoder import block")
+	}
+	content = bytes.Replace(content, []byte("import (\n"), []byte("import (\n\t\"errors\"\n"), 1)
+	content = append(content, []byte(`
+
+func validateSendCustomEventRequest(req *SendCustomEventRequest) error {
+	if req == nil {
+		return errors.New("invalid: SendCustomEventRequest is nil")
+	}
+	hasContactID := req.ContactID.Set && !req.ContactID.Null
+	hasEmail := req.Email.Set && !req.Email.Null && req.Email.Value != ""
+	if hasContactID == hasEmail {
+		return errors.New("invalid: exactly one of contact_id or email must be set")
+	}
+	return nil
+}
+`)...)
 	formatted, err := format.Source(content)
 	if err != nil {
 		return fmt.Errorf("format generated segment request encoders: %w", err)

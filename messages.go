@@ -115,11 +115,11 @@ func (s *MessagesService) Metrics(ctx context.Context, days int, domainID string
 	if err != nil {
 		return nil, err
 	}
-	result, ok := response.(*api.MetricsResponse)
+	result, ok := response.(*api.MetricsResponseHeaders)
 	if !ok {
 		return nil, fmt.Errorf("viapost: unexpected GET /v1/messages/metrics response %T", response)
 	}
-	converted, err := convertGenerated[MetricsResponse](result)
+	converted, err := convertGenerated[MetricsResponse](&result.Response)
 	return &converted, err
 }
 

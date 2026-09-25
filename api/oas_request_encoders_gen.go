@@ -4,6 +4,7 @@ package api
 
 import (
 	"bytes"
+	"errors"
 	"net/http"
 
 	"github.com/go-faster/jx"
@@ -196,6 +197,9 @@ func encodePostEventsSendRequest(
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
+	if err := validateSendCustomEventRequest(req); err != nil {
+		return err
+	}
 	e := new(jx.Encoder)
 	{
 		req.Encode(e)
@@ -510,5 +514,17 @@ func encodePostWebhooksIDTestRequest(
 	}
 	encoded := e.Bytes()
 	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func validateSendCustomEventRequest(req *SendCustomEventRequest) error {
+	if req == nil {
+		return errors.New("invalid: SendCustomEventRequest is nil")
+	}
+	hasContactID := req.ContactID.Set && !req.ContactID.Null
+	hasEmail := req.Email.Set && !req.Email.Null && req.Email.Value != ""
+	if hasContactID == hasEmail {
+		return errors.New("invalid: exactly one of contact_id or email must be set")
+	}
 	return nil
 }

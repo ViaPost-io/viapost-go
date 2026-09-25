@@ -29,7 +29,7 @@ func TestResourceFacade_HTTPContracts(t *testing.T) {
 	}{
 		{"messages get", http.MethodGet, "/v1/messages/" + id, http.StatusOK, message, func(ctx context.Context, client *Client) error { _, err := client.Messages.Get(ctx, id); return err }},
 		{"messages events", http.MethodGet, "/v1/messages/" + id + "/events", http.StatusOK, `{"events":[]}`, func(ctx context.Context, client *Client) error { _, err := client.Messages.Events(ctx, id); return err }},
-		{"messages metrics", http.MethodGet, "/v1/messages/metrics", http.StatusOK, `{"since":"` + timestamp + `","until":"` + timestamp + `","current":{"total":0,"delivered":0,"opened":0,"clicked":0,"bounced":0,"complained":0},"previous":{"total":0,"delivered":0,"opened":0,"clicked":0,"bounced":0,"complained":0},"timeseries":[],"by_domain":[]}`, func(ctx context.Context, client *Client) error {
+		{"messages metrics", http.MethodGet, "/v1/messages/metrics", http.StatusOK, `{"since":"` + timestamp + `","until":"` + timestamp + `","current":{"total":0,"delivered":0,"opened":0,"clicked":0,"bounced":0,"complained":0},"previous":{"total":0,"delivered":0,"opened":0,"clicked":0,"bounced":0,"complained":0},"timeseries":[],"by_domain":[],"deliverability":{"providers":[],"rejections":{"soft_bounce":0,"hard_bounce":0,"policy_block":0,"nonexistent_domain":0,"other":0},"previous_rejections":{"soft_bounce":0,"hard_bounce":0,"policy_block":0,"nonexistent_domain":0,"other":0},"problem_domains":[],"volume":[]}}`, func(ctx context.Context, client *Client) error {
 			_, err := client.Messages.Metrics(ctx, 14, "")
 			return err
 		}},

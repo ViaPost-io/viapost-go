@@ -103,13 +103,13 @@ O cliente público bloqueia operações autenticadas e usa `https://status.viapo
 
 O arquivo [`openapi.yaml`](./openapi.yaml) é um snapshot versionado do contrato público em
 [`docs.viapost.io/openapi/public.yaml`](https://docs.viapost.io/openapi/public.yaml), sincronizado
-da fonte `ViaPost-io/base-code/docs/openapi/public.yaml` no merge
-`a8d78b4dc2140d3ceee2dbc52eb9ee438b640560`.
+em 2026-09-25. O workflow agendado de drift verifica semanticamente o snapshot contra esse
+contrato canônico.
 
 SHA-256 do snapshot:
 
 ```text
-4296cf369c8a2b1e27f215fddc36dbafb4203aa35c509095df1048243b8da847
+7c931b5a4a2a602d3c42341f2a70af9c49378600894b31adebfd333469b9e183
 ```
 
 O código em `api/` é gerado com ogen `v1.24.0`, está versionado e não busca schemas remotos:
