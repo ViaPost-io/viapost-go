@@ -12,6 +12,17 @@ All notable changes to this project are documented in this file. This project fo
   low-level generated interfaces must add the corresponding operations.
 - `api.DynamicSegmentMembershipErrorError.Code` is now the documented `string` constant instead
   of `jx.Raw`; consumers assigning or comparing raw JSON must migrate to a string.
+- The generated segment API changes request and response representations: `PostSegments` accepts
+  an `api.CreateSegmentRequest` value (not a pointer), and `CreateSegmentRequest`, `Segment`, and
+  `SegmentDefinition` are JSON-raw maps. `Contact.CreatedAt` and `UpdatedAt` use
+  `api.SegmentTimestamp`; `ContactList.NextCursor` and `SegmentList.NextCursor` are strings;
+  `Message.Status` and `MessageDetail.Status` use named status types. See the
+  [v0.4.0 migration guide](docs/migrations/v0.4.0.md) for before/after code and the complete
+  low-level compatibility inventory.
+- `CreateWebhookResult.Secret` is now accessed with `CreateWebhookResult.Secret()` so ordinary
+  formatting and JSON serialization redact the one-time secret. Several generated error response
+  types are no longer comparable, and responses no longer present in the public contract were
+  removed; the migration guide lists the affected names.
 
 ### Changed
 

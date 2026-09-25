@@ -99,6 +99,13 @@ snapshot, err := statusClient.GetPublicStatus(ctx)
 
 O cliente público bloqueia operações autenticadas e usa `https://status.viapost.io` por padrão.
 
+## Migração
+
+Ao atualizar para `v0.4.0`, revise o [guia de migração](docs/migrations/v0.4.0.md), especialmente
+se seu código usa o cliente gerado por `client.Raw()` ou implementa `api.Invoker`. Ele cobre as
+mudanças de segmentos, timestamps, cursores, status nomeados, segredos de webhook e respostas
+geradas.
+
 ## Contrato e geração
 
 O arquivo [`openapi.yaml`](./openapi.yaml) é um snapshot versionado do contrato público em
