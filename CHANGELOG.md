@@ -3,7 +3,16 @@
 All notable changes to this project are documented in this file. This project follows
 [Semantic Versioning](https://semver.org/).
 
-## [0.5.0] - Unreleased
+## [0.6.0] - Unreleased
+
+### Breaking changes
+
+- Synchronize the low-level generated timeline client with the public `include=inbound` contract.
+  `GetMessagesEventsParams.Type` uses `OptMessageTimelineFilterType`, and the response uses
+  `GetMessagesEventsOKHeaders` with raw event objects so both legacy and mixed pages decode.
+  Callers using the old generated `MessageTimelinePageHeaders` response must update their code.
+
+## [0.5.0] - 2026-09-25
 
 ### Fixed
 
