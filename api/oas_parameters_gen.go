@@ -167,15 +167,17 @@ type GetMessagesEngagementParams struct {
 
 // GetMessagesEventsParams is parameters of getMessagesEvents operation.
 type GetMessagesEventsParams struct {
+	// O valor `inbound` habilita a página mista e exige também `inbound:read`.
+	Include OptGetMessagesEventsInclude `json:",omitempty,omitzero"`
 	// Cursor opaco retornado em `next_cursor`; não deve ser interpretado ou alterado pelo cliente.
 	Cursor OptString `json:",omitempty,omitzero"`
 	// Quantidade máxima de eventos retornados.
 	Limit OptInt `json:",omitempty,omitzero"`
 	// Janela relativa ao instante da consulta; usa `24h` quando omitida.
 	Period OptGetMessagesEventsPeriod `json:",omitempty,omitzero"`
-	// Filtra por um único tipo outbound de entrega ou tracking.
-	Type OptOutboundMessageEventType `json:",omitempty,omitzero"`
-	// Filtra pelo UUID de uma mensagem pertencente ao tenant autenticado.
+	// `inbound.received` só é aceito com `include=inbound`; os demais tipos filtram outbound.
+	Type OptMessageTimelineFilterType `json:",omitempty,omitzero"`
+	// Filtra pelo UUID de mensagem outbound; incompatível com `include=inbound`.
 	MessageID OptString `json:",omitempty,omitzero"`
 }
 

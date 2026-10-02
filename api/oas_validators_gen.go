@@ -4125,10 +4125,65 @@ func (s *GetMessagesEventsForbidden) Validate() error {
 	return nil
 }
 
+func (s GetMessagesEventsInclude) Validate() error {
+	switch s {
+	case "inbound":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
 func (s *GetMessagesEventsInternalServerError) Validate() error {
 	alias := (*Error)(s)
 	if err := alias.Validate(); err != nil {
 		return err
+	}
+	return nil
+}
+
+func (s *GetMessagesEventsOK) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.Data == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "data",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *GetMessagesEventsOKHeaders) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Response.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "Response",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
 	}
 	return nil
 }
@@ -5747,120 +5802,39 @@ func (s MessageStream) Validate() error {
 	}
 }
 
-func (s *MessageTimelineEvent) Validate() error {
-	if s == nil {
-		return validate.ErrNilPointer
-	}
-
-	var failures []validate.FieldError
-	if err := func() error {
-		if err := s.Type.Validate(); err != nil {
-			return err
-		}
+func (s MessageTimelineFilterType) Validate() error {
+	switch s {
+	case "queued":
 		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "type",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
-func (s *MessageTimelinePage) Validate() error {
-	if s == nil {
-		return validate.ErrNilPointer
-	}
-
-	var failures []validate.FieldError
-	if err := func() error {
-		if s.Data == nil {
-			return errors.New("nil is invalid value")
-		}
-		var failures []validate.FieldError
-		for i, elem := range s.Data {
-			if err := func() error {
-				if err := elem.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				failures = append(failures, validate.FieldError{
-					Name:  fmt.Sprintf("[%d]", i),
-					Error: err,
-				})
-			}
-		}
-		if len(failures) > 0 {
-			return &validate.Error{Fields: failures}
-		}
+	case "sent":
 		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "data",
-			Error: err,
-		})
-	}
-	if err := func() error {
-		if value, ok := s.NextCursor.Get(); ok {
-			if err := func() error {
-				if err := (validate.String{
-					MinLength:     1,
-					MinLengthSet:  true,
-					MaxLength:     0,
-					MaxLengthSet:  false,
-					Email:         false,
-					Hostname:      false,
-					Regex:         nil,
-					MinNumeric:    0,
-					MinNumericSet: false,
-					MaxNumeric:    0,
-					MaxNumericSet: false,
-				}).Validate(string(value)); err != nil {
-					return errors.Wrap(err, "string")
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		}
+	case "delivered":
 		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "next_cursor",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
-func (s *MessageTimelinePageHeaders) Validate() error {
-	if s == nil {
-		return validate.ErrNilPointer
-	}
-
-	var failures []validate.FieldError
-	if err := func() error {
-		if err := s.Response.Validate(); err != nil {
-			return err
-		}
+	case "deferred":
 		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "Response",
-			Error: err,
-		})
+	case "soft_bounce":
+		return nil
+	case "hard_bounce":
+		return nil
+	case "complaint":
+		return nil
+	case "open":
+		return nil
+	case "click":
+		return nil
+	case "unsubscribe":
+		return nil
+	case "rejected":
+		return nil
+	case "failed":
+		return nil
+	case "suppressed":
+		return nil
+	case "inbound.received":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
 	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
 }
 
 func (s *MessageTimeseriesDay) Validate() error {
@@ -6614,39 +6588,6 @@ func (s *MonthlyUsage) Validate() error {
 		return &validate.Error{Fields: failures}
 	}
 	return nil
-}
-
-func (s OutboundMessageEventType) Validate() error {
-	switch s {
-	case "queued":
-		return nil
-	case "sent":
-		return nil
-	case "delivered":
-		return nil
-	case "deferred":
-		return nil
-	case "soft_bounce":
-		return nil
-	case "hard_bounce":
-		return nil
-	case "complaint":
-		return nil
-	case "open":
-		return nil
-	case "click":
-		return nil
-	case "unsubscribe":
-		return nil
-	case "rejected":
-		return nil
-	case "failed":
-		return nil
-	case "suppressed":
-		return nil
-	default:
-		return errors.Errorf("invalid value: %v", s)
-	}
 }
 
 func (s *PatchAutomationsIDBadRequest) Validate() error {

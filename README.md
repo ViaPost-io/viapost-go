@@ -110,13 +110,13 @@ geradas.
 
 O arquivo [`openapi.yaml`](./openapi.yaml) é um snapshot versionado do contrato público em
 [`docs.viapost.io/openapi/public.yaml`](https://docs.viapost.io/openapi/public.yaml), sincronizado
-em 2026-09-25. O workflow agendado de drift verifica semanticamente o snapshot contra esse
+em 2026-10-02. O workflow agendado de drift verifica semanticamente o snapshot contra esse
 contrato canônico.
 
 SHA-256 do snapshot:
 
 ```text
-7c931b5a4a2a602d3c42341f2a70af9c49378600894b31adebfd333469b9e183
+14b629c986087e273923791af3b54792426cf70c943c176ccd41285e7c20aad0
 ```
 
 O código em `api/` é gerado com ogen `v1.24.0`, está versionado e não busca schemas remotos:

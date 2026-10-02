@@ -4978,9 +4978,107 @@ type GetMessagesEventsForbidden Error
 
 func (*GetMessagesEventsForbidden) getMessagesEventsRes() {}
 
+type GetMessagesEventsInclude string
+
+const (
+	GetMessagesEventsIncludeInbound GetMessagesEventsInclude = "inbound"
+)
+
+// AllValues returns all GetMessagesEventsInclude values.
+func (GetMessagesEventsInclude) AllValues() []GetMessagesEventsInclude {
+	return []GetMessagesEventsInclude{
+		GetMessagesEventsIncludeInbound,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s GetMessagesEventsInclude) MarshalText() ([]byte, error) {
+	switch s {
+	case GetMessagesEventsIncludeInbound:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *GetMessagesEventsInclude) UnmarshalText(data []byte) error {
+	switch GetMessagesEventsInclude(data) {
+	case GetMessagesEventsIncludeInbound:
+		*s = GetMessagesEventsIncludeInbound
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 type GetMessagesEventsInternalServerError Error
 
 func (*GetMessagesEventsInternalServerError) getMessagesEventsRes() {}
+
+type GetMessagesEventsOK struct {
+	Data       []GetMessagesEventsOKDataItem `json:"data"`
+	NextCursor OptString                     `json:"next_cursor"`
+}
+
+// GetData returns the value of Data.
+func (s *GetMessagesEventsOK) GetData() []GetMessagesEventsOKDataItem {
+	return s.Data
+}
+
+// GetNextCursor returns the value of NextCursor.
+func (s *GetMessagesEventsOK) GetNextCursor() OptString {
+	return s.NextCursor
+}
+
+// SetData sets the value of Data.
+func (s *GetMessagesEventsOK) SetData(val []GetMessagesEventsOKDataItem) {
+	s.Data = val
+}
+
+// SetNextCursor sets the value of NextCursor.
+func (s *GetMessagesEventsOK) SetNextCursor(val OptString) {
+	s.NextCursor = val
+}
+
+type GetMessagesEventsOKDataItem map[string]jx.Raw
+
+func (s *GetMessagesEventsOKDataItem) init() GetMessagesEventsOKDataItem {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+// GetMessagesEventsOKHeaders wraps GetMessagesEventsOK with response headers.
+type GetMessagesEventsOKHeaders struct {
+	CacheControl OptString
+	Response     GetMessagesEventsOK
+}
+
+// GetCacheControl returns the value of CacheControl.
+func (s *GetMessagesEventsOKHeaders) GetCacheControl() OptString {
+	return s.CacheControl
+}
+
+// GetResponse returns the value of Response.
+func (s *GetMessagesEventsOKHeaders) GetResponse() GetMessagesEventsOK {
+	return s.Response
+}
+
+// SetCacheControl sets the value of CacheControl.
+func (s *GetMessagesEventsOKHeaders) SetCacheControl(val OptString) {
+	s.CacheControl = val
+}
+
+// SetResponse sets the value of Response.
+func (s *GetMessagesEventsOKHeaders) SetResponse(val GetMessagesEventsOK) {
+	s.Response = val
+}
+
+func (*GetMessagesEventsOKHeaders) getMessagesEventsRes() {}
 
 type GetMessagesEventsPeriod string
 
@@ -7501,175 +7599,131 @@ func (s *MessageStream) UnmarshalText(data []byte) error {
 	}
 }
 
-// Ref: #/components/schemas/MessageTimelineEvent
-type MessageTimelineEvent struct {
-	// UUID estável do evento persistido (`event_uuid`).
-	ID           UUID                     `json:"id"`
-	MessageID    UUID                     `json:"message_id"`
-	Type         OutboundMessageEventType `json:"type"`
-	OccurredAt   Timestamp                `json:"occurred_at"`
-	Recipient    OptString                `json:"recipient"`
-	SMTPCode     OptInt                   `json:"smtp_code"`
-	EnhancedCode OptString                `json:"enhanced_code"`
-	Diagnostic   OptString                `json:"diagnostic"`
-	MxHost       OptString                `json:"mx_host"`
-	ClickURL     OptURI                   `json:"click_url"`
+// Ref: #/components/schemas/MessageTimelineFilterType
+type MessageTimelineFilterType string
+
+const (
+	MessageTimelineFilterTypeQueued          MessageTimelineFilterType = "queued"
+	MessageTimelineFilterTypeSent            MessageTimelineFilterType = "sent"
+	MessageTimelineFilterTypeDelivered       MessageTimelineFilterType = "delivered"
+	MessageTimelineFilterTypeDeferred        MessageTimelineFilterType = "deferred"
+	MessageTimelineFilterTypeSoftBounce      MessageTimelineFilterType = "soft_bounce"
+	MessageTimelineFilterTypeHardBounce      MessageTimelineFilterType = "hard_bounce"
+	MessageTimelineFilterTypeComplaint       MessageTimelineFilterType = "complaint"
+	MessageTimelineFilterTypeOpen            MessageTimelineFilterType = "open"
+	MessageTimelineFilterTypeClick           MessageTimelineFilterType = "click"
+	MessageTimelineFilterTypeUnsubscribe     MessageTimelineFilterType = "unsubscribe"
+	MessageTimelineFilterTypeRejected        MessageTimelineFilterType = "rejected"
+	MessageTimelineFilterTypeFailed          MessageTimelineFilterType = "failed"
+	MessageTimelineFilterTypeSuppressed      MessageTimelineFilterType = "suppressed"
+	MessageTimelineFilterTypeInboundReceived MessageTimelineFilterType = "inbound.received"
+)
+
+// AllValues returns all MessageTimelineFilterType values.
+func (MessageTimelineFilterType) AllValues() []MessageTimelineFilterType {
+	return []MessageTimelineFilterType{
+		MessageTimelineFilterTypeQueued,
+		MessageTimelineFilterTypeSent,
+		MessageTimelineFilterTypeDelivered,
+		MessageTimelineFilterTypeDeferred,
+		MessageTimelineFilterTypeSoftBounce,
+		MessageTimelineFilterTypeHardBounce,
+		MessageTimelineFilterTypeComplaint,
+		MessageTimelineFilterTypeOpen,
+		MessageTimelineFilterTypeClick,
+		MessageTimelineFilterTypeUnsubscribe,
+		MessageTimelineFilterTypeRejected,
+		MessageTimelineFilterTypeFailed,
+		MessageTimelineFilterTypeSuppressed,
+		MessageTimelineFilterTypeInboundReceived,
+	}
 }
 
-// GetID returns the value of ID.
-func (s *MessageTimelineEvent) GetID() UUID {
-	return s.ID
+// MarshalText implements encoding.TextMarshaler.
+func (s MessageTimelineFilterType) MarshalText() ([]byte, error) {
+	switch s {
+	case MessageTimelineFilterTypeQueued:
+		return []byte(s), nil
+	case MessageTimelineFilterTypeSent:
+		return []byte(s), nil
+	case MessageTimelineFilterTypeDelivered:
+		return []byte(s), nil
+	case MessageTimelineFilterTypeDeferred:
+		return []byte(s), nil
+	case MessageTimelineFilterTypeSoftBounce:
+		return []byte(s), nil
+	case MessageTimelineFilterTypeHardBounce:
+		return []byte(s), nil
+	case MessageTimelineFilterTypeComplaint:
+		return []byte(s), nil
+	case MessageTimelineFilterTypeOpen:
+		return []byte(s), nil
+	case MessageTimelineFilterTypeClick:
+		return []byte(s), nil
+	case MessageTimelineFilterTypeUnsubscribe:
+		return []byte(s), nil
+	case MessageTimelineFilterTypeRejected:
+		return []byte(s), nil
+	case MessageTimelineFilterTypeFailed:
+		return []byte(s), nil
+	case MessageTimelineFilterTypeSuppressed:
+		return []byte(s), nil
+	case MessageTimelineFilterTypeInboundReceived:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
 }
 
-// GetMessageID returns the value of MessageID.
-func (s *MessageTimelineEvent) GetMessageID() UUID {
-	return s.MessageID
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *MessageTimelineFilterType) UnmarshalText(data []byte) error {
+	switch MessageTimelineFilterType(data) {
+	case MessageTimelineFilterTypeQueued:
+		*s = MessageTimelineFilterTypeQueued
+		return nil
+	case MessageTimelineFilterTypeSent:
+		*s = MessageTimelineFilterTypeSent
+		return nil
+	case MessageTimelineFilterTypeDelivered:
+		*s = MessageTimelineFilterTypeDelivered
+		return nil
+	case MessageTimelineFilterTypeDeferred:
+		*s = MessageTimelineFilterTypeDeferred
+		return nil
+	case MessageTimelineFilterTypeSoftBounce:
+		*s = MessageTimelineFilterTypeSoftBounce
+		return nil
+	case MessageTimelineFilterTypeHardBounce:
+		*s = MessageTimelineFilterTypeHardBounce
+		return nil
+	case MessageTimelineFilterTypeComplaint:
+		*s = MessageTimelineFilterTypeComplaint
+		return nil
+	case MessageTimelineFilterTypeOpen:
+		*s = MessageTimelineFilterTypeOpen
+		return nil
+	case MessageTimelineFilterTypeClick:
+		*s = MessageTimelineFilterTypeClick
+		return nil
+	case MessageTimelineFilterTypeUnsubscribe:
+		*s = MessageTimelineFilterTypeUnsubscribe
+		return nil
+	case MessageTimelineFilterTypeRejected:
+		*s = MessageTimelineFilterTypeRejected
+		return nil
+	case MessageTimelineFilterTypeFailed:
+		*s = MessageTimelineFilterTypeFailed
+		return nil
+	case MessageTimelineFilterTypeSuppressed:
+		*s = MessageTimelineFilterTypeSuppressed
+		return nil
+	case MessageTimelineFilterTypeInboundReceived:
+		*s = MessageTimelineFilterTypeInboundReceived
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
-
-// GetType returns the value of Type.
-func (s *MessageTimelineEvent) GetType() OutboundMessageEventType {
-	return s.Type
-}
-
-// GetOccurredAt returns the value of OccurredAt.
-func (s *MessageTimelineEvent) GetOccurredAt() Timestamp {
-	return s.OccurredAt
-}
-
-// GetRecipient returns the value of Recipient.
-func (s *MessageTimelineEvent) GetRecipient() OptString {
-	return s.Recipient
-}
-
-// GetSMTPCode returns the value of SMTPCode.
-func (s *MessageTimelineEvent) GetSMTPCode() OptInt {
-	return s.SMTPCode
-}
-
-// GetEnhancedCode returns the value of EnhancedCode.
-func (s *MessageTimelineEvent) GetEnhancedCode() OptString {
-	return s.EnhancedCode
-}
-
-// GetDiagnostic returns the value of Diagnostic.
-func (s *MessageTimelineEvent) GetDiagnostic() OptString {
-	return s.Diagnostic
-}
-
-// GetMxHost returns the value of MxHost.
-func (s *MessageTimelineEvent) GetMxHost() OptString {
-	return s.MxHost
-}
-
-// GetClickURL returns the value of ClickURL.
-func (s *MessageTimelineEvent) GetClickURL() OptURI {
-	return s.ClickURL
-}
-
-// SetID sets the value of ID.
-func (s *MessageTimelineEvent) SetID(val UUID) {
-	s.ID = val
-}
-
-// SetMessageID sets the value of MessageID.
-func (s *MessageTimelineEvent) SetMessageID(val UUID) {
-	s.MessageID = val
-}
-
-// SetType sets the value of Type.
-func (s *MessageTimelineEvent) SetType(val OutboundMessageEventType) {
-	s.Type = val
-}
-
-// SetOccurredAt sets the value of OccurredAt.
-func (s *MessageTimelineEvent) SetOccurredAt(val Timestamp) {
-	s.OccurredAt = val
-}
-
-// SetRecipient sets the value of Recipient.
-func (s *MessageTimelineEvent) SetRecipient(val OptString) {
-	s.Recipient = val
-}
-
-// SetSMTPCode sets the value of SMTPCode.
-func (s *MessageTimelineEvent) SetSMTPCode(val OptInt) {
-	s.SMTPCode = val
-}
-
-// SetEnhancedCode sets the value of EnhancedCode.
-func (s *MessageTimelineEvent) SetEnhancedCode(val OptString) {
-	s.EnhancedCode = val
-}
-
-// SetDiagnostic sets the value of Diagnostic.
-func (s *MessageTimelineEvent) SetDiagnostic(val OptString) {
-	s.Diagnostic = val
-}
-
-// SetMxHost sets the value of MxHost.
-func (s *MessageTimelineEvent) SetMxHost(val OptString) {
-	s.MxHost = val
-}
-
-// SetClickURL sets the value of ClickURL.
-func (s *MessageTimelineEvent) SetClickURL(val OptURI) {
-	s.ClickURL = val
-}
-
-// Ref: #/components/schemas/MessageTimelinePage
-type MessageTimelinePage struct {
-	Data []MessageTimelineEvent `json:"data"`
-	// Cursor opaco para a página seguinte; ausente quando não há mais eventos no período.
-	NextCursor OptString `json:"next_cursor"`
-}
-
-// GetData returns the value of Data.
-func (s *MessageTimelinePage) GetData() []MessageTimelineEvent {
-	return s.Data
-}
-
-// GetNextCursor returns the value of NextCursor.
-func (s *MessageTimelinePage) GetNextCursor() OptString {
-	return s.NextCursor
-}
-
-// SetData sets the value of Data.
-func (s *MessageTimelinePage) SetData(val []MessageTimelineEvent) {
-	s.Data = val
-}
-
-// SetNextCursor sets the value of NextCursor.
-func (s *MessageTimelinePage) SetNextCursor(val OptString) {
-	s.NextCursor = val
-}
-
-// MessageTimelinePageHeaders wraps MessageTimelinePage with response headers.
-type MessageTimelinePageHeaders struct {
-	CacheControl OptString
-	Response     MessageTimelinePage
-}
-
-// GetCacheControl returns the value of CacheControl.
-func (s *MessageTimelinePageHeaders) GetCacheControl() OptString {
-	return s.CacheControl
-}
-
-// GetResponse returns the value of Response.
-func (s *MessageTimelinePageHeaders) GetResponse() MessageTimelinePage {
-	return s.Response
-}
-
-// SetCacheControl sets the value of CacheControl.
-func (s *MessageTimelinePageHeaders) SetCacheControl(val OptString) {
-	s.CacheControl = val
-}
-
-// SetResponse sets the value of Response.
-func (s *MessageTimelinePageHeaders) SetResponse(val MessageTimelinePage) {
-	s.Response = val
-}
-
-func (*MessageTimelinePageHeaders) getMessagesEventsRes() {}
 
 // Ref: #/components/schemas/MessageTimeseriesDay
 type MessageTimeseriesDay struct {
@@ -8823,6 +8877,52 @@ func (o OptGetInboundMessagesPeriod) Or(d GetInboundMessagesPeriod) GetInboundMe
 	return d
 }
 
+// NewOptGetMessagesEventsInclude returns new OptGetMessagesEventsInclude with value set to v.
+func NewOptGetMessagesEventsInclude(v GetMessagesEventsInclude) OptGetMessagesEventsInclude {
+	return OptGetMessagesEventsInclude{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptGetMessagesEventsInclude is optional GetMessagesEventsInclude.
+type OptGetMessagesEventsInclude struct {
+	Value GetMessagesEventsInclude
+	Set   bool
+}
+
+// IsSet returns true if OptGetMessagesEventsInclude was set.
+func (o OptGetMessagesEventsInclude) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptGetMessagesEventsInclude) Reset() {
+	var v GetMessagesEventsInclude
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptGetMessagesEventsInclude) SetTo(v GetMessagesEventsInclude) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptGetMessagesEventsInclude) Get() (v GetMessagesEventsInclude, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptGetMessagesEventsInclude) Or(d GetMessagesEventsInclude) GetMessagesEventsInclude {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptGetMessagesEventsPeriod returns new OptGetMessagesEventsPeriod with value set to v.
 func NewOptGetMessagesEventsPeriod(v GetMessagesEventsPeriod) OptGetMessagesEventsPeriod {
 	return OptGetMessagesEventsPeriod{
@@ -9093,6 +9193,52 @@ func (o OptMessageDetailContentStatus) Get() (v MessageDetailContentStatus, ok b
 
 // Or returns value if set, or given parameter if does not.
 func (o OptMessageDetailContentStatus) Or(d MessageDetailContentStatus) MessageDetailContentStatus {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptMessageTimelineFilterType returns new OptMessageTimelineFilterType with value set to v.
+func NewOptMessageTimelineFilterType(v MessageTimelineFilterType) OptMessageTimelineFilterType {
+	return OptMessageTimelineFilterType{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptMessageTimelineFilterType is optional MessageTimelineFilterType.
+type OptMessageTimelineFilterType struct {
+	Value MessageTimelineFilterType
+	Set   bool
+}
+
+// IsSet returns true if OptMessageTimelineFilterType was set.
+func (o OptMessageTimelineFilterType) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptMessageTimelineFilterType) Reset() {
+	var v MessageTimelineFilterType
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptMessageTimelineFilterType) SetTo(v MessageTimelineFilterType) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptMessageTimelineFilterType) Get() (v MessageTimelineFilterType, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptMessageTimelineFilterType) Or(d MessageTimelineFilterType) MessageTimelineFilterType {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -9637,52 +9783,6 @@ func (o OptNilUUID) Get() (v UUID, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptNilUUID) Or(d UUID) UUID {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptOutboundMessageEventType returns new OptOutboundMessageEventType with value set to v.
-func NewOptOutboundMessageEventType(v OutboundMessageEventType) OptOutboundMessageEventType {
-	return OptOutboundMessageEventType{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptOutboundMessageEventType is optional OutboundMessageEventType.
-type OptOutboundMessageEventType struct {
-	Value OutboundMessageEventType
-	Set   bool
-}
-
-// IsSet returns true if OptOutboundMessageEventType was set.
-func (o OptOutboundMessageEventType) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptOutboundMessageEventType) Reset() {
-	var v OutboundMessageEventType
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptOutboundMessageEventType) SetTo(v OutboundMessageEventType) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptOutboundMessageEventType) Get() (v OutboundMessageEventType, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptOutboundMessageEventType) Or(d OutboundMessageEventType) OutboundMessageEventType {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -10469,125 +10569,6 @@ func (o OptWebhookDeliveryStatus) Or(d WebhookDeliveryStatus) WebhookDeliverySta
 		return v
 	}
 	return d
-}
-
-// Ref: #/components/schemas/OutboundMessageEventType
-type OutboundMessageEventType string
-
-const (
-	OutboundMessageEventTypeQueued      OutboundMessageEventType = "queued"
-	OutboundMessageEventTypeSent        OutboundMessageEventType = "sent"
-	OutboundMessageEventTypeDelivered   OutboundMessageEventType = "delivered"
-	OutboundMessageEventTypeDeferred    OutboundMessageEventType = "deferred"
-	OutboundMessageEventTypeSoftBounce  OutboundMessageEventType = "soft_bounce"
-	OutboundMessageEventTypeHardBounce  OutboundMessageEventType = "hard_bounce"
-	OutboundMessageEventTypeComplaint   OutboundMessageEventType = "complaint"
-	OutboundMessageEventTypeOpen        OutboundMessageEventType = "open"
-	OutboundMessageEventTypeClick       OutboundMessageEventType = "click"
-	OutboundMessageEventTypeUnsubscribe OutboundMessageEventType = "unsubscribe"
-	OutboundMessageEventTypeRejected    OutboundMessageEventType = "rejected"
-	OutboundMessageEventTypeFailed      OutboundMessageEventType = "failed"
-	OutboundMessageEventTypeSuppressed  OutboundMessageEventType = "suppressed"
-)
-
-// AllValues returns all OutboundMessageEventType values.
-func (OutboundMessageEventType) AllValues() []OutboundMessageEventType {
-	return []OutboundMessageEventType{
-		OutboundMessageEventTypeQueued,
-		OutboundMessageEventTypeSent,
-		OutboundMessageEventTypeDelivered,
-		OutboundMessageEventTypeDeferred,
-		OutboundMessageEventTypeSoftBounce,
-		OutboundMessageEventTypeHardBounce,
-		OutboundMessageEventTypeComplaint,
-		OutboundMessageEventTypeOpen,
-		OutboundMessageEventTypeClick,
-		OutboundMessageEventTypeUnsubscribe,
-		OutboundMessageEventTypeRejected,
-		OutboundMessageEventTypeFailed,
-		OutboundMessageEventTypeSuppressed,
-	}
-}
-
-// MarshalText implements encoding.TextMarshaler.
-func (s OutboundMessageEventType) MarshalText() ([]byte, error) {
-	switch s {
-	case OutboundMessageEventTypeQueued:
-		return []byte(s), nil
-	case OutboundMessageEventTypeSent:
-		return []byte(s), nil
-	case OutboundMessageEventTypeDelivered:
-		return []byte(s), nil
-	case OutboundMessageEventTypeDeferred:
-		return []byte(s), nil
-	case OutboundMessageEventTypeSoftBounce:
-		return []byte(s), nil
-	case OutboundMessageEventTypeHardBounce:
-		return []byte(s), nil
-	case OutboundMessageEventTypeComplaint:
-		return []byte(s), nil
-	case OutboundMessageEventTypeOpen:
-		return []byte(s), nil
-	case OutboundMessageEventTypeClick:
-		return []byte(s), nil
-	case OutboundMessageEventTypeUnsubscribe:
-		return []byte(s), nil
-	case OutboundMessageEventTypeRejected:
-		return []byte(s), nil
-	case OutboundMessageEventTypeFailed:
-		return []byte(s), nil
-	case OutboundMessageEventTypeSuppressed:
-		return []byte(s), nil
-	default:
-		return nil, errors.Errorf("invalid value: %q", s)
-	}
-}
-
-// UnmarshalText implements encoding.TextUnmarshaler.
-func (s *OutboundMessageEventType) UnmarshalText(data []byte) error {
-	switch OutboundMessageEventType(data) {
-	case OutboundMessageEventTypeQueued:
-		*s = OutboundMessageEventTypeQueued
-		return nil
-	case OutboundMessageEventTypeSent:
-		*s = OutboundMessageEventTypeSent
-		return nil
-	case OutboundMessageEventTypeDelivered:
-		*s = OutboundMessageEventTypeDelivered
-		return nil
-	case OutboundMessageEventTypeDeferred:
-		*s = OutboundMessageEventTypeDeferred
-		return nil
-	case OutboundMessageEventTypeSoftBounce:
-		*s = OutboundMessageEventTypeSoftBounce
-		return nil
-	case OutboundMessageEventTypeHardBounce:
-		*s = OutboundMessageEventTypeHardBounce
-		return nil
-	case OutboundMessageEventTypeComplaint:
-		*s = OutboundMessageEventTypeComplaint
-		return nil
-	case OutboundMessageEventTypeOpen:
-		*s = OutboundMessageEventTypeOpen
-		return nil
-	case OutboundMessageEventTypeClick:
-		*s = OutboundMessageEventTypeClick
-		return nil
-	case OutboundMessageEventTypeUnsubscribe:
-		*s = OutboundMessageEventTypeUnsubscribe
-		return nil
-	case OutboundMessageEventTypeRejected:
-		*s = OutboundMessageEventTypeRejected
-		return nil
-	case OutboundMessageEventTypeFailed:
-		*s = OutboundMessageEventTypeFailed
-		return nil
-	case OutboundMessageEventTypeSuppressed:
-		*s = OutboundMessageEventTypeSuppressed
-		return nil
-	default:
-		return errors.Errorf("invalid value: %q", data)
-	}
 }
 
 type PatchAutomationsIDBadRequest Error

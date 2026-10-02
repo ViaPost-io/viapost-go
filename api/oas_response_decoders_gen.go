@@ -11612,7 +11612,7 @@ func decodeGetMessagesEventsResponse(resp *http.Response) (res GetMessagesEvents
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response MessageTimelinePage
+			var response GetMessagesEventsOK
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -11638,7 +11638,7 @@ func decodeGetMessagesEventsResponse(resp *http.Response) (res GetMessagesEvents
 			}(); err != nil {
 				return res, errors.Wrap(err, "validate")
 			}
-			var wrapper MessageTimelinePageHeaders
+			var wrapper GetMessagesEventsOKHeaders
 			wrapper.Response = response
 			h := uri.NewHeaderDecoder(resp.Header)
 			// Parse "Cache-Control" header.

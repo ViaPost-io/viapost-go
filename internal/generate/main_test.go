@@ -65,6 +65,47 @@ parameters: [{ $ref: '#/components/parameters/CsrfHeader' }]
 	}
 }
 
+func TestNormalizeCodegenSpec_RelaxesOnlyMessageTimelinePageUnion(t *testing.T) {
+	source := []byte(`openapi: 3.1.1
+paths:
+  /v1/messages/events:
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/MessageTimelinePage'
+                  - $ref: '#/components/schemas/MessageTimelineOptInPage'
+components:
+  schemas:
+    UUID:
+      type: string
+      format: uuid
+    MessageTimelinePage:
+      type: object
+    MessageTimelineOptInPage:
+      type: object
+`)
+	normalized, err := normalizeCodegenSpec(source)
+	if err != nil {
+		t.Fatalf("normalizeCodegenSpec() error = %v", err)
+	}
+	got := string(normalized)
+	if strings.Contains(got, "anyOf:\n                  - $ref: '#/components/schemas/MessageTimelinePage'") {
+		t.Fatal("unsupported response union remains")
+	}
+	for _, wanted := range []string{"required: [data]", "additionalProperties: true", "next_cursor:", "    MessageTimelinePage:", "    MessageTimelineOptInPage:"} {
+		if !strings.Contains(got, wanted) {
+			t.Errorf("normalized schema lost %q", wanted)
+		}
+	}
+	if !strings.Contains(string(source), "anyOf:\n                  - $ref: '#/components/schemas/MessageTimelinePage'") {
+		t.Fatal("normalization mutated source buffer")
+	}
+}
+
 func TestNormalizeCodegenSpec_RelaxesOnlySendCustomEventSelectionAnyOf(t *testing.T) {
 	source := []byte(`openapi: 3.1.1
 info: { title: test, version: 1.0.0 }

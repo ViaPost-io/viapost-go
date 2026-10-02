@@ -229,11 +229,12 @@ type Invoker interface {
 	GetMessagesEngagement(ctx context.Context, params GetMessagesEngagementParams) (GetMessagesEngagementRes, error)
 	// GetMessagesEvents invokes getMessagesEvents operation.
 	//
-	// Primeira fatia da timeline unificada: agrega, do mais recente para o mais antigo, somente eventos
-	// outbound de entrega e tracking persistidos para o tenant autenticado. Não inclui mensagens inbound,
-	// eventos customizados de automações, execuções de automação, operações de webhook nem eventos
-	// de auditoria. O endpoint legado `/v1/messages/{id}/events` mantém sua resposta cronológica e sem
-	// paginação.
+	// Sem `include`, mantém a timeline outbound e seus cursores v1 exatamente como antes.
+	// `include=inbound` acrescenta recebimentos comuns positivamente classificados do tenant, usa cursor
+	// v2 e exige simultaneamente `messages:read` e `inbound:read`. Entradas técnicas, históricas
+	// ambíguas e não classificadas não aparecem. `message_id` é inválido no modo misto. Não inclui
+	// eventos customizados, execuções de automação, operações de webhook nem eventos de auditoria. O
+	// endpoint legado `/v1/messages/{id}/events` não muda.
 	//
 	// GET /v1/messages/events
 	GetMessagesEvents(ctx context.Context, params GetMessagesEventsParams) (GetMessagesEventsRes, error)
@@ -3824,11 +3825,12 @@ func (c *Client) sendGetMessagesEngagement(ctx context.Context, params GetMessag
 
 // GetMessagesEvents invokes getMessagesEvents operation.
 //
-// Primeira fatia da timeline unificada: agrega, do mais recente para o mais antigo, somente eventos
-// outbound de entrega e tracking persistidos para o tenant autenticado. Não inclui mensagens inbound,
-// eventos customizados de automações, execuções de automação, operações de webhook nem eventos
-// de auditoria. O endpoint legado `/v1/messages/{id}/events` mantém sua resposta cronológica e sem
-// paginação.
+// Sem `include`, mantém a timeline outbound e seus cursores v1 exatamente como antes.
+// `include=inbound` acrescenta recebimentos comuns positivamente classificados do tenant, usa cursor
+// v2 e exige simultaneamente `messages:read` e `inbound:read`. Entradas técnicas, históricas
+// ambíguas e não classificadas não aparecem. `message_id` é inválido no modo misto. Não inclui
+// eventos customizados, execuções de automação, operações de webhook nem eventos de auditoria. O
+// endpoint legado `/v1/messages/{id}/events` não muda.
 //
 // GET /v1/messages/events
 func (c *Client) GetMessagesEvents(ctx context.Context, params GetMessagesEventsParams) (GetMessagesEventsRes, error) {
@@ -3844,6 +3846,23 @@ func (c *Client) sendGetMessagesEvents(ctx context.Context, params GetMessagesEv
 	uri.AddPathParts(u, pathParts[:]...)
 
 	q := uri.NewQueryEncoder()
+	{
+		// Encode "include" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "include",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Include.Get(); ok {
+				return e.EncodeValue(conv.StringToString(string(val)))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
 	{
 		// Encode "cursor" parameter.
 		cfg := uri.QueryParameterEncodingConfig{
