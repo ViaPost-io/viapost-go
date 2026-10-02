@@ -25,6 +25,7 @@ var (
 	csrfComponent            = regexp.MustCompile(`(?ms)^    CsrfHeader:\r?\n.*?(^  securitySchemes:)`)
 	sessionScheme            = regexp.MustCompile(`(?ms)^    sessionCookie:\r?\n.*?(^  schemas:)`)
 	webhookDeliveryEvent     = regexp.MustCompile(`(?ms)^    WebhookDeliveryEventType:\r?\n      anyOf:\r?\n        - \$ref: '#/components/schemas/WebhookSubscribableEventType'\r?\n        - type: string\r?\n          const: webhook\.test[\t ]*$`)
+	messageTimelinePageUnion = regexp.MustCompile(`(?m)^                anyOf:\r?\n                  - \$ref: '#/components/schemas/MessageTimelinePage'\r?\n                  - \$ref: '#/components/schemas/MessageTimelineOptInPage'[\t ]*$`)
 	propertyComparisonValue  = regexp.MustCompile(`(?m)^        value:\r?\n          type:\r?\n            - string\r?\n            - number\r?\n            - boolean\r?\n`)
 	untypedConst             = regexp.MustCompile(`(?m)^([ \t]+)([[:alnum:]_]+):\r?\n([ \t]+)const: ([^\r\n]+)[\t ]*$`)
 	sendCustomEventSelection = regexp.MustCompile(`(?ms)(^    SendCustomEventRequest:\r?\n.*?)(^      anyOf:\r?\n.*?)(^      properties:\r?\n.*?)(^    [[:alnum:]_]+:|\z)`)
@@ -58,6 +59,15 @@ func normalizeCodegenSpec(source []byte) ([]byte, error) {
 	// as a plain string in generated code; the versioned contract still retains
 	// the exact anyOf constraints for documentation and drift checks.
 	normalized = webhookDeliveryEvent.ReplaceAllString(normalized, "    WebhookDeliveryEventType:\n      type: string")
+	// The timeline response now has two overlapping object shapes. ogen v1.24
+	// cannot generate that anyOf; retain their common page envelope and decode
+	// each event as an open object so both legacy and inbound fields survive.
+	if strings.Contains(normalized, "MessageTimelineOptInPage") {
+		if matches := messageTimelinePageUnion.FindAllStringIndex(normalized, -1); len(matches) != 1 {
+			return nil, fmt.Errorf("expected exactly one message timeline page union, found %d", len(matches))
+		}
+		normalized = messageTimelinePageUnion.ReplaceAllString(normalized, "                type: object\n                required: [data]\n                properties:\n                  data:\n                    type: array\n                    items:\n                      type: object\n                      additionalProperties: true\n                  next_cursor:\n                    type: string")
+	}
 	// ogen v1.24 does not support JSON Schema's multi-type form. The generated
 	// client represents this documented scalar union as an unconstrained value.
 	normalized = propertyComparisonValue.ReplaceAllString(normalized, "        value: {}\n")

@@ -1,12 +1,15 @@
 # ViaPost Go SDK
 
-SDK oficial, server-side, para a API pública do ViaPost. A versão `v0.5.0` cobre envio de e-mails,
-mensagens e métricas, domínios, templates, webhooks, automações e consumo mensal.
+SDK oficial, server-side, para a API pública do ViaPost. A próxima versão, `v0.6.0` (ainda não
+publicada), cobre envio de e-mails, mensagens e métricas, domínios, templates, webhooks,
+automações e consumo mensal.
 
 > Nunca coloque uma API key no frontend, em logs ou no repositório. Leia a chave de um secret ou
 > variável de ambiente do servidor.
 
 ## Instalação
+
+Para instalar a versão publicada mais recente (`v0.5.0`):
 
 ```bash
 go get github.com/ViaPost-io/viapost-go@v0.5.0
@@ -63,7 +66,7 @@ Um programa executável está em [`examples/send`](./examples/send).
 ## Configuração
 
 `NewClient` usa autenticação Bearer, `https://api.viapost.io`, timeout de 60 segundos e o
-User-Agent `viapost-go/0.5.0`. Use `WithBaseURL`, `WithTimeout`, `WithUserAgent`,
+User-Agent `viapost-go/0.6.0`. Use `WithBaseURL`, `WithTimeout`, `WithUserAgent`,
 `WithHTTPClient` ou `WithMaxRawResponseBytes` para customizar. Todo método recebe
 `context.Context`; o primeiro limite atingido
 entre o contexto e o timeout do cliente encerra a requisição. Mutações não são repetidas
@@ -110,13 +113,13 @@ geradas.
 
 O arquivo [`openapi.yaml`](./openapi.yaml) é um snapshot versionado do contrato público em
 [`docs.viapost.io/openapi/public.yaml`](https://docs.viapost.io/openapi/public.yaml), sincronizado
-em 2026-09-25. O workflow agendado de drift verifica semanticamente o snapshot contra esse
+em 2026-10-02. O workflow agendado de drift verifica semanticamente o snapshot contra esse
 contrato canônico.
 
 SHA-256 do snapshot:
 
 ```text
-7c931b5a4a2a602d3c42341f2a70af9c49378600894b31adebfd333469b9e183
+14b629c986087e273923791af3b54792426cf70c943c176ccd41285e7c20aad0
 ```
 
 O código em `api/` é gerado com ogen `v1.24.0`, está versionado e não busca schemas remotos:
@@ -142,7 +145,8 @@ Consulte [CONTRIBUTING.md](./CONTRIBUTING.md), [SECURITY.md](./SECURITY.md) e
 
 ## English
 
-The official server-side Go SDK for the ViaPost public API. Install it with:
+The official server-side Go SDK for the ViaPost public API. The next version, `v0.6.0`, is
+unreleased. Install the latest published version with:
 
 ```bash
 go get github.com/ViaPost-io/viapost-go@v0.5.0
