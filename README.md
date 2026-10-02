@@ -1,15 +1,18 @@
 # ViaPost Go SDK
 
-SDK oficial, server-side, para a API pública do ViaPost. A versão `v0.6.0` cobre envio de e-mails,
-mensagens e métricas, domínios, templates, webhooks, automações e consumo mensal.
+SDK oficial, server-side, para a API pública do ViaPost. A próxima versão, `v0.6.0` (ainda não
+publicada), cobre envio de e-mails, mensagens e métricas, domínios, templates, webhooks,
+automações e consumo mensal.
 
 > Nunca coloque uma API key no frontend, em logs ou no repositório. Leia a chave de um secret ou
 > variável de ambiente do servidor.
 
 ## Instalação
 
+Para instalar a versão publicada mais recente (`v0.5.0`):
+
 ```bash
-go get github.com/ViaPost-io/viapost-go@v0.6.0
+go get github.com/ViaPost-io/viapost-go@v0.5.0
 ```
 
 O SDK requer Go 1.25 ou posterior. Desenvolvimento, CI e releases usam o toolchain
@@ -142,10 +145,11 @@ Consulte [CONTRIBUTING.md](./CONTRIBUTING.md), [SECURITY.md](./SECURITY.md) e
 
 ## English
 
-The official server-side Go SDK for the ViaPost public API. Install it with:
+The official server-side Go SDK for the ViaPost public API. The next version, `v0.6.0`, is
+unreleased. Install the latest published version with:
 
 ```bash
-go get github.com/ViaPost-io/viapost-go@v0.6.0
+go get github.com/ViaPost-io/viapost-go@v0.5.0
 ```
 
 Create a client with `viapost.NewClient(os.Getenv("VIAPOST_API_KEY"))`, then call the resource
