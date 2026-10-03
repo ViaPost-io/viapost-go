@@ -5,6 +5,11 @@ All notable changes to this project are documented in this file. This project fo
 
 ## [0.6.0] - Unreleased
 
+### Changed
+
+- Synchronize the public status component contract with the optional tracking `verified_at`
+  timestamp and its conditional presence rules. The generated status components remain raw JSON.
+
 ### Breaking changes
 
 - Synchronize the low-level generated timeline client with the public `include=inbound` contract.
