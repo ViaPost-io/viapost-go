@@ -65,6 +65,97 @@ parameters: [{ $ref: '#/components/parameters/CsrfHeader' }]
 	}
 }
 
+func TestNormalizeCodegenSpec_ExcludesCookieOnlyOperations(t *testing.T) {
+	source := []byte(`openapi: 3.1.1
+info: { title: test, version: 1.0.0 }
+paths:
+  /v1/automations/{id}/recipes/saas-onboarding:
+    patch:
+      operationId: patchAutomationsIdRecipesSaasOnboarding
+      security:
+        - sessionCookie: []
+      responses:
+        '200': { description: OK }
+  /v1/automations/{id}:
+    get:
+      operationId: getAutomationsId
+      security:
+        - bearerApiKey: []
+        - sessionCookie: []
+      responses:
+        '200': { description: OK }
+    patch:
+      operationId: patchAutomationsIdCookieOnly
+      security:
+        - sessionCookie: []
+      responses:
+        '200': { description: OK }
+components:
+  securitySchemes:
+    bearerApiKey: { type: http, scheme: bearer }
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: viapost_session
+  schemas:
+    UUID:
+      type: string
+      format: uuid
+`)
+	normalized, err := normalizeCodegenSpec(source)
+	if err != nil {
+		t.Fatalf("normalizeCodegenSpec() error = %v", err)
+	}
+	if strings.Contains(string(normalized), "saas-onboarding") || strings.Contains(string(normalized), "patchAutomationsIdRecipesSaasOnboarding") || strings.Contains(string(normalized), "patchAutomationsIdCookieOnly") {
+		t.Fatalf("cookie-only route remains in API-key generation input:\n%s", normalized)
+	}
+	if !strings.Contains(string(normalized), "getAutomationsId") {
+		t.Fatalf("Bearer-capable operation was removed:\n%s", normalized)
+	}
+	if !strings.Contains(string(source), "patchAutomationsIdRecipesSaasOnboarding") {
+		t.Fatal("normalization mutated source buffer")
+	}
+}
+
+func TestVendoredContractCookieOnlyRouteAbsentFromGeneratedClient(t *testing.T) {
+	source, err := os.ReadFile("../../openapi.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	const route = "/v1/automations/{id}/recipes/saas-onboarding"
+	const operation = "patchAutomationsIdRecipesSaasOnboarding"
+	if !strings.Contains(string(source), route) || !strings.Contains(string(source), operation) {
+		t.Fatal("vendored public contract lost the session-only operation")
+	}
+	normalized, err := normalizeCodegenSpec(source)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(normalized), route) || strings.Contains(string(normalized), operation) {
+		t.Fatal("session-only route remains in generation input")
+	}
+	generatedFiles, err := filepath.Glob("../../api/oas_*_gen.go")
+	if err != nil || len(generatedFiles) == 0 {
+		t.Fatalf("find generated SDK files: %v (count=%d)", err, len(generatedFiles))
+	}
+	for _, path := range generatedFiles {
+		content, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if strings.Contains(string(content), "SaasOnboarding") || strings.Contains(string(content), route) || strings.Contains(string(content), operation) {
+			t.Fatalf("generated API-key SDK file %s exposes the session-only operation", path)
+		}
+	}
+	client, err := os.ReadFile("../../api/oas_client_gen.go")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(client), "GetAutomationsID(") {
+		t.Fatal("generated API-key client lost Bearer-capable automation operation")
+	}
+}
+
 func TestNormalizeCodegenSpec_RelaxesOnlyMessageTimelinePageUnion(t *testing.T) {
 	source := []byte(`openapi: 3.1.1
 paths:
