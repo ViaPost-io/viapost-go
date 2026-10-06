@@ -113,13 +113,13 @@ geradas.
 
 O arquivo [`openapi.yaml`](./openapi.yaml) é um snapshot versionado do contrato público em
 [`docs.viapost.io/openapi/public.yaml`](https://docs.viapost.io/openapi/public.yaml), sincronizado
-em 2026-10-03. O workflow agendado de drift verifica semanticamente o snapshot contra esse
+no commit `b26db96bca4586b42bd6e2d7741e29bb12f411b1` da base-code. O workflow agendado de drift verifica semanticamente o snapshot contra esse
 contrato canônico.
 
 SHA-256 do snapshot:
 
 ```text
-d42e0c5d732780b743aead543be32d6b474631dec4fd0c1c8838e1416216bc4e
+96f2fa883334ff15400f51f43bee917e690030e8f3e31b1d8dcdcca2782ab77b
 ```
 
 O código em `api/` é gerado com ogen `v1.24.0`, está versionado e não busca schemas remotos:
@@ -134,7 +134,9 @@ o contrato publicado devem ser semânticas, pois serializações YAML equivalent
 textuais diferentes. Um workflow agendado faz essa comparação semântica contra o contrato canônico,
 sem adicionar dependência de rede aos builds normais. Durante a geração, autenticação por cookie de
 sessão e parâmetros CSRF administrativos são removidos da representação gerada: este SDK público é
-exclusivamente autenticado por API key Bearer.
+exclusivamente autenticado por API key Bearer. Operações exclusivas de cookie de sessão, como a
+materialização da receita de onboarding SaaS, permanecem no snapshot público, mas são excluídas
+do cliente gerado por API key.
 
 ## Desenvolvimento e segurança
 

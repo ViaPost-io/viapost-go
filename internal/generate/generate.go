@@ -4,6 +4,7 @@ package generate
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"go/format"
 	"os"
@@ -11,6 +12,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/ghodss/yaml"
 )
 
 //go:generate go run ../cmd/generate ../../openapi.yaml ../../api
@@ -37,7 +40,11 @@ const (
 )
 
 func normalizeCodegenSpec(source []byte) ([]byte, error) {
-	normalized := string(append([]byte(nil), source...))
+	filtered, err := excludeSessionOnlyOperations(source)
+	if err != nil {
+		return nil, err
+	}
+	normalized := string(filtered)
 	// ogen gives every inline UUID schema the same generated helper names. Keep
 	// the canonical UUID component typed and relax only those conflicting
 	// anonymous schemas until the public contract references UUID consistently.
@@ -85,7 +92,6 @@ func normalizeCodegenSpec(source []byte) ([]byte, error) {
 		}
 		return fmt.Sprintf("%s%s:\n%stype: %s\n%sconst: %s", parts[1], parts[2], parts[3], typ, parts[3], value)
 	})
-	var err error
 	normalized, err = relaxSendCustomEventSelection(normalized)
 	if err != nil {
 		return nil, err
@@ -95,6 +101,112 @@ func normalizeCodegenSpec(source []byte) ([]byte, error) {
 		return nil, err
 	}
 	return []byte(normalized), nil
+}
+
+// excludeSessionOnlyOperations keeps the versioned public contract intact but
+// prevents cookie-only routes from becoming unauthenticated API-key methods
+// when sessionCookie is stripped from the temporary ogen input below.
+func excludeSessionOnlyOperations(source []byte) ([]byte, error) {
+	if !bytes.Contains(source, []byte("paths:")) {
+		return append([]byte(nil), source...), nil
+	}
+	asJSON, err := yaml.YAMLToJSON(source)
+	if err != nil {
+		return nil, fmt.Errorf("parse OpenAPI paths for session-only filtering: %w", err)
+	}
+	var document struct {
+		Security []map[string]json.RawMessage `json:"security"`
+		Paths    map[string]map[string]struct {
+			Security *[]map[string]json.RawMessage `json:"security"`
+		} `json:"paths"`
+	}
+	if err := json.Unmarshal(asJSON, &document); err != nil {
+		return nil, fmt.Errorf("decode OpenAPI paths for session-only filtering: %w", err)
+	}
+	excluded := make(map[string]map[string]bool)
+	wholePath := make(map[string]bool)
+	for path, operations := range document.Paths {
+		methodCount := 0
+		for method, operation := range operations {
+			if !isHTTPMethod(method) {
+				continue
+			}
+			methodCount++
+			security := document.Security
+			if operation.Security != nil {
+				security = *operation.Security
+			}
+			if len(security) == 0 {
+				continue
+			}
+			requiresSession := true
+			for _, alternative := range security {
+				if _, hasCookie := alternative["sessionCookie"]; !hasCookie {
+					requiresSession = false
+					break
+				}
+			}
+			if requiresSession {
+				if excluded[path] == nil {
+					excluded[path] = make(map[string]bool)
+				}
+				excluded[path][method] = true
+			}
+		}
+		wholePath[path] = methodCount > 0 && len(excluded[path]) == methodCount
+	}
+	if len(excluded) == 0 {
+		return append([]byte(nil), source...), nil
+	}
+
+	lines := strings.SplitAfter(string(source), "\n")
+	var output strings.Builder
+	inPaths, skipPath, skipOperation := false, false, false
+	currentPath := ""
+	seen := make(map[string]map[string]bool)
+	for _, line := range lines {
+		trimmed := strings.TrimRight(line, "\r\n")
+		if trimmed == "paths:" {
+			inPaths = true
+		} else if inPaths && trimmed != "" && trimmed[0] != ' ' && trimmed[0] != '\t' {
+			inPaths, skipPath, skipOperation = false, false, false
+		}
+		if inPaths {
+			if strings.HasPrefix(trimmed, "  /") && !strings.HasPrefix(trimmed, "   ") && strings.HasSuffix(trimmed, ":") {
+				currentPath = strings.TrimSuffix(strings.TrimPrefix(trimmed, "  "), ":")
+				skipPath, skipOperation = wholePath[currentPath], false
+			} else if strings.HasPrefix(trimmed, "    ") && !strings.HasPrefix(trimmed, "     ") && strings.HasSuffix(trimmed, ":") {
+				method := strings.TrimSuffix(strings.TrimPrefix(trimmed, "    "), ":")
+				skipOperation = excluded[currentPath][method]
+				if skipOperation {
+					if seen[currentPath] == nil {
+						seen[currentPath] = make(map[string]bool)
+					}
+					seen[currentPath][method] = true
+				}
+			}
+		}
+		if !skipPath && !skipOperation {
+			output.WriteString(line)
+		}
+	}
+	for path, methods := range excluded {
+		for method := range methods {
+			if !seen[path][method] {
+				return nil, fmt.Errorf("session-only OpenAPI operation %s %s not found in source", method, path)
+			}
+		}
+	}
+	return []byte(output.String()), nil
+}
+
+func isHTTPMethod(method string) bool {
+	switch method {
+	case "get", "put", "post", "delete", "options", "head", "patch", "trace":
+		return true
+	default:
+		return false
+	}
 }
 
 func relaxSendCustomEventSelection(source string) (string, error) {
