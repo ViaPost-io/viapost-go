@@ -11,6 +11,34 @@ import (
 	ht "github.com/ogen-go/ogen/http"
 )
 
+func encodeBulkContactTagsRequest(
+	req *BulkContactTagRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeCreateContactTagRequest(
+	req *CreateContactTagRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodePatchAutomationsIDRequest(
 	req *RenameAutomationRequest,
 	r *http.Request,
@@ -27,6 +55,20 @@ func encodePatchAutomationsIDRequest(
 
 func encodePatchAutomationsIDDraftRequest(
 	req *UpdateAutomationDraftRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodePatchBroadcastsIDRequest(
+	req *PatchBroadcastsIDReq,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -114,6 +156,62 @@ func encodePatchWebhooksIDRequest(
 
 func encodePostAutomationsRequest(
 	req *CreateAutomationRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodePostBroadcastsRequest(
+	req *CreateBroadcastRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodePostBroadcastsIDCancelRequest(
+	req *BroadcastVersionRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodePostBroadcastsIDScheduleRequest(
+	req *BroadcastVersionRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodePostBroadcastsIDTestRequest(
+	req *PostBroadcastsIDTestReq,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -505,6 +603,20 @@ func encodePostWebhooksIDSecretRotateRequest(
 
 func encodePostWebhooksIDTestRequest(
 	req *EmptyObjectRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeUpdateContactTagRequest(
+	req *UpdateContactTagRequest,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

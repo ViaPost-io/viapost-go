@@ -908,14 +908,815 @@ func (s *BearerAPIKey) SetRoles(val []string) {
 	s.Roles = val
 }
 
+// Ref: #/components/schemas/Broadcast
+type Broadcast struct {
+	ID          UUID                    `json:"id"`
+	Name        string                  `json:"name"`
+	Status      BroadcastStatus         `json:"status"`
+	TargetKind  BroadcastTargetKind     `json:"target_kind"`
+	SegmentID   NilUUID                 `json:"segment_id"`
+	ScheduledAt NilTimestamp            `json:"scheduled_at"`
+	SnapshotAt  NilTimestamp            `json:"snapshot_at"`
+	StartedAt   NilTimestamp            `json:"started_at"`
+	CompletedAt NilTimestamp            `json:"completed_at"`
+	CancelledAt NilTimestamp            `json:"cancelled_at"`
+	FailureCode NilBroadcastFailureCode `json:"failure_code"`
+	Version     int64                   `json:"version"`
+	Counts      BroadcastCounts         `json:"counts"`
+	CreatedAt   Timestamp               `json:"created_at"`
+	UpdatedAt   Timestamp               `json:"updated_at"`
+}
+
+// GetID returns the value of ID.
+func (s *Broadcast) GetID() UUID {
+	return s.ID
+}
+
+// GetName returns the value of Name.
+func (s *Broadcast) GetName() string {
+	return s.Name
+}
+
+// GetStatus returns the value of Status.
+func (s *Broadcast) GetStatus() BroadcastStatus {
+	return s.Status
+}
+
+// GetTargetKind returns the value of TargetKind.
+func (s *Broadcast) GetTargetKind() BroadcastTargetKind {
+	return s.TargetKind
+}
+
+// GetSegmentID returns the value of SegmentID.
+func (s *Broadcast) GetSegmentID() NilUUID {
+	return s.SegmentID
+}
+
+// GetScheduledAt returns the value of ScheduledAt.
+func (s *Broadcast) GetScheduledAt() NilTimestamp {
+	return s.ScheduledAt
+}
+
+// GetSnapshotAt returns the value of SnapshotAt.
+func (s *Broadcast) GetSnapshotAt() NilTimestamp {
+	return s.SnapshotAt
+}
+
+// GetStartedAt returns the value of StartedAt.
+func (s *Broadcast) GetStartedAt() NilTimestamp {
+	return s.StartedAt
+}
+
+// GetCompletedAt returns the value of CompletedAt.
+func (s *Broadcast) GetCompletedAt() NilTimestamp {
+	return s.CompletedAt
+}
+
+// GetCancelledAt returns the value of CancelledAt.
+func (s *Broadcast) GetCancelledAt() NilTimestamp {
+	return s.CancelledAt
+}
+
+// GetFailureCode returns the value of FailureCode.
+func (s *Broadcast) GetFailureCode() NilBroadcastFailureCode {
+	return s.FailureCode
+}
+
+// GetVersion returns the value of Version.
+func (s *Broadcast) GetVersion() int64 {
+	return s.Version
+}
+
+// GetCounts returns the value of Counts.
+func (s *Broadcast) GetCounts() BroadcastCounts {
+	return s.Counts
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *Broadcast) GetCreatedAt() Timestamp {
+	return s.CreatedAt
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *Broadcast) GetUpdatedAt() Timestamp {
+	return s.UpdatedAt
+}
+
+// SetID sets the value of ID.
+func (s *Broadcast) SetID(val UUID) {
+	s.ID = val
+}
+
+// SetName sets the value of Name.
+func (s *Broadcast) SetName(val string) {
+	s.Name = val
+}
+
+// SetStatus sets the value of Status.
+func (s *Broadcast) SetStatus(val BroadcastStatus) {
+	s.Status = val
+}
+
+// SetTargetKind sets the value of TargetKind.
+func (s *Broadcast) SetTargetKind(val BroadcastTargetKind) {
+	s.TargetKind = val
+}
+
+// SetSegmentID sets the value of SegmentID.
+func (s *Broadcast) SetSegmentID(val NilUUID) {
+	s.SegmentID = val
+}
+
+// SetScheduledAt sets the value of ScheduledAt.
+func (s *Broadcast) SetScheduledAt(val NilTimestamp) {
+	s.ScheduledAt = val
+}
+
+// SetSnapshotAt sets the value of SnapshotAt.
+func (s *Broadcast) SetSnapshotAt(val NilTimestamp) {
+	s.SnapshotAt = val
+}
+
+// SetStartedAt sets the value of StartedAt.
+func (s *Broadcast) SetStartedAt(val NilTimestamp) {
+	s.StartedAt = val
+}
+
+// SetCompletedAt sets the value of CompletedAt.
+func (s *Broadcast) SetCompletedAt(val NilTimestamp) {
+	s.CompletedAt = val
+}
+
+// SetCancelledAt sets the value of CancelledAt.
+func (s *Broadcast) SetCancelledAt(val NilTimestamp) {
+	s.CancelledAt = val
+}
+
+// SetFailureCode sets the value of FailureCode.
+func (s *Broadcast) SetFailureCode(val NilBroadcastFailureCode) {
+	s.FailureCode = val
+}
+
+// SetVersion sets the value of Version.
+func (s *Broadcast) SetVersion(val int64) {
+	s.Version = val
+}
+
+// SetCounts sets the value of Counts.
+func (s *Broadcast) SetCounts(val BroadcastCounts) {
+	s.Counts = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *Broadcast) SetCreatedAt(val Timestamp) {
+	s.CreatedAt = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *Broadcast) SetUpdatedAt(val Timestamp) {
+	s.UpdatedAt = val
+}
+
+func (*Broadcast) postBroadcastsIDCancelRes()   {}
+func (*Broadcast) postBroadcastsIDScheduleRes() {}
+
+// Ref: #/components/schemas/BroadcastContentSnapshot
+type BroadcastContentSnapshot struct {
+	Schema   string    `json:"schema"`
+	FromName NilString `json:"from_name"`
+	ReplyTo  NilString `json:"reply_to"`
+	Subject  NilString `json:"subject"`
+	// O MVP não aceita variáveis por broadcast; envie um objeto vazio.
+	Variables BroadcastContentSnapshotVariables `json:"variables"`
+	Tags      []string                          `json:"tags"`
+	Metadata  BroadcastContentSnapshotMetadata  `json:"metadata"`
+}
+
+// GetSchema returns the value of Schema.
+func (s *BroadcastContentSnapshot) GetSchema() string {
+	return s.Schema
+}
+
+// GetFromName returns the value of FromName.
+func (s *BroadcastContentSnapshot) GetFromName() NilString {
+	return s.FromName
+}
+
+// GetReplyTo returns the value of ReplyTo.
+func (s *BroadcastContentSnapshot) GetReplyTo() NilString {
+	return s.ReplyTo
+}
+
+// GetSubject returns the value of Subject.
+func (s *BroadcastContentSnapshot) GetSubject() NilString {
+	return s.Subject
+}
+
+// GetVariables returns the value of Variables.
+func (s *BroadcastContentSnapshot) GetVariables() BroadcastContentSnapshotVariables {
+	return s.Variables
+}
+
+// GetTags returns the value of Tags.
+func (s *BroadcastContentSnapshot) GetTags() []string {
+	return s.Tags
+}
+
+// GetMetadata returns the value of Metadata.
+func (s *BroadcastContentSnapshot) GetMetadata() BroadcastContentSnapshotMetadata {
+	return s.Metadata
+}
+
+// SetSchema sets the value of Schema.
+func (s *BroadcastContentSnapshot) SetSchema(val string) {
+	s.Schema = val
+}
+
+// SetFromName sets the value of FromName.
+func (s *BroadcastContentSnapshot) SetFromName(val NilString) {
+	s.FromName = val
+}
+
+// SetReplyTo sets the value of ReplyTo.
+func (s *BroadcastContentSnapshot) SetReplyTo(val NilString) {
+	s.ReplyTo = val
+}
+
+// SetSubject sets the value of Subject.
+func (s *BroadcastContentSnapshot) SetSubject(val NilString) {
+	s.Subject = val
+}
+
+// SetVariables sets the value of Variables.
+func (s *BroadcastContentSnapshot) SetVariables(val BroadcastContentSnapshotVariables) {
+	s.Variables = val
+}
+
+// SetTags sets the value of Tags.
+func (s *BroadcastContentSnapshot) SetTags(val []string) {
+	s.Tags = val
+}
+
+// SetMetadata sets the value of Metadata.
+func (s *BroadcastContentSnapshot) SetMetadata(val BroadcastContentSnapshotMetadata) {
+	s.Metadata = val
+}
+
+type BroadcastContentSnapshotMetadata map[string]jx.Raw
+
+func (s *BroadcastContentSnapshotMetadata) init() BroadcastContentSnapshotMetadata {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+// O MVP não aceita variáveis por broadcast; envie um objeto vazio.
+type BroadcastContentSnapshotVariables struct{}
+
+// Ref: #/components/schemas/BroadcastCounts
+type BroadcastCounts struct {
+	Audience  int64 `json:"audience"`
+	Queued    int64 `json:"queued"`
+	Skipped   int64 `json:"skipped"`
+	Failed    int64 `json:"failed"`
+	Cancelled int64 `json:"cancelled"`
+}
+
+// GetAudience returns the value of Audience.
+func (s *BroadcastCounts) GetAudience() int64 {
+	return s.Audience
+}
+
+// GetQueued returns the value of Queued.
+func (s *BroadcastCounts) GetQueued() int64 {
+	return s.Queued
+}
+
+// GetSkipped returns the value of Skipped.
+func (s *BroadcastCounts) GetSkipped() int64 {
+	return s.Skipped
+}
+
+// GetFailed returns the value of Failed.
+func (s *BroadcastCounts) GetFailed() int64 {
+	return s.Failed
+}
+
+// GetCancelled returns the value of Cancelled.
+func (s *BroadcastCounts) GetCancelled() int64 {
+	return s.Cancelled
+}
+
+// SetAudience sets the value of Audience.
+func (s *BroadcastCounts) SetAudience(val int64) {
+	s.Audience = val
+}
+
+// SetQueued sets the value of Queued.
+func (s *BroadcastCounts) SetQueued(val int64) {
+	s.Queued = val
+}
+
+// SetSkipped sets the value of Skipped.
+func (s *BroadcastCounts) SetSkipped(val int64) {
+	s.Skipped = val
+}
+
+// SetFailed sets the value of Failed.
+func (s *BroadcastCounts) SetFailed(val int64) {
+	s.Failed = val
+}
+
+// SetCancelled sets the value of Cancelled.
+func (s *BroadcastCounts) SetCancelled(val int64) {
+	s.Cancelled = val
+}
+
+// Ref: #/components/schemas/BroadcastDeliveryCounts
+type BroadcastDeliveryCounts struct {
+	Processed int64 `json:"processed"`
+	Delivered int64 `json:"delivered"`
+	Bounced   int64 `json:"bounced"`
+	Failed    int64 `json:"failed"`
+}
+
+// GetProcessed returns the value of Processed.
+func (s *BroadcastDeliveryCounts) GetProcessed() int64 {
+	return s.Processed
+}
+
+// GetDelivered returns the value of Delivered.
+func (s *BroadcastDeliveryCounts) GetDelivered() int64 {
+	return s.Delivered
+}
+
+// GetBounced returns the value of Bounced.
+func (s *BroadcastDeliveryCounts) GetBounced() int64 {
+	return s.Bounced
+}
+
+// GetFailed returns the value of Failed.
+func (s *BroadcastDeliveryCounts) GetFailed() int64 {
+	return s.Failed
+}
+
+// SetProcessed sets the value of Processed.
+func (s *BroadcastDeliveryCounts) SetProcessed(val int64) {
+	s.Processed = val
+}
+
+// SetDelivered sets the value of Delivered.
+func (s *BroadcastDeliveryCounts) SetDelivered(val int64) {
+	s.Delivered = val
+}
+
+// SetBounced sets the value of Bounced.
+func (s *BroadcastDeliveryCounts) SetBounced(val int64) {
+	s.Bounced = val
+}
+
+// SetFailed sets the value of Failed.
+func (s *BroadcastDeliveryCounts) SetFailed(val int64) {
+	s.Failed = val
+}
+
+// Ref: #/components/schemas/BroadcastDetail
+type BroadcastDetail struct {
+	Broadcast      Broadcast               `json:"broadcast"`
+	DeliveryCounts BroadcastDeliveryCounts `json:"delivery_counts"`
+}
+
+// GetBroadcast returns the value of Broadcast.
+func (s *BroadcastDetail) GetBroadcast() Broadcast {
+	return s.Broadcast
+}
+
+// GetDeliveryCounts returns the value of DeliveryCounts.
+func (s *BroadcastDetail) GetDeliveryCounts() BroadcastDeliveryCounts {
+	return s.DeliveryCounts
+}
+
+// SetBroadcast sets the value of Broadcast.
+func (s *BroadcastDetail) SetBroadcast(val Broadcast) {
+	s.Broadcast = val
+}
+
+// SetDeliveryCounts sets the value of DeliveryCounts.
+func (s *BroadcastDetail) SetDeliveryCounts(val BroadcastDeliveryCounts) {
+	s.DeliveryCounts = val
+}
+
+// BroadcastDetailHeaders wraps BroadcastDetail with response headers.
+type BroadcastDetailHeaders struct {
+	CacheControl OptString
+	Response     BroadcastDetail
+}
+
+// GetCacheControl returns the value of CacheControl.
+func (s *BroadcastDetailHeaders) GetCacheControl() OptString {
+	return s.CacheControl
+}
+
+// GetResponse returns the value of Response.
+func (s *BroadcastDetailHeaders) GetResponse() BroadcastDetail {
+	return s.Response
+}
+
+// SetCacheControl sets the value of CacheControl.
+func (s *BroadcastDetailHeaders) SetCacheControl(val OptString) {
+	s.CacheControl = val
+}
+
+// SetResponse sets the value of Response.
+func (s *BroadcastDetailHeaders) SetResponse(val BroadcastDetail) {
+	s.Response = val
+}
+
+func (*BroadcastDetailHeaders) getBroadcastsIDRes() {}
+
+type BroadcastFailureCode string
+
+const (
+	BroadcastFailureCodeSnapshotFailed BroadcastFailureCode = "snapshot_failed"
+	BroadcastFailureCodeQuotaExceeded  BroadcastFailureCode = "quota_exceeded"
+	BroadcastFailureCodeDispatchFailed BroadcastFailureCode = "dispatch_failed"
+	BroadcastFailureCodeRetryExhausted BroadcastFailureCode = "retry_exhausted"
+)
+
+// AllValues returns all BroadcastFailureCode values.
+func (BroadcastFailureCode) AllValues() []BroadcastFailureCode {
+	return []BroadcastFailureCode{
+		BroadcastFailureCodeSnapshotFailed,
+		BroadcastFailureCodeQuotaExceeded,
+		BroadcastFailureCodeDispatchFailed,
+		BroadcastFailureCodeRetryExhausted,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s BroadcastFailureCode) MarshalText() ([]byte, error) {
+	switch s {
+	case BroadcastFailureCodeSnapshotFailed:
+		return []byte(s), nil
+	case BroadcastFailureCodeQuotaExceeded:
+		return []byte(s), nil
+	case BroadcastFailureCodeDispatchFailed:
+		return []byte(s), nil
+	case BroadcastFailureCodeRetryExhausted:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *BroadcastFailureCode) UnmarshalText(data []byte) error {
+	switch BroadcastFailureCode(data) {
+	case BroadcastFailureCodeSnapshotFailed:
+		*s = BroadcastFailureCodeSnapshotFailed
+		return nil
+	case BroadcastFailureCodeQuotaExceeded:
+		*s = BroadcastFailureCodeQuotaExceeded
+		return nil
+	case BroadcastFailureCodeDispatchFailed:
+		*s = BroadcastFailureCodeDispatchFailed
+		return nil
+	case BroadcastFailureCodeRetryExhausted:
+		*s = BroadcastFailureCodeRetryExhausted
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/BroadcastList
+type BroadcastList struct {
+	Data       []Broadcast `json:"data"`
+	NextCursor NilString   `json:"next_cursor"`
+}
+
+// GetData returns the value of Data.
+func (s *BroadcastList) GetData() []Broadcast {
+	return s.Data
+}
+
+// GetNextCursor returns the value of NextCursor.
+func (s *BroadcastList) GetNextCursor() NilString {
+	return s.NextCursor
+}
+
+// SetData sets the value of Data.
+func (s *BroadcastList) SetData(val []Broadcast) {
+	s.Data = val
+}
+
+// SetNextCursor sets the value of NextCursor.
+func (s *BroadcastList) SetNextCursor(val NilString) {
+	s.NextCursor = val
+}
+
+// BroadcastListHeaders wraps BroadcastList with response headers.
+type BroadcastListHeaders struct {
+	CacheControl OptString
+	Response     BroadcastList
+}
+
+// GetCacheControl returns the value of CacheControl.
+func (s *BroadcastListHeaders) GetCacheControl() OptString {
+	return s.CacheControl
+}
+
+// GetResponse returns the value of Response.
+func (s *BroadcastListHeaders) GetResponse() BroadcastList {
+	return s.Response
+}
+
+// SetCacheControl sets the value of CacheControl.
+func (s *BroadcastListHeaders) SetCacheControl(val OptString) {
+	s.CacheControl = val
+}
+
+// SetResponse sets the value of Response.
+func (s *BroadcastListHeaders) SetResponse(val BroadcastList) {
+	s.Response = val
+}
+
+func (*BroadcastListHeaders) getBroadcastsRes() {}
+
+type BroadcastStatus string
+
+const (
+	BroadcastStatusDraft               BroadcastStatus = "draft"
+	BroadcastStatusPreparing           BroadcastStatus = "preparing"
+	BroadcastStatusScheduled           BroadcastStatus = "scheduled"
+	BroadcastStatusDispatching         BroadcastStatus = "dispatching"
+	BroadcastStatusCancelling          BroadcastStatus = "cancelling"
+	BroadcastStatusCompleted           BroadcastStatus = "completed"
+	BroadcastStatusCompletedWithErrors BroadcastStatus = "completed_with_errors"
+	BroadcastStatusCancelled           BroadcastStatus = "cancelled"
+	BroadcastStatusFailed              BroadcastStatus = "failed"
+)
+
+// AllValues returns all BroadcastStatus values.
+func (BroadcastStatus) AllValues() []BroadcastStatus {
+	return []BroadcastStatus{
+		BroadcastStatusDraft,
+		BroadcastStatusPreparing,
+		BroadcastStatusScheduled,
+		BroadcastStatusDispatching,
+		BroadcastStatusCancelling,
+		BroadcastStatusCompleted,
+		BroadcastStatusCompletedWithErrors,
+		BroadcastStatusCancelled,
+		BroadcastStatusFailed,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s BroadcastStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case BroadcastStatusDraft:
+		return []byte(s), nil
+	case BroadcastStatusPreparing:
+		return []byte(s), nil
+	case BroadcastStatusScheduled:
+		return []byte(s), nil
+	case BroadcastStatusDispatching:
+		return []byte(s), nil
+	case BroadcastStatusCancelling:
+		return []byte(s), nil
+	case BroadcastStatusCompleted:
+		return []byte(s), nil
+	case BroadcastStatusCompletedWithErrors:
+		return []byte(s), nil
+	case BroadcastStatusCancelled:
+		return []byte(s), nil
+	case BroadcastStatusFailed:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *BroadcastStatus) UnmarshalText(data []byte) error {
+	switch BroadcastStatus(data) {
+	case BroadcastStatusDraft:
+		*s = BroadcastStatusDraft
+		return nil
+	case BroadcastStatusPreparing:
+		*s = BroadcastStatusPreparing
+		return nil
+	case BroadcastStatusScheduled:
+		*s = BroadcastStatusScheduled
+		return nil
+	case BroadcastStatusDispatching:
+		*s = BroadcastStatusDispatching
+		return nil
+	case BroadcastStatusCancelling:
+		*s = BroadcastStatusCancelling
+		return nil
+	case BroadcastStatusCompleted:
+		*s = BroadcastStatusCompleted
+		return nil
+	case BroadcastStatusCompletedWithErrors:
+		*s = BroadcastStatusCompletedWithErrors
+		return nil
+	case BroadcastStatusCancelled:
+		*s = BroadcastStatusCancelled
+		return nil
+	case BroadcastStatusFailed:
+		*s = BroadcastStatusFailed
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type BroadcastTargetKind string
+
+const (
+	BroadcastTargetKindAllContacts BroadcastTargetKind = "all_contacts"
+	BroadcastTargetKindSegment     BroadcastTargetKind = "segment"
+)
+
+// AllValues returns all BroadcastTargetKind values.
+func (BroadcastTargetKind) AllValues() []BroadcastTargetKind {
+	return []BroadcastTargetKind{
+		BroadcastTargetKindAllContacts,
+		BroadcastTargetKindSegment,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s BroadcastTargetKind) MarshalText() ([]byte, error) {
+	switch s {
+	case BroadcastTargetKindAllContacts:
+		return []byte(s), nil
+	case BroadcastTargetKindSegment:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *BroadcastTargetKind) UnmarshalText(data []byte) error {
+	switch BroadcastTargetKind(data) {
+	case BroadcastTargetKindAllContacts:
+		*s = BroadcastTargetKindAllContacts
+		return nil
+	case BroadcastTargetKindSegment:
+		*s = BroadcastTargetKindSegment
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/BroadcastVersionRequest
+type BroadcastVersionRequest struct {
+	ExpectedVersion int64 `json:"expected_version"`
+}
+
+// GetExpectedVersion returns the value of ExpectedVersion.
+func (s *BroadcastVersionRequest) GetExpectedVersion() int64 {
+	return s.ExpectedVersion
+}
+
+// SetExpectedVersion sets the value of ExpectedVersion.
+func (s *BroadcastVersionRequest) SetExpectedVersion(val int64) {
+	s.ExpectedVersion = val
+}
+
+// Ref: #/components/schemas/BulkContactTagRequest
+type BulkContactTagRequest struct {
+	ContactIds []UUID        `json:"contact_ids"`
+	TagIds     ContactTagIDs `json:"tag_ids"`
+	// Lista vazia de etiquetas somente para replace.
+	Operation BulkContactTagRequestOperation `json:"operation"`
+}
+
+// GetContactIds returns the value of ContactIds.
+func (s *BulkContactTagRequest) GetContactIds() []UUID {
+	return s.ContactIds
+}
+
+// GetTagIds returns the value of TagIds.
+func (s *BulkContactTagRequest) GetTagIds() ContactTagIDs {
+	return s.TagIds
+}
+
+// GetOperation returns the value of Operation.
+func (s *BulkContactTagRequest) GetOperation() BulkContactTagRequestOperation {
+	return s.Operation
+}
+
+// SetContactIds sets the value of ContactIds.
+func (s *BulkContactTagRequest) SetContactIds(val []UUID) {
+	s.ContactIds = val
+}
+
+// SetTagIds sets the value of TagIds.
+func (s *BulkContactTagRequest) SetTagIds(val ContactTagIDs) {
+	s.TagIds = val
+}
+
+// SetOperation sets the value of Operation.
+func (s *BulkContactTagRequest) SetOperation(val BulkContactTagRequestOperation) {
+	s.Operation = val
+}
+
+// Lista vazia de etiquetas somente para replace.
+type BulkContactTagRequestOperation string
+
+const (
+	BulkContactTagRequestOperationAdd     BulkContactTagRequestOperation = "add"
+	BulkContactTagRequestOperationRemove  BulkContactTagRequestOperation = "remove"
+	BulkContactTagRequestOperationReplace BulkContactTagRequestOperation = "replace"
+)
+
+// AllValues returns all BulkContactTagRequestOperation values.
+func (BulkContactTagRequestOperation) AllValues() []BulkContactTagRequestOperation {
+	return []BulkContactTagRequestOperation{
+		BulkContactTagRequestOperationAdd,
+		BulkContactTagRequestOperationRemove,
+		BulkContactTagRequestOperationReplace,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s BulkContactTagRequestOperation) MarshalText() ([]byte, error) {
+	switch s {
+	case BulkContactTagRequestOperationAdd:
+		return []byte(s), nil
+	case BulkContactTagRequestOperationRemove:
+		return []byte(s), nil
+	case BulkContactTagRequestOperationReplace:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *BulkContactTagRequestOperation) UnmarshalText(data []byte) error {
+	switch BulkContactTagRequestOperation(data) {
+	case BulkContactTagRequestOperationAdd:
+		*s = BulkContactTagRequestOperationAdd
+		return nil
+	case BulkContactTagRequestOperationRemove:
+		*s = BulkContactTagRequestOperationRemove
+		return nil
+	case BulkContactTagRequestOperationReplace:
+		*s = BulkContactTagRequestOperationReplace
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type BulkContactTagsBadRequest Error
+
+func (*BulkContactTagsBadRequest) bulkContactTagsRes() {}
+
+type BulkContactTagsConflict Error
+
+func (*BulkContactTagsConflict) bulkContactTagsRes() {}
+
+type BulkContactTagsForbidden Error
+
+func (*BulkContactTagsForbidden) bulkContactTagsRes() {}
+
+type BulkContactTagsInternalServerError Error
+
+func (*BulkContactTagsInternalServerError) bulkContactTagsRes() {}
+
+// BulkContactTagsNoContent is response for BulkContactTags operation.
+type BulkContactTagsNoContent struct{}
+
+func (*BulkContactTagsNoContent) bulkContactTagsRes() {}
+
+type BulkContactTagsNotFound Error
+
+func (*BulkContactTagsNotFound) bulkContactTagsRes() {}
+
+type BulkContactTagsUnauthorized Error
+
+func (*BulkContactTagsUnauthorized) bulkContactTagsRes() {}
+
 // Ref: #/components/schemas/Contact
 type Contact struct {
 	ID UUID `json:"id"`
 	// Endereço de caixa postal normalizado em minúsculas; nunca contém nome de exibição.
-	Email      string       `json:"email"`
-	FirstName  OptNilString `json:"first_name"`
-	LastName   OptNilString `json:"last_name"`
-	Subscribed bool         `json:"subscribed"`
+	Email      string          `json:"email"`
+	FirstName  OptNilString    `json:"first_name"`
+	LastName   OptNilString    `json:"last_name"`
+	Tags       []ContactTagRef `json:"tags"`
+	Subscribed bool            `json:"subscribed"`
 	// Objeto JSON livre; nunca é `null` nem array.
 	Properties ContactProperties `json:"properties"`
 	CreatedAt  SegmentTimestamp  `json:"created_at"`
@@ -940,6 +1741,11 @@ func (s *Contact) GetFirstName() OptNilString {
 // GetLastName returns the value of LastName.
 func (s *Contact) GetLastName() OptNilString {
 	return s.LastName
+}
+
+// GetTags returns the value of Tags.
+func (s *Contact) GetTags() []ContactTagRef {
+	return s.Tags
 }
 
 // GetSubscribed returns the value of Subscribed.
@@ -982,6 +1788,11 @@ func (s *Contact) SetLastName(val OptNilString) {
 	s.LastName = val
 }
 
+// SetTags sets the value of Tags.
+func (s *Contact) SetTags(val []ContactTagRef) {
+	s.Tags = val
+}
+
 // SetSubscribed sets the value of Subscribed.
 func (s *Contact) SetSubscribed(val bool) {
 	s.Subscribed = val
@@ -1008,12 +1819,24 @@ func (*Contact) postContactsRes()    {}
 
 // Ref: #/components/schemas/ContactImportResult
 type ContactImportResult struct {
-	Total   int `json:"total"`
-	Created int `json:"created"`
+	Failed  OptInt                          `json:"failed"`
+	Errors  []ContactImportResultErrorsItem `json:"errors"`
+	Total   int                             `json:"total"`
+	Created int                             `json:"created"`
 	// Contatos já existentes ou que venceram uma corrida concorrente no banco.
 	Skipped int `json:"skipped"`
 	// Linhas duplicadas válidas do arquivo, após a primeira ocorrência.
 	Duplicates int `json:"duplicates"`
+}
+
+// GetFailed returns the value of Failed.
+func (s *ContactImportResult) GetFailed() OptInt {
+	return s.Failed
+}
+
+// GetErrors returns the value of Errors.
+func (s *ContactImportResult) GetErrors() []ContactImportResultErrorsItem {
+	return s.Errors
 }
 
 // GetTotal returns the value of Total.
@@ -1034,6 +1857,16 @@ func (s *ContactImportResult) GetSkipped() int {
 // GetDuplicates returns the value of Duplicates.
 func (s *ContactImportResult) GetDuplicates() int {
 	return s.Duplicates
+}
+
+// SetFailed sets the value of Failed.
+func (s *ContactImportResult) SetFailed(val OptInt) {
+	s.Failed = val
+}
+
+// SetErrors sets the value of Errors.
+func (s *ContactImportResult) SetErrors(val []ContactImportResultErrorsItem) {
+	s.Errors = val
 }
 
 // SetTotal sets the value of Total.
@@ -1057,6 +1890,42 @@ func (s *ContactImportResult) SetDuplicates(val int) {
 }
 
 func (*ContactImportResult) postContactsImportRes() {}
+
+type ContactImportResultErrorsItem struct {
+	Line  int    `json:"line"`
+	Field string `json:"field"`
+	Code  string `json:"code"`
+}
+
+// GetLine returns the value of Line.
+func (s *ContactImportResultErrorsItem) GetLine() int {
+	return s.Line
+}
+
+// GetField returns the value of Field.
+func (s *ContactImportResultErrorsItem) GetField() string {
+	return s.Field
+}
+
+// GetCode returns the value of Code.
+func (s *ContactImportResultErrorsItem) GetCode() string {
+	return s.Code
+}
+
+// SetLine sets the value of Line.
+func (s *ContactImportResultErrorsItem) SetLine(val int) {
+	s.Line = val
+}
+
+// SetField sets the value of Field.
+func (s *ContactImportResultErrorsItem) SetField(val string) {
+	s.Field = val
+}
+
+// SetCode sets the value of Code.
+func (s *ContactImportResultErrorsItem) SetCode(val string) {
+	s.Code = val
+}
 
 // Ref: #/components/schemas/ContactList
 type ContactList struct {
@@ -1100,6 +1969,158 @@ func (s *ContactProperties) init() ContactProperties {
 	return m
 }
 
+// Ref: #/components/schemas/ContactTag
+type ContactTag struct {
+	ID           UUID      `json:"id"`
+	Name         string    `json:"name"`
+	Description  NilString `json:"description"`
+	Color        string    `json:"color"`
+	ContactCount int       `json:"contact_count"`
+	CreatedAt    Timestamp `json:"created_at"`
+	UpdatedAt    Timestamp `json:"updated_at"`
+}
+
+// GetID returns the value of ID.
+func (s *ContactTag) GetID() UUID {
+	return s.ID
+}
+
+// GetName returns the value of Name.
+func (s *ContactTag) GetName() string {
+	return s.Name
+}
+
+// GetDescription returns the value of Description.
+func (s *ContactTag) GetDescription() NilString {
+	return s.Description
+}
+
+// GetColor returns the value of Color.
+func (s *ContactTag) GetColor() string {
+	return s.Color
+}
+
+// GetContactCount returns the value of ContactCount.
+func (s *ContactTag) GetContactCount() int {
+	return s.ContactCount
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *ContactTag) GetCreatedAt() Timestamp {
+	return s.CreatedAt
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *ContactTag) GetUpdatedAt() Timestamp {
+	return s.UpdatedAt
+}
+
+// SetID sets the value of ID.
+func (s *ContactTag) SetID(val UUID) {
+	s.ID = val
+}
+
+// SetName sets the value of Name.
+func (s *ContactTag) SetName(val string) {
+	s.Name = val
+}
+
+// SetDescription sets the value of Description.
+func (s *ContactTag) SetDescription(val NilString) {
+	s.Description = val
+}
+
+// SetColor sets the value of Color.
+func (s *ContactTag) SetColor(val string) {
+	s.Color = val
+}
+
+// SetContactCount sets the value of ContactCount.
+func (s *ContactTag) SetContactCount(val int) {
+	s.ContactCount = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *ContactTag) SetCreatedAt(val Timestamp) {
+	s.CreatedAt = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *ContactTag) SetUpdatedAt(val Timestamp) {
+	s.UpdatedAt = val
+}
+
+func (*ContactTag) createContactTagRes() {}
+func (*ContactTag) getContactTagRes()    {}
+func (*ContactTag) updateContactTagRes() {}
+
+type ContactTagIDs []UUID
+
+// Ref: #/components/schemas/ContactTagList
+type ContactTagList struct {
+	Data       []ContactTag `json:"data"`
+	NextCursor NilString    `json:"next_cursor"`
+}
+
+// GetData returns the value of Data.
+func (s *ContactTagList) GetData() []ContactTag {
+	return s.Data
+}
+
+// GetNextCursor returns the value of NextCursor.
+func (s *ContactTagList) GetNextCursor() NilString {
+	return s.NextCursor
+}
+
+// SetData sets the value of Data.
+func (s *ContactTagList) SetData(val []ContactTag) {
+	s.Data = val
+}
+
+// SetNextCursor sets the value of NextCursor.
+func (s *ContactTagList) SetNextCursor(val NilString) {
+	s.NextCursor = val
+}
+
+func (*ContactTagList) getContactTagsRes() {}
+
+// Ref: #/components/schemas/ContactTagRef
+type ContactTagRef struct {
+	ID    UUID   `json:"id"`
+	Name  string `json:"name"`
+	Color string `json:"color"`
+}
+
+// GetID returns the value of ID.
+func (s *ContactTagRef) GetID() UUID {
+	return s.ID
+}
+
+// GetName returns the value of Name.
+func (s *ContactTagRef) GetName() string {
+	return s.Name
+}
+
+// GetColor returns the value of Color.
+func (s *ContactTagRef) GetColor() string {
+	return s.Color
+}
+
+// SetID sets the value of ID.
+func (s *ContactTagRef) SetID(val UUID) {
+	s.ID = val
+}
+
+// SetName sets the value of Name.
+func (s *ContactTagRef) SetName(val string) {
+	s.Name = val
+}
+
+// SetColor sets the value of Color.
+func (s *ContactTagRef) SetColor(val string) {
+	s.Color = val
+}
+
 // Ref: #/components/schemas/CreateAutomationRequest
 type CreateAutomationRequest struct {
 	Name string `json:"name"`
@@ -1115,8 +2136,135 @@ func (s *CreateAutomationRequest) SetName(val string) {
 	s.Name = val
 }
 
+// Ref: #/components/schemas/CreateBroadcastRequest
+type CreateBroadcastRequest struct {
+	// Espaços nas extremidades são removidos antes da validação e persistência.
+	Name       string                           `json:"name"`
+	TargetKind CreateBroadcastRequestTargetKind `json:"target_kind"`
+	// Obrigatório e não nulo quando target_kind é segment; deve ser omitido ou nulo para all_contacts.
+	SegmentID         OptNilUUID `json:"segment_id"`
+	DomainID          UUID       `json:"domain_id"`
+	TemplateVersionID UUID       `json:"template_version_id"`
+	// Endereço canônico sem nome de exibição; o domínio deve corresponder ao domain_id verificado.
+	FromAddress string `json:"from_address"`
+	// Quando omitido, a API usa o snapshot vazio padrão do schema viapost.broadcast/v1.
+	ContentSnapshot OptBroadcastContentSnapshot `json:"content_snapshot"`
+}
+
+// GetName returns the value of Name.
+func (s *CreateBroadcastRequest) GetName() string {
+	return s.Name
+}
+
+// GetTargetKind returns the value of TargetKind.
+func (s *CreateBroadcastRequest) GetTargetKind() CreateBroadcastRequestTargetKind {
+	return s.TargetKind
+}
+
+// GetSegmentID returns the value of SegmentID.
+func (s *CreateBroadcastRequest) GetSegmentID() OptNilUUID {
+	return s.SegmentID
+}
+
+// GetDomainID returns the value of DomainID.
+func (s *CreateBroadcastRequest) GetDomainID() UUID {
+	return s.DomainID
+}
+
+// GetTemplateVersionID returns the value of TemplateVersionID.
+func (s *CreateBroadcastRequest) GetTemplateVersionID() UUID {
+	return s.TemplateVersionID
+}
+
+// GetFromAddress returns the value of FromAddress.
+func (s *CreateBroadcastRequest) GetFromAddress() string {
+	return s.FromAddress
+}
+
+// GetContentSnapshot returns the value of ContentSnapshot.
+func (s *CreateBroadcastRequest) GetContentSnapshot() OptBroadcastContentSnapshot {
+	return s.ContentSnapshot
+}
+
+// SetName sets the value of Name.
+func (s *CreateBroadcastRequest) SetName(val string) {
+	s.Name = val
+}
+
+// SetTargetKind sets the value of TargetKind.
+func (s *CreateBroadcastRequest) SetTargetKind(val CreateBroadcastRequestTargetKind) {
+	s.TargetKind = val
+}
+
+// SetSegmentID sets the value of SegmentID.
+func (s *CreateBroadcastRequest) SetSegmentID(val OptNilUUID) {
+	s.SegmentID = val
+}
+
+// SetDomainID sets the value of DomainID.
+func (s *CreateBroadcastRequest) SetDomainID(val UUID) {
+	s.DomainID = val
+}
+
+// SetTemplateVersionID sets the value of TemplateVersionID.
+func (s *CreateBroadcastRequest) SetTemplateVersionID(val UUID) {
+	s.TemplateVersionID = val
+}
+
+// SetFromAddress sets the value of FromAddress.
+func (s *CreateBroadcastRequest) SetFromAddress(val string) {
+	s.FromAddress = val
+}
+
+// SetContentSnapshot sets the value of ContentSnapshot.
+func (s *CreateBroadcastRequest) SetContentSnapshot(val OptBroadcastContentSnapshot) {
+	s.ContentSnapshot = val
+}
+
+type CreateBroadcastRequestTargetKind string
+
+const (
+	CreateBroadcastRequestTargetKindAllContacts CreateBroadcastRequestTargetKind = "all_contacts"
+	CreateBroadcastRequestTargetKindSegment     CreateBroadcastRequestTargetKind = "segment"
+)
+
+// AllValues returns all CreateBroadcastRequestTargetKind values.
+func (CreateBroadcastRequestTargetKind) AllValues() []CreateBroadcastRequestTargetKind {
+	return []CreateBroadcastRequestTargetKind{
+		CreateBroadcastRequestTargetKindAllContacts,
+		CreateBroadcastRequestTargetKindSegment,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s CreateBroadcastRequestTargetKind) MarshalText() ([]byte, error) {
+	switch s {
+	case CreateBroadcastRequestTargetKindAllContacts:
+		return []byte(s), nil
+	case CreateBroadcastRequestTargetKindSegment:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *CreateBroadcastRequestTargetKind) UnmarshalText(data []byte) error {
+	switch CreateBroadcastRequestTargetKind(data) {
+	case CreateBroadcastRequestTargetKindAllContacts:
+		*s = CreateBroadcastRequestTargetKindAllContacts
+		return nil
+	case CreateBroadcastRequestTargetKindSegment:
+		*s = CreateBroadcastRequestTargetKindSegment
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Ref: #/components/schemas/CreateContactRequest
 type CreateContactRequest struct {
+	TagIds ContactTagIDs `json:"tag_ids"`
 	// Caixa postal válida, sem nome de exibição ou espaços; é normalizada em minúsculas.
 	Email      string    `json:"email"`
 	FirstName  OptString `json:"first_name"`
@@ -1124,6 +2272,11 @@ type CreateContactRequest struct {
 	Subscribed OptBool   `json:"subscribed"`
 	// Objeto JSON livre; `null` e arrays são inválidos.
 	Properties OptCreateContactRequestProperties `json:"properties"`
+}
+
+// GetTagIds returns the value of TagIds.
+func (s *CreateContactRequest) GetTagIds() ContactTagIDs {
+	return s.TagIds
 }
 
 // GetEmail returns the value of Email.
@@ -1149,6 +2302,11 @@ func (s *CreateContactRequest) GetSubscribed() OptBool {
 // GetProperties returns the value of Properties.
 func (s *CreateContactRequest) GetProperties() OptCreateContactRequestProperties {
 	return s.Properties
+}
+
+// SetTagIds sets the value of TagIds.
+func (s *CreateContactRequest) SetTagIds(val ContactTagIDs) {
+	s.TagIds = val
 }
 
 // SetEmail sets the value of Email.
@@ -1187,6 +2345,68 @@ func (s *CreateContactRequestProperties) init() CreateContactRequestProperties {
 	}
 	return m
 }
+
+type CreateContactTagBadRequest Error
+
+func (*CreateContactTagBadRequest) createContactTagRes() {}
+
+type CreateContactTagConflict Error
+
+func (*CreateContactTagConflict) createContactTagRes() {}
+
+type CreateContactTagForbidden Error
+
+func (*CreateContactTagForbidden) createContactTagRes() {}
+
+type CreateContactTagInternalServerError Error
+
+func (*CreateContactTagInternalServerError) createContactTagRes() {}
+
+type CreateContactTagNotFound Error
+
+func (*CreateContactTagNotFound) createContactTagRes() {}
+
+// Ref: #/components/schemas/CreateContactTagRequest
+type CreateContactTagRequest struct {
+	// Unicidade por tenant com Unicode NFKC e case folding.
+	Name        string       `json:"name"`
+	Description OptNilString `json:"description"`
+	Color       OptString    `json:"color"`
+}
+
+// GetName returns the value of Name.
+func (s *CreateContactTagRequest) GetName() string {
+	return s.Name
+}
+
+// GetDescription returns the value of Description.
+func (s *CreateContactTagRequest) GetDescription() OptNilString {
+	return s.Description
+}
+
+// GetColor returns the value of Color.
+func (s *CreateContactTagRequest) GetColor() OptString {
+	return s.Color
+}
+
+// SetName sets the value of Name.
+func (s *CreateContactTagRequest) SetName(val string) {
+	s.Name = val
+}
+
+// SetDescription sets the value of Description.
+func (s *CreateContactTagRequest) SetDescription(val OptNilString) {
+	s.Description = val
+}
+
+// SetColor sets the value of Color.
+func (s *CreateContactTagRequest) SetColor(val OptString) {
+	s.Color = val
+}
+
+type CreateContactTagUnauthorized Error
+
+func (*CreateContactTagUnauthorized) createContactTagRes() {}
 
 // Ref: #/components/schemas/CreateCustomEventRequest
 type CreateCustomEventRequest struct {
@@ -1494,8 +2714,27 @@ func (s *CreateTrackingDomainRequest) SetHostname(val string) {
 
 // Ref: #/components/schemas/CreateWebhookRequest
 type CreateWebhookRequest struct {
-	URL        url.URL                        `json:"url"`
-	EventTypes []WebhookSubscribableEventType `json:"event_types"`
+	Name        OptString                      `json:"name"`
+	Enabled     OptBool                        `json:"enabled"`
+	MaxAttempts OptInt                         `json:"max_attempts"`
+	URL         url.URL                        `json:"url"`
+	Description OptString                      `json:"description"`
+	EventTypes  []WebhookSubscribableEventType `json:"event_types"`
+}
+
+// GetName returns the value of Name.
+func (s *CreateWebhookRequest) GetName() OptString {
+	return s.Name
+}
+
+// GetEnabled returns the value of Enabled.
+func (s *CreateWebhookRequest) GetEnabled() OptBool {
+	return s.Enabled
+}
+
+// GetMaxAttempts returns the value of MaxAttempts.
+func (s *CreateWebhookRequest) GetMaxAttempts() OptInt {
+	return s.MaxAttempts
 }
 
 // GetURL returns the value of URL.
@@ -1503,14 +2742,39 @@ func (s *CreateWebhookRequest) GetURL() url.URL {
 	return s.URL
 }
 
+// GetDescription returns the value of Description.
+func (s *CreateWebhookRequest) GetDescription() OptString {
+	return s.Description
+}
+
 // GetEventTypes returns the value of EventTypes.
 func (s *CreateWebhookRequest) GetEventTypes() []WebhookSubscribableEventType {
 	return s.EventTypes
 }
 
+// SetName sets the value of Name.
+func (s *CreateWebhookRequest) SetName(val OptString) {
+	s.Name = val
+}
+
+// SetEnabled sets the value of Enabled.
+func (s *CreateWebhookRequest) SetEnabled(val OptBool) {
+	s.Enabled = val
+}
+
+// SetMaxAttempts sets the value of MaxAttempts.
+func (s *CreateWebhookRequest) SetMaxAttempts(val OptInt) {
+	s.MaxAttempts = val
+}
+
 // SetURL sets the value of URL.
 func (s *CreateWebhookRequest) SetURL(val url.URL) {
 	s.URL = val
+}
+
+// SetDescription sets the value of Description.
+func (s *CreateWebhookRequest) SetDescription(val OptString) {
+	s.Description = val
 }
 
 // SetEventTypes sets the value of EventTypes.
@@ -1998,6 +3262,35 @@ func (*DeleteAutomationsIDNotFound) deleteAutomationsIDRes() {}
 type DeleteAutomationsIDUnauthorized Error
 
 func (*DeleteAutomationsIDUnauthorized) deleteAutomationsIDRes() {}
+
+type DeleteContactTagBadRequest Error
+
+func (*DeleteContactTagBadRequest) deleteContactTagRes() {}
+
+type DeleteContactTagConflict Error
+
+func (*DeleteContactTagConflict) deleteContactTagRes() {}
+
+type DeleteContactTagForbidden Error
+
+func (*DeleteContactTagForbidden) deleteContactTagRes() {}
+
+type DeleteContactTagInternalServerError Error
+
+func (*DeleteContactTagInternalServerError) deleteContactTagRes() {}
+
+// DeleteContactTagNoContent is response for DeleteContactTag operation.
+type DeleteContactTagNoContent struct{}
+
+func (*DeleteContactTagNoContent) deleteContactTagRes() {}
+
+type DeleteContactTagNotFound Error
+
+func (*DeleteContactTagNotFound) deleteContactTagRes() {}
+
+type DeleteContactTagUnauthorized Error
+
+func (*DeleteContactTagUnauthorized) deleteContactTagRes() {}
 
 type DeleteContactsIDBadRequest Error
 
@@ -4529,6 +5822,377 @@ type GetAutomationsUnauthorized Error
 
 func (*GetAutomationsUnauthorized) getAutomationsRes() {}
 
+type GetBroadcastsBadRequest Error
+
+func (*GetBroadcastsBadRequest) getBroadcastsRes() {}
+
+type GetBroadcastsConflict Error
+
+func (*GetBroadcastsConflict) getBroadcastsRes() {}
+
+type GetBroadcastsForbidden Error
+
+func (*GetBroadcastsForbidden) getBroadcastsRes() {}
+
+type GetBroadcastsIDAnalyticsBadRequest Error
+
+func (*GetBroadcastsIDAnalyticsBadRequest) getBroadcastsIDAnalyticsRes() {}
+
+type GetBroadcastsIDAnalyticsForbidden Error
+
+func (*GetBroadcastsIDAnalyticsForbidden) getBroadcastsIDAnalyticsRes() {}
+
+type GetBroadcastsIDAnalyticsInternalServerError Error
+
+func (*GetBroadcastsIDAnalyticsInternalServerError) getBroadcastsIDAnalyticsRes() {}
+
+type GetBroadcastsIDAnalyticsNotFound Error
+
+func (*GetBroadcastsIDAnalyticsNotFound) getBroadcastsIDAnalyticsRes() {}
+
+// GetBroadcastsIDAnalyticsOK is response for GetBroadcastsIDAnalytics operation.
+type GetBroadcastsIDAnalyticsOK struct{}
+
+func (*GetBroadcastsIDAnalyticsOK) getBroadcastsIDAnalyticsRes() {}
+
+type GetBroadcastsIDAnalyticsUnauthorized Error
+
+func (*GetBroadcastsIDAnalyticsUnauthorized) getBroadcastsIDAnalyticsRes() {}
+
+type GetBroadcastsIDBadRequest Error
+
+func (*GetBroadcastsIDBadRequest) getBroadcastsIDRes() {}
+
+type GetBroadcastsIDConflict Error
+
+func (*GetBroadcastsIDConflict) getBroadcastsIDRes() {}
+
+type GetBroadcastsIDForbidden Error
+
+func (*GetBroadcastsIDForbidden) getBroadcastsIDRes() {}
+
+type GetBroadcastsIDInternalServerError Error
+
+func (*GetBroadcastsIDInternalServerError) getBroadcastsIDRes() {}
+
+type GetBroadcastsIDNotFound Error
+
+func (*GetBroadcastsIDNotFound) getBroadcastsIDRes() {}
+
+type GetBroadcastsIDUnauthorized Error
+
+func (*GetBroadcastsIDUnauthorized) getBroadcastsIDRes() {}
+
+type GetBroadcastsInternalServerError Error
+
+func (*GetBroadcastsInternalServerError) getBroadcastsRes() {}
+
+type GetBroadcastsManageBadRequest Error
+
+func (*GetBroadcastsManageBadRequest) getBroadcastsManageRes() {}
+
+type GetBroadcastsManageForbidden Error
+
+func (*GetBroadcastsManageForbidden) getBroadcastsManageRes() {}
+
+type GetBroadcastsManageInternalServerError Error
+
+func (*GetBroadcastsManageInternalServerError) getBroadcastsManageRes() {}
+
+// GetBroadcastsManageOK is response for GetBroadcastsManage operation.
+type GetBroadcastsManageOK struct{}
+
+func (*GetBroadcastsManageOK) getBroadcastsManageRes() {}
+
+type GetBroadcastsManageOrder string
+
+const (
+	GetBroadcastsManageOrderAsc  GetBroadcastsManageOrder = "asc"
+	GetBroadcastsManageOrderDesc GetBroadcastsManageOrder = "desc"
+)
+
+// AllValues returns all GetBroadcastsManageOrder values.
+func (GetBroadcastsManageOrder) AllValues() []GetBroadcastsManageOrder {
+	return []GetBroadcastsManageOrder{
+		GetBroadcastsManageOrderAsc,
+		GetBroadcastsManageOrderDesc,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s GetBroadcastsManageOrder) MarshalText() ([]byte, error) {
+	switch s {
+	case GetBroadcastsManageOrderAsc:
+		return []byte(s), nil
+	case GetBroadcastsManageOrderDesc:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *GetBroadcastsManageOrder) UnmarshalText(data []byte) error {
+	switch GetBroadcastsManageOrder(data) {
+	case GetBroadcastsManageOrderAsc:
+		*s = GetBroadcastsManageOrderAsc
+		return nil
+	case GetBroadcastsManageOrderDesc:
+		*s = GetBroadcastsManageOrderDesc
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type GetBroadcastsManageTargetKind string
+
+const (
+	GetBroadcastsManageTargetKindAllContacts GetBroadcastsManageTargetKind = "all_contacts"
+	GetBroadcastsManageTargetKindSegment     GetBroadcastsManageTargetKind = "segment"
+)
+
+// AllValues returns all GetBroadcastsManageTargetKind values.
+func (GetBroadcastsManageTargetKind) AllValues() []GetBroadcastsManageTargetKind {
+	return []GetBroadcastsManageTargetKind{
+		GetBroadcastsManageTargetKindAllContacts,
+		GetBroadcastsManageTargetKindSegment,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s GetBroadcastsManageTargetKind) MarshalText() ([]byte, error) {
+	switch s {
+	case GetBroadcastsManageTargetKindAllContacts:
+		return []byte(s), nil
+	case GetBroadcastsManageTargetKindSegment:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *GetBroadcastsManageTargetKind) UnmarshalText(data []byte) error {
+	switch GetBroadcastsManageTargetKind(data) {
+	case GetBroadcastsManageTargetKindAllContacts:
+		*s = GetBroadcastsManageTargetKindAllContacts
+		return nil
+	case GetBroadcastsManageTargetKindSegment:
+		*s = GetBroadcastsManageTargetKindSegment
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type GetBroadcastsManageUnauthorized Error
+
+func (*GetBroadcastsManageUnauthorized) getBroadcastsManageRes() {}
+
+type GetBroadcastsOverviewBadRequest Error
+
+func (*GetBroadcastsOverviewBadRequest) getBroadcastsOverviewRes() {}
+
+type GetBroadcastsOverviewForbidden Error
+
+func (*GetBroadcastsOverviewForbidden) getBroadcastsOverviewRes() {}
+
+type GetBroadcastsOverviewInternalServerError Error
+
+func (*GetBroadcastsOverviewInternalServerError) getBroadcastsOverviewRes() {}
+
+// GetBroadcastsOverviewOK is response for GetBroadcastsOverview operation.
+type GetBroadcastsOverviewOK struct{}
+
+func (*GetBroadcastsOverviewOK) getBroadcastsOverviewRes() {}
+
+type GetBroadcastsOverviewTargetKind string
+
+const (
+	GetBroadcastsOverviewTargetKindAllContacts GetBroadcastsOverviewTargetKind = "all_contacts"
+	GetBroadcastsOverviewTargetKindSegment     GetBroadcastsOverviewTargetKind = "segment"
+)
+
+// AllValues returns all GetBroadcastsOverviewTargetKind values.
+func (GetBroadcastsOverviewTargetKind) AllValues() []GetBroadcastsOverviewTargetKind {
+	return []GetBroadcastsOverviewTargetKind{
+		GetBroadcastsOverviewTargetKindAllContacts,
+		GetBroadcastsOverviewTargetKindSegment,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s GetBroadcastsOverviewTargetKind) MarshalText() ([]byte, error) {
+	switch s {
+	case GetBroadcastsOverviewTargetKindAllContacts:
+		return []byte(s), nil
+	case GetBroadcastsOverviewTargetKindSegment:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *GetBroadcastsOverviewTargetKind) UnmarshalText(data []byte) error {
+	switch GetBroadcastsOverviewTargetKind(data) {
+	case GetBroadcastsOverviewTargetKindAllContacts:
+		*s = GetBroadcastsOverviewTargetKindAllContacts
+		return nil
+	case GetBroadcastsOverviewTargetKindSegment:
+		*s = GetBroadcastsOverviewTargetKindSegment
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type GetBroadcastsOverviewUnauthorized Error
+
+func (*GetBroadcastsOverviewUnauthorized) getBroadcastsOverviewRes() {}
+
+type GetBroadcastsUnauthorized Error
+
+func (*GetBroadcastsUnauthorized) getBroadcastsRes() {}
+
+type GetContactTagBadRequest Error
+
+func (*GetContactTagBadRequest) getContactTagRes() {}
+
+type GetContactTagConflict Error
+
+func (*GetContactTagConflict) getContactTagRes() {}
+
+type GetContactTagForbidden Error
+
+func (*GetContactTagForbidden) getContactTagRes() {}
+
+type GetContactTagInternalServerError Error
+
+func (*GetContactTagInternalServerError) getContactTagRes() {}
+
+type GetContactTagNotFound Error
+
+func (*GetContactTagNotFound) getContactTagRes() {}
+
+type GetContactTagUnauthorized Error
+
+func (*GetContactTagUnauthorized) getContactTagRes() {}
+
+type GetContactTagsBadRequest Error
+
+func (*GetContactTagsBadRequest) getContactTagsRes() {}
+
+type GetContactTagsConflict Error
+
+func (*GetContactTagsConflict) getContactTagsRes() {}
+
+type GetContactTagsForbidden Error
+
+func (*GetContactTagsForbidden) getContactTagsRes() {}
+
+type GetContactTagsInternalServerError Error
+
+func (*GetContactTagsInternalServerError) getContactTagsRes() {}
+
+type GetContactTagsNotFound Error
+
+func (*GetContactTagsNotFound) getContactTagsRes() {}
+
+type GetContactTagsOrder string
+
+const (
+	GetContactTagsOrderAsc  GetContactTagsOrder = "asc"
+	GetContactTagsOrderDesc GetContactTagsOrder = "desc"
+)
+
+// AllValues returns all GetContactTagsOrder values.
+func (GetContactTagsOrder) AllValues() []GetContactTagsOrder {
+	return []GetContactTagsOrder{
+		GetContactTagsOrderAsc,
+		GetContactTagsOrderDesc,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s GetContactTagsOrder) MarshalText() ([]byte, error) {
+	switch s {
+	case GetContactTagsOrderAsc:
+		return []byte(s), nil
+	case GetContactTagsOrderDesc:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *GetContactTagsOrder) UnmarshalText(data []byte) error {
+	switch GetContactTagsOrder(data) {
+	case GetContactTagsOrderAsc:
+		*s = GetContactTagsOrderAsc
+		return nil
+	case GetContactTagsOrderDesc:
+		*s = GetContactTagsOrderDesc
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type GetContactTagsSort string
+
+const (
+	GetContactTagsSortName         GetContactTagsSort = "name"
+	GetContactTagsSortCreatedAt    GetContactTagsSort = "created_at"
+	GetContactTagsSortContactCount GetContactTagsSort = "contact_count"
+)
+
+// AllValues returns all GetContactTagsSort values.
+func (GetContactTagsSort) AllValues() []GetContactTagsSort {
+	return []GetContactTagsSort{
+		GetContactTagsSortName,
+		GetContactTagsSortCreatedAt,
+		GetContactTagsSortContactCount,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s GetContactTagsSort) MarshalText() ([]byte, error) {
+	switch s {
+	case GetContactTagsSortName:
+		return []byte(s), nil
+	case GetContactTagsSortCreatedAt:
+		return []byte(s), nil
+	case GetContactTagsSortContactCount:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *GetContactTagsSort) UnmarshalText(data []byte) error {
+	switch GetContactTagsSort(data) {
+	case GetContactTagsSortName:
+		*s = GetContactTagsSortName
+		return nil
+	case GetContactTagsSortCreatedAt:
+		*s = GetContactTagsSortCreatedAt
+		return nil
+	case GetContactTagsSortContactCount:
+		*s = GetContactTagsSortContactCount
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type GetContactTagsUnauthorized Error
+
+func (*GetContactTagsUnauthorized) getContactTagsRes() {}
+
 type GetContactsBadRequest Error
 
 func (*GetContactsBadRequest) getContactsRes() {}
@@ -4560,6 +6224,54 @@ func (*GetContactsIDUnauthorized) getContactsIDRes() {}
 type GetContactsInternalServerError Error
 
 func (*GetContactsInternalServerError) getContactsRes() {}
+
+type GetContactsTagMatch string
+
+const (
+	GetContactsTagMatchAny  GetContactsTagMatch = "any"
+	GetContactsTagMatchAll  GetContactsTagMatch = "all"
+	GetContactsTagMatchNone GetContactsTagMatch = "none"
+)
+
+// AllValues returns all GetContactsTagMatch values.
+func (GetContactsTagMatch) AllValues() []GetContactsTagMatch {
+	return []GetContactsTagMatch{
+		GetContactsTagMatchAny,
+		GetContactsTagMatchAll,
+		GetContactsTagMatchNone,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s GetContactsTagMatch) MarshalText() ([]byte, error) {
+	switch s {
+	case GetContactsTagMatchAny:
+		return []byte(s), nil
+	case GetContactsTagMatchAll:
+		return []byte(s), nil
+	case GetContactsTagMatchNone:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *GetContactsTagMatch) UnmarshalText(data []byte) error {
+	switch GetContactsTagMatch(data) {
+	case GetContactsTagMatchAny:
+		*s = GetContactsTagMatchAny
+		return nil
+	case GetContactsTagMatchAll:
+		*s = GetContactsTagMatchAll
+		return nil
+	case GetContactsTagMatchNone:
+		*s = GetContactsTagMatchNone
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
 
 type GetContactsUnauthorized Error
 
@@ -5770,6 +7482,70 @@ type GetTemplatesUnauthorized Error
 
 func (*GetTemplatesUnauthorized) getTemplatesRes() {}
 
+type GetTenantWebhookDeliveriesBadRequest Error
+
+func (*GetTenantWebhookDeliveriesBadRequest) getTenantWebhookDeliveriesRes() {}
+
+type GetTenantWebhookDeliveriesForbidden Error
+
+func (*GetTenantWebhookDeliveriesForbidden) getTenantWebhookDeliveriesRes() {}
+
+type GetTenantWebhookDeliveriesInternalServerError Error
+
+func (*GetTenantWebhookDeliveriesInternalServerError) getTenantWebhookDeliveriesRes() {}
+
+type GetTenantWebhookDeliveriesStatus string
+
+const (
+	GetTenantWebhookDeliveriesStatusPending   GetTenantWebhookDeliveriesStatus = "pending"
+	GetTenantWebhookDeliveriesStatusDelivered GetTenantWebhookDeliveriesStatus = "delivered"
+	GetTenantWebhookDeliveriesStatusFailed    GetTenantWebhookDeliveriesStatus = "failed"
+)
+
+// AllValues returns all GetTenantWebhookDeliveriesStatus values.
+func (GetTenantWebhookDeliveriesStatus) AllValues() []GetTenantWebhookDeliveriesStatus {
+	return []GetTenantWebhookDeliveriesStatus{
+		GetTenantWebhookDeliveriesStatusPending,
+		GetTenantWebhookDeliveriesStatusDelivered,
+		GetTenantWebhookDeliveriesStatusFailed,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s GetTenantWebhookDeliveriesStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case GetTenantWebhookDeliveriesStatusPending:
+		return []byte(s), nil
+	case GetTenantWebhookDeliveriesStatusDelivered:
+		return []byte(s), nil
+	case GetTenantWebhookDeliveriesStatusFailed:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *GetTenantWebhookDeliveriesStatus) UnmarshalText(data []byte) error {
+	switch GetTenantWebhookDeliveriesStatus(data) {
+	case GetTenantWebhookDeliveriesStatusPending:
+		*s = GetTenantWebhookDeliveriesStatusPending
+		return nil
+	case GetTenantWebhookDeliveriesStatusDelivered:
+		*s = GetTenantWebhookDeliveriesStatusDelivered
+		return nil
+	case GetTenantWebhookDeliveriesStatusFailed:
+		*s = GetTenantWebhookDeliveriesStatusFailed
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type GetTenantWebhookDeliveriesUnauthorized Error
+
+func (*GetTenantWebhookDeliveriesUnauthorized) getTenantWebhookDeliveriesRes() {}
+
 type GetThemesBadRequest Error
 
 func (*GetThemesBadRequest) getThemesRes() {}
@@ -5817,6 +7593,58 @@ func (*GetUsageNotFound) getUsageRes() {}
 type GetUsageUnauthorized Error
 
 func (*GetUsageUnauthorized) getUsageRes() {}
+
+type GetWebhookEndpointBadRequest Error
+
+func (*GetWebhookEndpointBadRequest) getWebhookEndpointRes() {}
+
+type GetWebhookEndpointForbidden Error
+
+func (*GetWebhookEndpointForbidden) getWebhookEndpointRes() {}
+
+type GetWebhookEndpointInternalServerError Error
+
+func (*GetWebhookEndpointInternalServerError) getWebhookEndpointRes() {}
+
+type GetWebhookEndpointNotFound Error
+
+func (*GetWebhookEndpointNotFound) getWebhookEndpointRes() {}
+
+type GetWebhookEndpointUnauthorized Error
+
+func (*GetWebhookEndpointUnauthorized) getWebhookEndpointRes() {}
+
+type GetWebhookEventCatalogBadRequest Error
+
+func (*GetWebhookEventCatalogBadRequest) getWebhookEventCatalogRes() {}
+
+type GetWebhookEventCatalogForbidden Error
+
+func (*GetWebhookEventCatalogForbidden) getWebhookEventCatalogRes() {}
+
+type GetWebhookEventCatalogInternalServerError Error
+
+func (*GetWebhookEventCatalogInternalServerError) getWebhookEventCatalogRes() {}
+
+type GetWebhookEventCatalogUnauthorized Error
+
+func (*GetWebhookEventCatalogUnauthorized) getWebhookEventCatalogRes() {}
+
+type GetWebhookMetricsBadRequest Error
+
+func (*GetWebhookMetricsBadRequest) getWebhookMetricsRes() {}
+
+type GetWebhookMetricsForbidden Error
+
+func (*GetWebhookMetricsForbidden) getWebhookMetricsRes() {}
+
+type GetWebhookMetricsInternalServerError Error
+
+func (*GetWebhookMetricsInternalServerError) getWebhookMetricsRes() {}
+
+type GetWebhookMetricsUnauthorized Error
+
+func (*GetWebhookMetricsUnauthorized) getWebhookMetricsRes() {}
 
 type GetWebhooksBadRequest Error
 
@@ -5877,6 +7705,47 @@ func (*GetWebhooksInternalServerError) getWebhooksRes() {}
 type GetWebhooksNotFound Error
 
 func (*GetWebhooksNotFound) getWebhooksRes() {}
+
+type GetWebhooksSort string
+
+const (
+	GetWebhooksSortCreatedAtDesc GetWebhooksSort = "created_at_desc"
+	GetWebhooksSortCreatedAtAsc  GetWebhooksSort = "created_at_asc"
+)
+
+// AllValues returns all GetWebhooksSort values.
+func (GetWebhooksSort) AllValues() []GetWebhooksSort {
+	return []GetWebhooksSort{
+		GetWebhooksSortCreatedAtDesc,
+		GetWebhooksSortCreatedAtAsc,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s GetWebhooksSort) MarshalText() ([]byte, error) {
+	switch s {
+	case GetWebhooksSortCreatedAtDesc:
+		return []byte(s), nil
+	case GetWebhooksSortCreatedAtAsc:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *GetWebhooksSort) UnmarshalText(data []byte) error {
+	switch GetWebhooksSort(data) {
+	case GetWebhooksSortCreatedAtDesc:
+		*s = GetWebhooksSortCreatedAtDesc
+		return nil
+	case GetWebhooksSortCreatedAtAsc:
+		*s = GetWebhooksSortCreatedAtAsc
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
 
 type GetWebhooksUnauthorized Error
 
@@ -8193,6 +10062,51 @@ func (s *MonthlyUsage) SetUnlimited(val bool) {
 
 func (*MonthlyUsage) getUsageRes() {}
 
+// NewNilBroadcastFailureCode returns new NilBroadcastFailureCode with value set to v.
+func NewNilBroadcastFailureCode(v BroadcastFailureCode) NilBroadcastFailureCode {
+	return NilBroadcastFailureCode{
+		Value: v,
+	}
+}
+
+// NilBroadcastFailureCode is nullable BroadcastFailureCode.
+type NilBroadcastFailureCode struct {
+	Value BroadcastFailureCode
+	Null  bool
+}
+
+// SetTo sets value to v.
+func (o *NilBroadcastFailureCode) SetTo(v BroadcastFailureCode) {
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o NilBroadcastFailureCode) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *NilBroadcastFailureCode) SetToNull() {
+	o.Null = true
+	var v BroadcastFailureCode
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o NilBroadcastFailureCode) Get() (v BroadcastFailureCode, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o NilBroadcastFailureCode) Or(d BroadcastFailureCode) BroadcastFailureCode {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewNilDomainHealthBounceRateCheckPoints returns new NilDomainHealthBounceRateCheckPoints with value set to v.
 func NewNilDomainHealthBounceRateCheckPoints(v DomainHealthBounceRateCheckPoints) NilDomainHealthBounceRateCheckPoints {
 	return NilDomainHealthBounceRateCheckPoints{
@@ -8277,6 +10191,51 @@ func (o NilDomainHealthDeliveryRateCheckPoints) Get() (v DomainHealthDeliveryRat
 
 // Or returns value if set, or given parameter if does not.
 func (o NilDomainHealthDeliveryRateCheckPoints) Or(d DomainHealthDeliveryRateCheckPoints) DomainHealthDeliveryRateCheckPoints {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewNilFloat64 returns new NilFloat64 with value set to v.
+func NewNilFloat64(v float64) NilFloat64 {
+	return NilFloat64{
+		Value: v,
+	}
+}
+
+// NilFloat64 is nullable float64.
+type NilFloat64 struct {
+	Value float64
+	Null  bool
+}
+
+// SetTo sets value to v.
+func (o *NilFloat64) SetTo(v float64) {
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o NilFloat64) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *NilFloat64) SetToNull() {
+	o.Null = true
+	var v float64
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o NilFloat64) Get() (v float64, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o NilFloat64) Or(d float64) float64 {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -8373,6 +10332,51 @@ func (o NilInt64) Or(d int64) int64 {
 	return d
 }
 
+// NewNilString returns new NilString with value set to v.
+func NewNilString(v string) NilString {
+	return NilString{
+		Value: v,
+	}
+}
+
+// NilString is nullable string.
+type NilString struct {
+	Value string
+	Null  bool
+}
+
+// SetTo sets value to v.
+func (o *NilString) SetTo(v string) {
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o NilString) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *NilString) SetToNull() {
+	o.Null = true
+	var v string
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o NilString) Get() (v string, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o NilString) Or(d string) string {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewNilTimestamp returns new NilTimestamp with value set to v.
 func NewNilTimestamp(v Timestamp) NilTimestamp {
 	return NilTimestamp{
@@ -8463,6 +10467,141 @@ func (o NilUUID) Or(d UUID) UUID {
 	return d
 }
 
+// NewNilWebhookDeliveryAttemptErrorClass returns new NilWebhookDeliveryAttemptErrorClass with value set to v.
+func NewNilWebhookDeliveryAttemptErrorClass(v WebhookDeliveryAttemptErrorClass) NilWebhookDeliveryAttemptErrorClass {
+	return NilWebhookDeliveryAttemptErrorClass{
+		Value: v,
+	}
+}
+
+// NilWebhookDeliveryAttemptErrorClass is nullable WebhookDeliveryAttemptErrorClass.
+type NilWebhookDeliveryAttemptErrorClass struct {
+	Value WebhookDeliveryAttemptErrorClass
+	Null  bool
+}
+
+// SetTo sets value to v.
+func (o *NilWebhookDeliveryAttemptErrorClass) SetTo(v WebhookDeliveryAttemptErrorClass) {
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o NilWebhookDeliveryAttemptErrorClass) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *NilWebhookDeliveryAttemptErrorClass) SetToNull() {
+	o.Null = true
+	var v WebhookDeliveryAttemptErrorClass
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o NilWebhookDeliveryAttemptErrorClass) Get() (v WebhookDeliveryAttemptErrorClass, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o NilWebhookDeliveryAttemptErrorClass) Or(d WebhookDeliveryAttemptErrorClass) WebhookDeliveryAttemptErrorClass {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewNilWebhookLastDelivery returns new NilWebhookLastDelivery with value set to v.
+func NewNilWebhookLastDelivery(v WebhookLastDelivery) NilWebhookLastDelivery {
+	return NilWebhookLastDelivery{
+		Value: v,
+	}
+}
+
+// NilWebhookLastDelivery is nullable WebhookLastDelivery.
+type NilWebhookLastDelivery struct {
+	Value WebhookLastDelivery
+	Null  bool
+}
+
+// SetTo sets value to v.
+func (o *NilWebhookLastDelivery) SetTo(v WebhookLastDelivery) {
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o NilWebhookLastDelivery) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *NilWebhookLastDelivery) SetToNull() {
+	o.Null = true
+	var v WebhookLastDelivery
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o NilWebhookLastDelivery) Get() (v WebhookLastDelivery, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o NilWebhookLastDelivery) Or(d WebhookLastDelivery) WebhookLastDelivery {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewNilWebhookRequestedBy returns new NilWebhookRequestedBy with value set to v.
+func NewNilWebhookRequestedBy(v WebhookRequestedBy) NilWebhookRequestedBy {
+	return NilWebhookRequestedBy{
+		Value: v,
+	}
+}
+
+// NilWebhookRequestedBy is nullable WebhookRequestedBy.
+type NilWebhookRequestedBy struct {
+	Value WebhookRequestedBy
+	Null  bool
+}
+
+// SetTo sets value to v.
+func (o *NilWebhookRequestedBy) SetTo(v WebhookRequestedBy) {
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o NilWebhookRequestedBy) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *NilWebhookRequestedBy) SetToNull() {
+	o.Null = true
+	var v WebhookRequestedBy
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o NilWebhookRequestedBy) Get() (v WebhookRequestedBy, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o NilWebhookRequestedBy) Or(d WebhookRequestedBy) WebhookRequestedBy {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptBool returns new OptBool with value set to v.
 func NewOptBool(v bool) OptBool {
 	return OptBool{
@@ -8503,6 +10642,52 @@ func (o OptBool) Get() (v bool, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptBool) Or(d bool) bool {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptBroadcastContentSnapshot returns new OptBroadcastContentSnapshot with value set to v.
+func NewOptBroadcastContentSnapshot(v BroadcastContentSnapshot) OptBroadcastContentSnapshot {
+	return OptBroadcastContentSnapshot{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBroadcastContentSnapshot is optional BroadcastContentSnapshot.
+type OptBroadcastContentSnapshot struct {
+	Value BroadcastContentSnapshot
+	Set   bool
+}
+
+// IsSet returns true if OptBroadcastContentSnapshot was set.
+func (o OptBroadcastContentSnapshot) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBroadcastContentSnapshot) Reset() {
+	var v BroadcastContentSnapshot
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBroadcastContentSnapshot) SetTo(v BroadcastContentSnapshot) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBroadcastContentSnapshot) Get() (v BroadcastContentSnapshot, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBroadcastContentSnapshot) Or(d BroadcastContentSnapshot) BroadcastContentSnapshot {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -8693,6 +10878,52 @@ func (o OptDMARCAuthenticationResult) Or(d DMARCAuthenticationResult) DMARCAuthe
 	return d
 }
 
+// NewOptDate returns new OptDate with value set to v.
+func NewOptDate(v time.Time) OptDate {
+	return OptDate{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptDate is optional time.Time.
+type OptDate struct {
+	Value time.Time
+	Set   bool
+}
+
+// IsSet returns true if OptDate was set.
+func (o OptDate) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptDate) Reset() {
+	var v time.Time
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptDate) SetTo(v time.Time) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptDate) Get() (v time.Time, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptDate) Or(d time.Time) time.Time {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptDateTime returns new OptDateTime with value set to v.
 func NewOptDateTime(v time.Time) OptDateTime {
 	return OptDateTime{
@@ -8825,6 +11056,282 @@ func (o OptGetAutomationsStatus) Get() (v GetAutomationsStatus, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptGetAutomationsStatus) Or(d GetAutomationsStatus) GetAutomationsStatus {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptGetBroadcastsManageOrder returns new OptGetBroadcastsManageOrder with value set to v.
+func NewOptGetBroadcastsManageOrder(v GetBroadcastsManageOrder) OptGetBroadcastsManageOrder {
+	return OptGetBroadcastsManageOrder{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptGetBroadcastsManageOrder is optional GetBroadcastsManageOrder.
+type OptGetBroadcastsManageOrder struct {
+	Value GetBroadcastsManageOrder
+	Set   bool
+}
+
+// IsSet returns true if OptGetBroadcastsManageOrder was set.
+func (o OptGetBroadcastsManageOrder) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptGetBroadcastsManageOrder) Reset() {
+	var v GetBroadcastsManageOrder
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptGetBroadcastsManageOrder) SetTo(v GetBroadcastsManageOrder) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptGetBroadcastsManageOrder) Get() (v GetBroadcastsManageOrder, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptGetBroadcastsManageOrder) Or(d GetBroadcastsManageOrder) GetBroadcastsManageOrder {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptGetBroadcastsManageTargetKind returns new OptGetBroadcastsManageTargetKind with value set to v.
+func NewOptGetBroadcastsManageTargetKind(v GetBroadcastsManageTargetKind) OptGetBroadcastsManageTargetKind {
+	return OptGetBroadcastsManageTargetKind{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptGetBroadcastsManageTargetKind is optional GetBroadcastsManageTargetKind.
+type OptGetBroadcastsManageTargetKind struct {
+	Value GetBroadcastsManageTargetKind
+	Set   bool
+}
+
+// IsSet returns true if OptGetBroadcastsManageTargetKind was set.
+func (o OptGetBroadcastsManageTargetKind) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptGetBroadcastsManageTargetKind) Reset() {
+	var v GetBroadcastsManageTargetKind
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptGetBroadcastsManageTargetKind) SetTo(v GetBroadcastsManageTargetKind) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptGetBroadcastsManageTargetKind) Get() (v GetBroadcastsManageTargetKind, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptGetBroadcastsManageTargetKind) Or(d GetBroadcastsManageTargetKind) GetBroadcastsManageTargetKind {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptGetBroadcastsOverviewTargetKind returns new OptGetBroadcastsOverviewTargetKind with value set to v.
+func NewOptGetBroadcastsOverviewTargetKind(v GetBroadcastsOverviewTargetKind) OptGetBroadcastsOverviewTargetKind {
+	return OptGetBroadcastsOverviewTargetKind{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptGetBroadcastsOverviewTargetKind is optional GetBroadcastsOverviewTargetKind.
+type OptGetBroadcastsOverviewTargetKind struct {
+	Value GetBroadcastsOverviewTargetKind
+	Set   bool
+}
+
+// IsSet returns true if OptGetBroadcastsOverviewTargetKind was set.
+func (o OptGetBroadcastsOverviewTargetKind) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptGetBroadcastsOverviewTargetKind) Reset() {
+	var v GetBroadcastsOverviewTargetKind
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptGetBroadcastsOverviewTargetKind) SetTo(v GetBroadcastsOverviewTargetKind) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptGetBroadcastsOverviewTargetKind) Get() (v GetBroadcastsOverviewTargetKind, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptGetBroadcastsOverviewTargetKind) Or(d GetBroadcastsOverviewTargetKind) GetBroadcastsOverviewTargetKind {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptGetContactTagsOrder returns new OptGetContactTagsOrder with value set to v.
+func NewOptGetContactTagsOrder(v GetContactTagsOrder) OptGetContactTagsOrder {
+	return OptGetContactTagsOrder{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptGetContactTagsOrder is optional GetContactTagsOrder.
+type OptGetContactTagsOrder struct {
+	Value GetContactTagsOrder
+	Set   bool
+}
+
+// IsSet returns true if OptGetContactTagsOrder was set.
+func (o OptGetContactTagsOrder) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptGetContactTagsOrder) Reset() {
+	var v GetContactTagsOrder
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptGetContactTagsOrder) SetTo(v GetContactTagsOrder) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptGetContactTagsOrder) Get() (v GetContactTagsOrder, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptGetContactTagsOrder) Or(d GetContactTagsOrder) GetContactTagsOrder {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptGetContactTagsSort returns new OptGetContactTagsSort with value set to v.
+func NewOptGetContactTagsSort(v GetContactTagsSort) OptGetContactTagsSort {
+	return OptGetContactTagsSort{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptGetContactTagsSort is optional GetContactTagsSort.
+type OptGetContactTagsSort struct {
+	Value GetContactTagsSort
+	Set   bool
+}
+
+// IsSet returns true if OptGetContactTagsSort was set.
+func (o OptGetContactTagsSort) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptGetContactTagsSort) Reset() {
+	var v GetContactTagsSort
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptGetContactTagsSort) SetTo(v GetContactTagsSort) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptGetContactTagsSort) Get() (v GetContactTagsSort, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptGetContactTagsSort) Or(d GetContactTagsSort) GetContactTagsSort {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptGetContactsTagMatch returns new OptGetContactsTagMatch with value set to v.
+func NewOptGetContactsTagMatch(v GetContactsTagMatch) OptGetContactsTagMatch {
+	return OptGetContactsTagMatch{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptGetContactsTagMatch is optional GetContactsTagMatch.
+type OptGetContactsTagMatch struct {
+	Value GetContactsTagMatch
+	Set   bool
+}
+
+// IsSet returns true if OptGetContactsTagMatch was set.
+func (o OptGetContactsTagMatch) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptGetContactsTagMatch) Reset() {
+	var v GetContactsTagMatch
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptGetContactsTagMatch) SetTo(v GetContactsTagMatch) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptGetContactsTagMatch) Get() (v GetContactsTagMatch, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptGetContactsTagMatch) Or(d GetContactsTagMatch) GetContactsTagMatch {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -9101,6 +11608,98 @@ func (o OptGetSuppressionsState) Get() (v GetSuppressionsState, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptGetSuppressionsState) Or(d GetSuppressionsState) GetSuppressionsState {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptGetTenantWebhookDeliveriesStatus returns new OptGetTenantWebhookDeliveriesStatus with value set to v.
+func NewOptGetTenantWebhookDeliveriesStatus(v GetTenantWebhookDeliveriesStatus) OptGetTenantWebhookDeliveriesStatus {
+	return OptGetTenantWebhookDeliveriesStatus{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptGetTenantWebhookDeliveriesStatus is optional GetTenantWebhookDeliveriesStatus.
+type OptGetTenantWebhookDeliveriesStatus struct {
+	Value GetTenantWebhookDeliveriesStatus
+	Set   bool
+}
+
+// IsSet returns true if OptGetTenantWebhookDeliveriesStatus was set.
+func (o OptGetTenantWebhookDeliveriesStatus) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptGetTenantWebhookDeliveriesStatus) Reset() {
+	var v GetTenantWebhookDeliveriesStatus
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptGetTenantWebhookDeliveriesStatus) SetTo(v GetTenantWebhookDeliveriesStatus) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptGetTenantWebhookDeliveriesStatus) Get() (v GetTenantWebhookDeliveriesStatus, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptGetTenantWebhookDeliveriesStatus) Or(d GetTenantWebhookDeliveriesStatus) GetTenantWebhookDeliveriesStatus {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptGetWebhooksSort returns new OptGetWebhooksSort with value set to v.
+func NewOptGetWebhooksSort(v GetWebhooksSort) OptGetWebhooksSort {
+	return OptGetWebhooksSort{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptGetWebhooksSort is optional GetWebhooksSort.
+type OptGetWebhooksSort struct {
+	Value GetWebhooksSort
+	Set   bool
+}
+
+// IsSet returns true if OptGetWebhooksSort was set.
+func (o OptGetWebhooksSort) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptGetWebhooksSort) Reset() {
+	var v GetWebhooksSort
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptGetWebhooksSort) SetTo(v GetWebhooksSort) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptGetWebhooksSort) Get() (v GetWebhooksSort, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptGetWebhooksSort) Or(d GetWebhooksSort) GetWebhooksSort {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -9783,6 +12382,52 @@ func (o OptNilUUID) Get() (v UUID, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptNilUUID) Or(d UUID) UUID {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptPostContactsImportTagMode returns new OptPostContactsImportTagMode with value set to v.
+func NewOptPostContactsImportTagMode(v PostContactsImportTagMode) OptPostContactsImportTagMode {
+	return OptPostContactsImportTagMode{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptPostContactsImportTagMode is optional PostContactsImportTagMode.
+type OptPostContactsImportTagMode struct {
+	Value PostContactsImportTagMode
+	Set   bool
+}
+
+// IsSet returns true if OptPostContactsImportTagMode was set.
+func (o OptPostContactsImportTagMode) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptPostContactsImportTagMode) Reset() {
+	var v PostContactsImportTagMode
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptPostContactsImportTagMode) SetTo(v PostContactsImportTagMode) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptPostContactsImportTagMode) Get() (v PostContactsImportTagMode, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptPostContactsImportTagMode) Or(d PostContactsImportTagMode) PostContactsImportTagMode {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -10619,6 +13264,49 @@ type PatchAutomationsIDUnauthorized Error
 
 func (*PatchAutomationsIDUnauthorized) patchAutomationsIDRes() {}
 
+type PatchBroadcastsIDBadRequest Error
+
+func (*PatchBroadcastsIDBadRequest) patchBroadcastsIDRes() {}
+
+type PatchBroadcastsIDConflict Error
+
+func (*PatchBroadcastsIDConflict) patchBroadcastsIDRes() {}
+
+type PatchBroadcastsIDForbidden Error
+
+func (*PatchBroadcastsIDForbidden) patchBroadcastsIDRes() {}
+
+type PatchBroadcastsIDInternalServerError Error
+
+func (*PatchBroadcastsIDInternalServerError) patchBroadcastsIDRes() {}
+
+type PatchBroadcastsIDNotFound Error
+
+func (*PatchBroadcastsIDNotFound) patchBroadcastsIDRes() {}
+
+// PatchBroadcastsIDOK is response for PatchBroadcastsID operation.
+type PatchBroadcastsIDOK struct{}
+
+func (*PatchBroadcastsIDOK) patchBroadcastsIDRes() {}
+
+type PatchBroadcastsIDReq struct {
+	ExpectedVersion int64 `json:"expected_version"`
+}
+
+// GetExpectedVersion returns the value of ExpectedVersion.
+func (s *PatchBroadcastsIDReq) GetExpectedVersion() int64 {
+	return s.ExpectedVersion
+}
+
+// SetExpectedVersion sets the value of ExpectedVersion.
+func (s *PatchBroadcastsIDReq) SetExpectedVersion(val int64) {
+	s.ExpectedVersion = val
+}
+
+type PatchBroadcastsIDUnauthorized Error
+
+func (*PatchBroadcastsIDUnauthorized) patchBroadcastsIDRes() {}
+
 type PatchContactsIDBadRequest Error
 
 func (*PatchContactsIDBadRequest) patchContactsIDRes() {}
@@ -10864,6 +13552,132 @@ type PostAutomationsUnauthorized Error
 
 func (*PostAutomationsUnauthorized) postAutomationsRes() {}
 
+type PostBroadcastsBadRequest Error
+
+func (*PostBroadcastsBadRequest) postBroadcastsRes() {}
+
+type PostBroadcastsConflict Error
+
+func (*PostBroadcastsConflict) postBroadcastsRes() {}
+
+type PostBroadcastsCreated Broadcast
+
+func (*PostBroadcastsCreated) postBroadcastsRes() {}
+
+type PostBroadcastsForbidden Error
+
+func (*PostBroadcastsForbidden) postBroadcastsRes() {}
+
+type PostBroadcastsIDCancelBadRequest Error
+
+func (*PostBroadcastsIDCancelBadRequest) postBroadcastsIDCancelRes() {}
+
+type PostBroadcastsIDCancelConflict Error
+
+func (*PostBroadcastsIDCancelConflict) postBroadcastsIDCancelRes() {}
+
+type PostBroadcastsIDCancelForbidden Error
+
+func (*PostBroadcastsIDCancelForbidden) postBroadcastsIDCancelRes() {}
+
+type PostBroadcastsIDCancelInternalServerError Error
+
+func (*PostBroadcastsIDCancelInternalServerError) postBroadcastsIDCancelRes() {}
+
+type PostBroadcastsIDCancelNotFound Error
+
+func (*PostBroadcastsIDCancelNotFound) postBroadcastsIDCancelRes() {}
+
+type PostBroadcastsIDCancelUnauthorized Error
+
+func (*PostBroadcastsIDCancelUnauthorized) postBroadcastsIDCancelRes() {}
+
+type PostBroadcastsIDScheduleBadRequest Error
+
+func (*PostBroadcastsIDScheduleBadRequest) postBroadcastsIDScheduleRes() {}
+
+type PostBroadcastsIDScheduleConflict Error
+
+func (*PostBroadcastsIDScheduleConflict) postBroadcastsIDScheduleRes() {}
+
+type PostBroadcastsIDScheduleForbidden Error
+
+func (*PostBroadcastsIDScheduleForbidden) postBroadcastsIDScheduleRes() {}
+
+type PostBroadcastsIDScheduleInternalServerError Error
+
+func (*PostBroadcastsIDScheduleInternalServerError) postBroadcastsIDScheduleRes() {}
+
+type PostBroadcastsIDScheduleNotFound Error
+
+func (*PostBroadcastsIDScheduleNotFound) postBroadcastsIDScheduleRes() {}
+
+type PostBroadcastsIDScheduleServiceUnavailable Error
+
+func (*PostBroadcastsIDScheduleServiceUnavailable) postBroadcastsIDScheduleRes() {}
+
+type PostBroadcastsIDScheduleUnauthorized Error
+
+func (*PostBroadcastsIDScheduleUnauthorized) postBroadcastsIDScheduleRes() {}
+
+type PostBroadcastsIDTestBadRequest Error
+
+func (*PostBroadcastsIDTestBadRequest) postBroadcastsIDTestRes() {}
+
+type PostBroadcastsIDTestConflict Error
+
+func (*PostBroadcastsIDTestConflict) postBroadcastsIDTestRes() {}
+
+type PostBroadcastsIDTestForbidden Error
+
+func (*PostBroadcastsIDTestForbidden) postBroadcastsIDTestRes() {}
+
+type PostBroadcastsIDTestInternalServerError Error
+
+func (*PostBroadcastsIDTestInternalServerError) postBroadcastsIDTestRes() {}
+
+type PostBroadcastsIDTestNotFound Error
+
+func (*PostBroadcastsIDTestNotFound) postBroadcastsIDTestRes() {}
+
+type PostBroadcastsIDTestReq struct {
+	ExpectedVersion int `json:"expected_version"`
+}
+
+// GetExpectedVersion returns the value of ExpectedVersion.
+func (s *PostBroadcastsIDTestReq) GetExpectedVersion() int {
+	return s.ExpectedVersion
+}
+
+// SetExpectedVersion sets the value of ExpectedVersion.
+func (s *PostBroadcastsIDTestReq) SetExpectedVersion(val int) {
+	s.ExpectedVersion = val
+}
+
+type PostBroadcastsIDTestServiceUnavailable Error
+
+func (*PostBroadcastsIDTestServiceUnavailable) postBroadcastsIDTestRes() {}
+
+type PostBroadcastsIDTestUnauthorized Error
+
+func (*PostBroadcastsIDTestUnauthorized) postBroadcastsIDTestRes() {}
+
+type PostBroadcastsInternalServerError Error
+
+func (*PostBroadcastsInternalServerError) postBroadcastsRes() {}
+
+type PostBroadcastsOK Broadcast
+
+func (*PostBroadcastsOK) postBroadcastsRes() {}
+
+type PostBroadcastsServiceUnavailable Error
+
+func (*PostBroadcastsServiceUnavailable) postBroadcastsRes() {}
+
+type PostBroadcastsUnauthorized Error
+
+func (*PostBroadcastsUnauthorized) postBroadcastsRes() {}
+
 type PostContactsBadRequest Error
 
 func (*PostContactsBadRequest) postContactsRes() {}
@@ -10905,6 +13719,47 @@ func (s PostContactsImportReq) Read(p []byte) (n int, err error) {
 type PostContactsImportRequestEntityTooLarge Error
 
 func (*PostContactsImportRequestEntityTooLarge) postContactsImportRes() {}
+
+type PostContactsImportTagMode string
+
+const (
+	PostContactsImportTagModeAdd     PostContactsImportTagMode = "add"
+	PostContactsImportTagModeReplace PostContactsImportTagMode = "replace"
+)
+
+// AllValues returns all PostContactsImportTagMode values.
+func (PostContactsImportTagMode) AllValues() []PostContactsImportTagMode {
+	return []PostContactsImportTagMode{
+		PostContactsImportTagModeAdd,
+		PostContactsImportTagModeReplace,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s PostContactsImportTagMode) MarshalText() ([]byte, error) {
+	switch s {
+	case PostContactsImportTagModeAdd:
+		return []byte(s), nil
+	case PostContactsImportTagModeReplace:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *PostContactsImportTagMode) UnmarshalText(data []byte) error {
+	switch PostContactsImportTagMode(data) {
+	case PostContactsImportTagModeAdd:
+		*s = PostContactsImportTagModeAdd
+		return nil
+	case PostContactsImportTagModeReplace:
+		*s = PostContactsImportTagModeReplace
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
 
 type PostContactsImportUnauthorized Error
 
@@ -13034,6 +15889,34 @@ func (s *SendResult) SetRejected(val []RejectedMessage) {
 
 func (*SendResult) postSendRes() {}
 
+// SendResultHeaders wraps SendResult with response headers.
+type SendResultHeaders struct {
+	CacheControl OptString
+	Response     SendResult
+}
+
+// GetCacheControl returns the value of CacheControl.
+func (s *SendResultHeaders) GetCacheControl() OptString {
+	return s.CacheControl
+}
+
+// GetResponse returns the value of Response.
+func (s *SendResultHeaders) GetResponse() SendResult {
+	return s.Response
+}
+
+// SetCacheControl sets the value of CacheControl.
+func (s *SendResultHeaders) SetCacheControl(val OptString) {
+	s.CacheControl = val
+}
+
+// SetResponse sets the value of Response.
+func (s *SendResultHeaders) SetResponse(val SendResult) {
+	s.Response = val
+}
+
+func (*SendResultHeaders) postBroadcastsIDTestRes() {}
+
 // Ref: #/components/schemas/StatusSubscriptionRequest
 type StatusSubscriptionRequest struct {
 	Email        string                                      `json:"email"`
@@ -14163,7 +17046,10 @@ func (s *TooManyRequestsHeaders) SetResponse(val Error) {
 	s.Response = val
 }
 
+func (*TooManyRequestsHeaders) bulkContactTagsRes()                          {}
+func (*TooManyRequestsHeaders) createContactTagRes()                         {}
 func (*TooManyRequestsHeaders) deleteAutomationsIDRes()                      {}
+func (*TooManyRequestsHeaders) deleteContactTagRes()                         {}
 func (*TooManyRequestsHeaders) deleteContactsIDRes()                         {}
 func (*TooManyRequestsHeaders) deleteDomainsIDRes()                          {}
 func (*TooManyRequestsHeaders) deleteEventsIDRes()                           {}
@@ -14176,6 +17062,10 @@ func (*TooManyRequestsHeaders) getAutomationsIDRes()                         {}
 func (*TooManyRequestsHeaders) getAutomationsIDRunsRes()                     {}
 func (*TooManyRequestsHeaders) getAutomationsIDRunsRunIDRes()                {}
 func (*TooManyRequestsHeaders) getAutomationsRes()                           {}
+func (*TooManyRequestsHeaders) getBroadcastsIDRes()                          {}
+func (*TooManyRequestsHeaders) getBroadcastsRes()                            {}
+func (*TooManyRequestsHeaders) getContactTagRes()                            {}
+func (*TooManyRequestsHeaders) getContactTagsRes()                           {}
 func (*TooManyRequestsHeaders) getContactsIDRes()                            {}
 func (*TooManyRequestsHeaders) getContactsRes()                              {}
 func (*TooManyRequestsHeaders) getDomainsIDDNSRes()                          {}
@@ -14207,8 +17097,12 @@ func (*TooManyRequestsHeaders) getTemplatesIDRes()                           {}
 func (*TooManyRequestsHeaders) getTemplatesIDVersionsRes()                   {}
 func (*TooManyRequestsHeaders) getTemplatesIDVersionsVersionIDRes()          {}
 func (*TooManyRequestsHeaders) getTemplatesRes()                             {}
+func (*TooManyRequestsHeaders) getTenantWebhookDeliveriesRes()               {}
 func (*TooManyRequestsHeaders) getThemesRes()                                {}
 func (*TooManyRequestsHeaders) getUsageRes()                                 {}
+func (*TooManyRequestsHeaders) getWebhookEndpointRes()                       {}
+func (*TooManyRequestsHeaders) getWebhookEventCatalogRes()                   {}
+func (*TooManyRequestsHeaders) getWebhookMetricsRes()                        {}
 func (*TooManyRequestsHeaders) getWebhooksIDDeliveriesDeliveryIDRes()        {}
 func (*TooManyRequestsHeaders) getWebhooksIDDeliveriesRes()                  {}
 func (*TooManyRequestsHeaders) getWebhooksRes()                              {}
@@ -14224,6 +17118,10 @@ func (*TooManyRequestsHeaders) postAutomationsIDDisableRes()                 {}
 func (*TooManyRequestsHeaders) postAutomationsIDDuplicateRes()               {}
 func (*TooManyRequestsHeaders) postAutomationsIDRunsRunIDCancelRes()         {}
 func (*TooManyRequestsHeaders) postAutomationsRes()                          {}
+func (*TooManyRequestsHeaders) postBroadcastsIDCancelRes()                   {}
+func (*TooManyRequestsHeaders) postBroadcastsIDScheduleRes()                 {}
+func (*TooManyRequestsHeaders) postBroadcastsIDTestRes()                     {}
+func (*TooManyRequestsHeaders) postBroadcastsRes()                           {}
 func (*TooManyRequestsHeaders) postContactsImportRes()                       {}
 func (*TooManyRequestsHeaders) postContactsRes()                             {}
 func (*TooManyRequestsHeaders) postDomainsIDDkimRotateRes()                  {}
@@ -14255,6 +17153,7 @@ func (*TooManyRequestsHeaders) postWebhooksIDDeliveriesDeliveryIDReplayRes() {}
 func (*TooManyRequestsHeaders) postWebhooksIDSecretRotateRes()               {}
 func (*TooManyRequestsHeaders) postWebhooksIDTestRes()                       {}
 func (*TooManyRequestsHeaders) postWebhooksRes()                             {}
+func (*TooManyRequestsHeaders) updateContactTagRes()                         {}
 
 // Ref: #/components/schemas/TrackingDomain
 type TrackingDomain struct {
@@ -14621,6 +17520,7 @@ func (s *UpdateAutomationDraftRequestGraph) init() UpdateAutomationDraftRequestG
 
 // Ref: #/components/schemas/UpdateContactRequest
 type UpdateContactRequest struct {
+	TagIds ContactTagIDs `json:"tag_ids"`
 	// Caixa postal válida, sem nome de exibição ou espaços; é normalizada em minúsculas.
 	Email      OptString    `json:"email"`
 	FirstName  OptNilString `json:"first_name"`
@@ -14628,6 +17528,11 @@ type UpdateContactRequest struct {
 	Subscribed OptBool      `json:"subscribed"`
 	// Substituição integral do objeto de propriedades; `null` e arrays são inválidos.
 	Properties OptUpdateContactRequestProperties `json:"properties"`
+}
+
+// GetTagIds returns the value of TagIds.
+func (s *UpdateContactRequest) GetTagIds() ContactTagIDs {
+	return s.TagIds
 }
 
 // GetEmail returns the value of Email.
@@ -14653,6 +17558,11 @@ func (s *UpdateContactRequest) GetSubscribed() OptBool {
 // GetProperties returns the value of Properties.
 func (s *UpdateContactRequest) GetProperties() OptUpdateContactRequestProperties {
 	return s.Properties
+}
+
+// SetTagIds sets the value of TagIds.
+func (s *UpdateContactRequest) SetTagIds(val ContactTagIDs) {
+	s.TagIds = val
 }
 
 // SetEmail sets the value of Email.
@@ -14691,6 +17601,67 @@ func (s *UpdateContactRequestProperties) init() UpdateContactRequestProperties {
 	}
 	return m
 }
+
+type UpdateContactTagBadRequest Error
+
+func (*UpdateContactTagBadRequest) updateContactTagRes() {}
+
+type UpdateContactTagConflict Error
+
+func (*UpdateContactTagConflict) updateContactTagRes() {}
+
+type UpdateContactTagForbidden Error
+
+func (*UpdateContactTagForbidden) updateContactTagRes() {}
+
+type UpdateContactTagInternalServerError Error
+
+func (*UpdateContactTagInternalServerError) updateContactTagRes() {}
+
+type UpdateContactTagNotFound Error
+
+func (*UpdateContactTagNotFound) updateContactTagRes() {}
+
+// Ref: #/components/schemas/UpdateContactTagRequest
+type UpdateContactTagRequest struct {
+	Name        OptString    `json:"name"`
+	Description OptNilString `json:"description"`
+	Color       OptString    `json:"color"`
+}
+
+// GetName returns the value of Name.
+func (s *UpdateContactTagRequest) GetName() OptString {
+	return s.Name
+}
+
+// GetDescription returns the value of Description.
+func (s *UpdateContactTagRequest) GetDescription() OptNilString {
+	return s.Description
+}
+
+// GetColor returns the value of Color.
+func (s *UpdateContactTagRequest) GetColor() OptString {
+	return s.Color
+}
+
+// SetName sets the value of Name.
+func (s *UpdateContactTagRequest) SetName(val OptString) {
+	s.Name = val
+}
+
+// SetDescription sets the value of Description.
+func (s *UpdateContactTagRequest) SetDescription(val OptNilString) {
+	s.Description = val
+}
+
+// SetColor sets the value of Color.
+func (s *UpdateContactTagRequest) SetColor(val OptString) {
+	s.Color = val
+}
+
+type UpdateContactTagUnauthorized Error
+
+func (*UpdateContactTagUnauthorized) updateContactTagRes() {}
 
 // Ref: #/components/schemas/UpdateCustomEventRequest
 type UpdateCustomEventRequest struct {
@@ -14866,15 +17837,34 @@ func (*UpdateTemplateDraftResponse) patchTemplatesIDDraftRes() {}
 
 // Ref: #/components/schemas/UpdateWebhookRequest
 type UpdateWebhookRequest struct {
-	ExpectedVersion int64                          `json:"expected_version"`
-	Enabled         OptBool                        `json:"enabled"`
-	EventTypes      []WebhookSubscribableEventType `json:"event_types"`
-	MaxAttempts     OptInt                         `json:"max_attempts"`
+	Name            OptString `json:"name"`
+	ExpectedVersion int64     `json:"expected_version"`
+	URL             OptURI    `json:"url"`
+	// String vazia limpa a descrição.
+	Description OptString                      `json:"description"`
+	Enabled     OptBool                        `json:"enabled"`
+	EventTypes  []WebhookSubscribableEventType `json:"event_types"`
+	MaxAttempts OptInt                         `json:"max_attempts"`
+}
+
+// GetName returns the value of Name.
+func (s *UpdateWebhookRequest) GetName() OptString {
+	return s.Name
 }
 
 // GetExpectedVersion returns the value of ExpectedVersion.
 func (s *UpdateWebhookRequest) GetExpectedVersion() int64 {
 	return s.ExpectedVersion
+}
+
+// GetURL returns the value of URL.
+func (s *UpdateWebhookRequest) GetURL() OptURI {
+	return s.URL
+}
+
+// GetDescription returns the value of Description.
+func (s *UpdateWebhookRequest) GetDescription() OptString {
+	return s.Description
 }
 
 // GetEnabled returns the value of Enabled.
@@ -14892,9 +17882,24 @@ func (s *UpdateWebhookRequest) GetMaxAttempts() OptInt {
 	return s.MaxAttempts
 }
 
+// SetName sets the value of Name.
+func (s *UpdateWebhookRequest) SetName(val OptString) {
+	s.Name = val
+}
+
 // SetExpectedVersion sets the value of ExpectedVersion.
 func (s *UpdateWebhookRequest) SetExpectedVersion(val int64) {
 	s.ExpectedVersion = val
+}
+
+// SetURL sets the value of URL.
+func (s *UpdateWebhookRequest) SetURL(val OptURI) {
+	s.URL = val
+}
+
+// SetDescription sets the value of Description.
+func (s *UpdateWebhookRequest) SetDescription(val OptString) {
+	s.Description = val
 }
 
 // SetEnabled sets the value of Enabled.
@@ -15133,13 +18138,33 @@ func (s *ValidationDetailField) UnmarshalText(data []byte) error {
 
 // Ref: #/components/schemas/WebhookDeliveryAttempt
 type WebhookDeliveryAttempt struct {
-	Attempt int `json:"attempt"`
+	// SHA-256 da resposta; nunca seu conteúdo.
+	ResponseHashSHA256 NilString `json:"response_hash_sha256"`
+	ResponseSizeBytes  NilInt    `json:"response_size_bytes"`
+	// Diagnóstico limitado; null em sucesso ou tentativa legada sem classificação.
+	ErrorClass NilWebhookDeliveryAttemptErrorClass `json:"error_class"`
+	Attempt    int                                 `json:"attempt"`
 	// Estado persistido da tentativa; consumidores não devem inferir o estado agregado por este campo.
 	Status       string       `json:"status"`
 	ResponseCode NilInt       `json:"response_code"`
 	DurationMs   NilInt       `json:"duration_ms"`
 	AttemptedAt  Timestamp    `json:"attempted_at"`
 	NextRetryAt  NilTimestamp `json:"next_retry_at"`
+}
+
+// GetResponseHashSHA256 returns the value of ResponseHashSHA256.
+func (s *WebhookDeliveryAttempt) GetResponseHashSHA256() NilString {
+	return s.ResponseHashSHA256
+}
+
+// GetResponseSizeBytes returns the value of ResponseSizeBytes.
+func (s *WebhookDeliveryAttempt) GetResponseSizeBytes() NilInt {
+	return s.ResponseSizeBytes
+}
+
+// GetErrorClass returns the value of ErrorClass.
+func (s *WebhookDeliveryAttempt) GetErrorClass() NilWebhookDeliveryAttemptErrorClass {
+	return s.ErrorClass
 }
 
 // GetAttempt returns the value of Attempt.
@@ -15172,6 +18197,21 @@ func (s *WebhookDeliveryAttempt) GetNextRetryAt() NilTimestamp {
 	return s.NextRetryAt
 }
 
+// SetResponseHashSHA256 sets the value of ResponseHashSHA256.
+func (s *WebhookDeliveryAttempt) SetResponseHashSHA256(val NilString) {
+	s.ResponseHashSHA256 = val
+}
+
+// SetResponseSizeBytes sets the value of ResponseSizeBytes.
+func (s *WebhookDeliveryAttempt) SetResponseSizeBytes(val NilInt) {
+	s.ResponseSizeBytes = val
+}
+
+// SetErrorClass sets the value of ErrorClass.
+func (s *WebhookDeliveryAttempt) SetErrorClass(val NilWebhookDeliveryAttemptErrorClass) {
+	s.ErrorClass = val
+}
+
 // SetAttempt sets the value of Attempt.
 func (s *WebhookDeliveryAttempt) SetAttempt(val int) {
 	s.Attempt = val
@@ -15202,23 +18242,122 @@ func (s *WebhookDeliveryAttempt) SetNextRetryAt(val NilTimestamp) {
 	s.NextRetryAt = val
 }
 
+// Diagnóstico limitado; null em sucesso ou tentativa legada sem classificação.
+type WebhookDeliveryAttemptErrorClass string
+
+const (
+	WebhookDeliveryAttemptErrorClassNetwork            WebhookDeliveryAttemptErrorClass = "network"
+	WebhookDeliveryAttemptErrorClassTimeout            WebhookDeliveryAttemptErrorClass = "timeout"
+	WebhookDeliveryAttemptErrorClassTLS                WebhookDeliveryAttemptErrorClass = "tls"
+	WebhookDeliveryAttemptErrorClassBlockedDestination WebhookDeliveryAttemptErrorClass = "blocked_destination"
+	WebhookDeliveryAttemptErrorClassHTTP3xx            WebhookDeliveryAttemptErrorClass = "http_3xx"
+	WebhookDeliveryAttemptErrorClassHTTP4xx            WebhookDeliveryAttemptErrorClass = "http_4xx"
+	WebhookDeliveryAttemptErrorClassHTTP5xx            WebhookDeliveryAttemptErrorClass = "http_5xx"
+	WebhookDeliveryAttemptErrorClassCancelled          WebhookDeliveryAttemptErrorClass = "cancelled"
+)
+
+// AllValues returns all WebhookDeliveryAttemptErrorClass values.
+func (WebhookDeliveryAttemptErrorClass) AllValues() []WebhookDeliveryAttemptErrorClass {
+	return []WebhookDeliveryAttemptErrorClass{
+		WebhookDeliveryAttemptErrorClassNetwork,
+		WebhookDeliveryAttemptErrorClassTimeout,
+		WebhookDeliveryAttemptErrorClassTLS,
+		WebhookDeliveryAttemptErrorClassBlockedDestination,
+		WebhookDeliveryAttemptErrorClassHTTP3xx,
+		WebhookDeliveryAttemptErrorClassHTTP4xx,
+		WebhookDeliveryAttemptErrorClassHTTP5xx,
+		WebhookDeliveryAttemptErrorClassCancelled,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s WebhookDeliveryAttemptErrorClass) MarshalText() ([]byte, error) {
+	switch s {
+	case WebhookDeliveryAttemptErrorClassNetwork:
+		return []byte(s), nil
+	case WebhookDeliveryAttemptErrorClassTimeout:
+		return []byte(s), nil
+	case WebhookDeliveryAttemptErrorClassTLS:
+		return []byte(s), nil
+	case WebhookDeliveryAttemptErrorClassBlockedDestination:
+		return []byte(s), nil
+	case WebhookDeliveryAttemptErrorClassHTTP3xx:
+		return []byte(s), nil
+	case WebhookDeliveryAttemptErrorClassHTTP4xx:
+		return []byte(s), nil
+	case WebhookDeliveryAttemptErrorClassHTTP5xx:
+		return []byte(s), nil
+	case WebhookDeliveryAttemptErrorClassCancelled:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *WebhookDeliveryAttemptErrorClass) UnmarshalText(data []byte) error {
+	switch WebhookDeliveryAttemptErrorClass(data) {
+	case WebhookDeliveryAttemptErrorClassNetwork:
+		*s = WebhookDeliveryAttemptErrorClassNetwork
+		return nil
+	case WebhookDeliveryAttemptErrorClassTimeout:
+		*s = WebhookDeliveryAttemptErrorClassTimeout
+		return nil
+	case WebhookDeliveryAttemptErrorClassTLS:
+		*s = WebhookDeliveryAttemptErrorClassTLS
+		return nil
+	case WebhookDeliveryAttemptErrorClassBlockedDestination:
+		*s = WebhookDeliveryAttemptErrorClassBlockedDestination
+		return nil
+	case WebhookDeliveryAttemptErrorClassHTTP3xx:
+		*s = WebhookDeliveryAttemptErrorClassHTTP3xx
+		return nil
+	case WebhookDeliveryAttemptErrorClassHTTP4xx:
+		*s = WebhookDeliveryAttemptErrorClassHTTP4xx
+		return nil
+	case WebhookDeliveryAttemptErrorClassHTTP5xx:
+		*s = WebhookDeliveryAttemptErrorClassHTTP5xx
+		return nil
+	case WebhookDeliveryAttemptErrorClassCancelled:
+		*s = WebhookDeliveryAttemptErrorClassCancelled
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Merged schema.
 // Ref: #/components/schemas/WebhookDeliveryDetail
 type WebhookDeliveryDetail struct {
-	DeliveryID         UUID                     `json:"delivery_id"`
-	EventType          WebhookDeliveryEventType `json:"event_type"`
-	Status             WebhookDeliveryStatus    `json:"status"`
-	AttemptCount       int                      `json:"attempt_count"`
-	CreatedAt          Timestamp                `json:"created_at"`
-	UpdatedAt          Timestamp                `json:"updated_at"`
-	NextRetryAt        NilTimestamp             `json:"next_retry_at"`
-	DeliveredAt        NilTimestamp             `json:"delivered_at"`
-	LastResponseCode   NilInt                   `json:"last_response_code"`
-	LastDurationMs     NilInt                   `json:"last_duration_ms"`
-	IsTest             bool                     `json:"is_test"`
-	ReplayOfDeliveryID NilUUID                  `json:"replay_of_delivery_id"`
-	PayloadRedacted    WebhookPayloadRedacted   `json:"payload_redacted"`
-	Attempts           []WebhookDeliveryAttempt `json:"attempts"`
+	EndpointID         UUID                       `json:"endpoint_id"`
+	State              WebhookDeliveryDetailState `json:"state"`
+	DeliveryID         UUID                       `json:"delivery_id"`
+	EventType          WebhookDeliveryEventType   `json:"event_type"`
+	Status             WebhookDeliveryStatus      `json:"status"`
+	AttemptCount       int                        `json:"attempt_count"`
+	CreatedAt          Timestamp                  `json:"created_at"`
+	UpdatedAt          Timestamp                  `json:"updated_at"`
+	NextRetryAt        NilTimestamp               `json:"next_retry_at"`
+	DeliveredAt        NilTimestamp               `json:"delivered_at"`
+	LastResponseCode   NilInt                     `json:"last_response_code"`
+	LastDurationMs     NilInt                     `json:"last_duration_ms"`
+	IsTest             bool                       `json:"is_test"`
+	ReplayOfDeliveryID NilUUID                    `json:"replay_of_delivery_id"`
+	// Cabeçalhos invariantes reconstruídos; não contém timestamp nem assinatura por tentativa.
+	HeadersPermitted WebhookDeliveryDetailHeadersPermitted `json:"headers_permitted"`
+	RequestedBy      NilWebhookRequestedBy                 `json:"requested_by"`
+	PayloadRedacted  WebhookPayloadRedacted                `json:"payload_redacted"`
+	Attempts         []WebhookDeliveryAttempt              `json:"attempts"`
+}
+
+// GetEndpointID returns the value of EndpointID.
+func (s *WebhookDeliveryDetail) GetEndpointID() UUID {
+	return s.EndpointID
+}
+
+// GetState returns the value of State.
+func (s *WebhookDeliveryDetail) GetState() WebhookDeliveryDetailState {
+	return s.State
 }
 
 // GetDeliveryID returns the value of DeliveryID.
@@ -15281,6 +18420,16 @@ func (s *WebhookDeliveryDetail) GetReplayOfDeliveryID() NilUUID {
 	return s.ReplayOfDeliveryID
 }
 
+// GetHeadersPermitted returns the value of HeadersPermitted.
+func (s *WebhookDeliveryDetail) GetHeadersPermitted() WebhookDeliveryDetailHeadersPermitted {
+	return s.HeadersPermitted
+}
+
+// GetRequestedBy returns the value of RequestedBy.
+func (s *WebhookDeliveryDetail) GetRequestedBy() NilWebhookRequestedBy {
+	return s.RequestedBy
+}
+
 // GetPayloadRedacted returns the value of PayloadRedacted.
 func (s *WebhookDeliveryDetail) GetPayloadRedacted() WebhookPayloadRedacted {
 	return s.PayloadRedacted
@@ -15289,6 +18438,16 @@ func (s *WebhookDeliveryDetail) GetPayloadRedacted() WebhookPayloadRedacted {
 // GetAttempts returns the value of Attempts.
 func (s *WebhookDeliveryDetail) GetAttempts() []WebhookDeliveryAttempt {
 	return s.Attempts
+}
+
+// SetEndpointID sets the value of EndpointID.
+func (s *WebhookDeliveryDetail) SetEndpointID(val UUID) {
+	s.EndpointID = val
+}
+
+// SetState sets the value of State.
+func (s *WebhookDeliveryDetail) SetState(val WebhookDeliveryDetailState) {
+	s.State = val
 }
 
 // SetDeliveryID sets the value of DeliveryID.
@@ -15351,6 +18510,16 @@ func (s *WebhookDeliveryDetail) SetReplayOfDeliveryID(val NilUUID) {
 	s.ReplayOfDeliveryID = val
 }
 
+// SetHeadersPermitted sets the value of HeadersPermitted.
+func (s *WebhookDeliveryDetail) SetHeadersPermitted(val WebhookDeliveryDetailHeadersPermitted) {
+	s.HeadersPermitted = val
+}
+
+// SetRequestedBy sets the value of RequestedBy.
+func (s *WebhookDeliveryDetail) SetRequestedBy(val NilWebhookRequestedBy) {
+	s.RequestedBy = val
+}
+
 // SetPayloadRedacted sets the value of PayloadRedacted.
 func (s *WebhookDeliveryDetail) SetPayloadRedacted(val WebhookPayloadRedacted) {
 	s.PayloadRedacted = val
@@ -15362,6 +18531,123 @@ func (s *WebhookDeliveryDetail) SetAttempts(val []WebhookDeliveryAttempt) {
 }
 
 func (*WebhookDeliveryDetail) getWebhooksIDDeliveriesDeliveryIDRes() {}
+
+// Cabeçalhos invariantes reconstruídos; não contém timestamp nem assinatura por tentativa.
+type WebhookDeliveryDetailHeadersPermitted struct {
+	ContentMinusType                      OptString `json:"Content-Type"`
+	XMinusViaPostMinusDelivery            OptUUID   `json:"X-ViaPost-Delivery"`
+	XMinusViaPostMinusEvent               OptString `json:"X-ViaPost-Event"`
+	XMinusViaPostMinusPayloadMinusVersion OptString `json:"X-ViaPost-Payload-Version"`
+}
+
+// GetContentMinusType returns the value of ContentMinusType.
+func (s *WebhookDeliveryDetailHeadersPermitted) GetContentMinusType() OptString {
+	return s.ContentMinusType
+}
+
+// GetXMinusViaPostMinusDelivery returns the value of XMinusViaPostMinusDelivery.
+func (s *WebhookDeliveryDetailHeadersPermitted) GetXMinusViaPostMinusDelivery() OptUUID {
+	return s.XMinusViaPostMinusDelivery
+}
+
+// GetXMinusViaPostMinusEvent returns the value of XMinusViaPostMinusEvent.
+func (s *WebhookDeliveryDetailHeadersPermitted) GetXMinusViaPostMinusEvent() OptString {
+	return s.XMinusViaPostMinusEvent
+}
+
+// GetXMinusViaPostMinusPayloadMinusVersion returns the value of XMinusViaPostMinusPayloadMinusVersion.
+func (s *WebhookDeliveryDetailHeadersPermitted) GetXMinusViaPostMinusPayloadMinusVersion() OptString {
+	return s.XMinusViaPostMinusPayloadMinusVersion
+}
+
+// SetContentMinusType sets the value of ContentMinusType.
+func (s *WebhookDeliveryDetailHeadersPermitted) SetContentMinusType(val OptString) {
+	s.ContentMinusType = val
+}
+
+// SetXMinusViaPostMinusDelivery sets the value of XMinusViaPostMinusDelivery.
+func (s *WebhookDeliveryDetailHeadersPermitted) SetXMinusViaPostMinusDelivery(val OptUUID) {
+	s.XMinusViaPostMinusDelivery = val
+}
+
+// SetXMinusViaPostMinusEvent sets the value of XMinusViaPostMinusEvent.
+func (s *WebhookDeliveryDetailHeadersPermitted) SetXMinusViaPostMinusEvent(val OptString) {
+	s.XMinusViaPostMinusEvent = val
+}
+
+// SetXMinusViaPostMinusPayloadMinusVersion sets the value of XMinusViaPostMinusPayloadMinusVersion.
+func (s *WebhookDeliveryDetailHeadersPermitted) SetXMinusViaPostMinusPayloadMinusVersion(val OptString) {
+	s.XMinusViaPostMinusPayloadMinusVersion = val
+}
+
+type WebhookDeliveryDetailState string
+
+const (
+	WebhookDeliveryDetailStateQueued         WebhookDeliveryDetailState = "queued"
+	WebhookDeliveryDetailStateProcessing     WebhookDeliveryDetailState = "processing"
+	WebhookDeliveryDetailStateRetryScheduled WebhookDeliveryDetailState = "retry_scheduled"
+	WebhookDeliveryDetailStateDelivered      WebhookDeliveryDetailState = "delivered"
+	WebhookDeliveryDetailStateFailed         WebhookDeliveryDetailState = "failed"
+	WebhookDeliveryDetailStateCancelled      WebhookDeliveryDetailState = "cancelled"
+)
+
+// AllValues returns all WebhookDeliveryDetailState values.
+func (WebhookDeliveryDetailState) AllValues() []WebhookDeliveryDetailState {
+	return []WebhookDeliveryDetailState{
+		WebhookDeliveryDetailStateQueued,
+		WebhookDeliveryDetailStateProcessing,
+		WebhookDeliveryDetailStateRetryScheduled,
+		WebhookDeliveryDetailStateDelivered,
+		WebhookDeliveryDetailStateFailed,
+		WebhookDeliveryDetailStateCancelled,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s WebhookDeliveryDetailState) MarshalText() ([]byte, error) {
+	switch s {
+	case WebhookDeliveryDetailStateQueued:
+		return []byte(s), nil
+	case WebhookDeliveryDetailStateProcessing:
+		return []byte(s), nil
+	case WebhookDeliveryDetailStateRetryScheduled:
+		return []byte(s), nil
+	case WebhookDeliveryDetailStateDelivered:
+		return []byte(s), nil
+	case WebhookDeliveryDetailStateFailed:
+		return []byte(s), nil
+	case WebhookDeliveryDetailStateCancelled:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *WebhookDeliveryDetailState) UnmarshalText(data []byte) error {
+	switch WebhookDeliveryDetailState(data) {
+	case WebhookDeliveryDetailStateQueued:
+		*s = WebhookDeliveryDetailStateQueued
+		return nil
+	case WebhookDeliveryDetailStateProcessing:
+		*s = WebhookDeliveryDetailStateProcessing
+		return nil
+	case WebhookDeliveryDetailStateRetryScheduled:
+		*s = WebhookDeliveryDetailStateRetryScheduled
+		return nil
+	case WebhookDeliveryDetailStateDelivered:
+		*s = WebhookDeliveryDetailStateDelivered
+		return nil
+	case WebhookDeliveryDetailStateFailed:
+		*s = WebhookDeliveryDetailStateFailed
+		return nil
+	case WebhookDeliveryDetailStateCancelled:
+		*s = WebhookDeliveryDetailStateCancelled
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
 
 type WebhookDeliveryEventType string
 
@@ -15392,7 +18678,8 @@ func (s *WebhookDeliveryPage) SetNextCursor(val OptString) {
 	s.NextCursor = val
 }
 
-func (*WebhookDeliveryPage) getWebhooksIDDeliveriesRes() {}
+func (*WebhookDeliveryPage) getTenantWebhookDeliveriesRes() {}
+func (*WebhookDeliveryPage) getWebhooksIDDeliveriesRes()    {}
 
 // `pending` agrega os estados internos em fila, processamento e retry. `failed` também representa
 // entregas canceladas porque o endpoint deixou de estar disponível.
@@ -15447,18 +18734,30 @@ func (s *WebhookDeliveryStatus) UnmarshalText(data []byte) error {
 
 // Ref: #/components/schemas/WebhookDeliverySummary
 type WebhookDeliverySummary struct {
-	DeliveryID         UUID                     `json:"delivery_id"`
-	EventType          WebhookDeliveryEventType `json:"event_type"`
-	Status             WebhookDeliveryStatus    `json:"status"`
-	AttemptCount       int                      `json:"attempt_count"`
-	CreatedAt          Timestamp                `json:"created_at"`
-	UpdatedAt          Timestamp                `json:"updated_at"`
-	NextRetryAt        NilTimestamp             `json:"next_retry_at"`
-	DeliveredAt        NilTimestamp             `json:"delivered_at"`
-	LastResponseCode   NilInt                   `json:"last_response_code"`
-	LastDurationMs     NilInt                   `json:"last_duration_ms"`
-	IsTest             bool                     `json:"is_test"`
-	ReplayOfDeliveryID NilUUID                  `json:"replay_of_delivery_id"`
+	EndpointID         UUID                        `json:"endpoint_id"`
+	State              WebhookDeliverySummaryState `json:"state"`
+	DeliveryID         UUID                        `json:"delivery_id"`
+	EventType          WebhookDeliveryEventType    `json:"event_type"`
+	Status             WebhookDeliveryStatus       `json:"status"`
+	AttemptCount       int                         `json:"attempt_count"`
+	CreatedAt          Timestamp                   `json:"created_at"`
+	UpdatedAt          Timestamp                   `json:"updated_at"`
+	NextRetryAt        NilTimestamp                `json:"next_retry_at"`
+	DeliveredAt        NilTimestamp                `json:"delivered_at"`
+	LastResponseCode   NilInt                      `json:"last_response_code"`
+	LastDurationMs     NilInt                      `json:"last_duration_ms"`
+	IsTest             bool                        `json:"is_test"`
+	ReplayOfDeliveryID NilUUID                     `json:"replay_of_delivery_id"`
+}
+
+// GetEndpointID returns the value of EndpointID.
+func (s *WebhookDeliverySummary) GetEndpointID() UUID {
+	return s.EndpointID
+}
+
+// GetState returns the value of State.
+func (s *WebhookDeliverySummary) GetState() WebhookDeliverySummaryState {
+	return s.State
 }
 
 // GetDeliveryID returns the value of DeliveryID.
@@ -15521,6 +18820,16 @@ func (s *WebhookDeliverySummary) GetReplayOfDeliveryID() NilUUID {
 	return s.ReplayOfDeliveryID
 }
 
+// SetEndpointID sets the value of EndpointID.
+func (s *WebhookDeliverySummary) SetEndpointID(val UUID) {
+	s.EndpointID = val
+}
+
+// SetState sets the value of State.
+func (s *WebhookDeliverySummary) SetState(val WebhookDeliverySummaryState) {
+	s.State = val
+}
+
 // SetDeliveryID sets the value of DeliveryID.
 func (s *WebhookDeliverySummary) SetDeliveryID(val UUID) {
 	s.DeliveryID = val
@@ -15581,20 +18890,109 @@ func (s *WebhookDeliverySummary) SetReplayOfDeliveryID(val NilUUID) {
 	s.ReplayOfDeliveryID = val
 }
 
+type WebhookDeliverySummaryState string
+
+const (
+	WebhookDeliverySummaryStateQueued         WebhookDeliverySummaryState = "queued"
+	WebhookDeliverySummaryStateProcessing     WebhookDeliverySummaryState = "processing"
+	WebhookDeliverySummaryStateRetryScheduled WebhookDeliverySummaryState = "retry_scheduled"
+	WebhookDeliverySummaryStateDelivered      WebhookDeliverySummaryState = "delivered"
+	WebhookDeliverySummaryStateFailed         WebhookDeliverySummaryState = "failed"
+	WebhookDeliverySummaryStateCancelled      WebhookDeliverySummaryState = "cancelled"
+)
+
+// AllValues returns all WebhookDeliverySummaryState values.
+func (WebhookDeliverySummaryState) AllValues() []WebhookDeliverySummaryState {
+	return []WebhookDeliverySummaryState{
+		WebhookDeliverySummaryStateQueued,
+		WebhookDeliverySummaryStateProcessing,
+		WebhookDeliverySummaryStateRetryScheduled,
+		WebhookDeliverySummaryStateDelivered,
+		WebhookDeliverySummaryStateFailed,
+		WebhookDeliverySummaryStateCancelled,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s WebhookDeliverySummaryState) MarshalText() ([]byte, error) {
+	switch s {
+	case WebhookDeliverySummaryStateQueued:
+		return []byte(s), nil
+	case WebhookDeliverySummaryStateProcessing:
+		return []byte(s), nil
+	case WebhookDeliverySummaryStateRetryScheduled:
+		return []byte(s), nil
+	case WebhookDeliverySummaryStateDelivered:
+		return []byte(s), nil
+	case WebhookDeliverySummaryStateFailed:
+		return []byte(s), nil
+	case WebhookDeliverySummaryStateCancelled:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *WebhookDeliverySummaryState) UnmarshalText(data []byte) error {
+	switch WebhookDeliverySummaryState(data) {
+	case WebhookDeliverySummaryStateQueued:
+		*s = WebhookDeliverySummaryStateQueued
+		return nil
+	case WebhookDeliverySummaryStateProcessing:
+		*s = WebhookDeliverySummaryStateProcessing
+		return nil
+	case WebhookDeliverySummaryStateRetryScheduled:
+		*s = WebhookDeliverySummaryStateRetryScheduled
+		return nil
+	case WebhookDeliverySummaryStateDelivered:
+		*s = WebhookDeliverySummaryStateDelivered
+		return nil
+	case WebhookDeliverySummaryStateFailed:
+		*s = WebhookDeliverySummaryStateFailed
+		return nil
+	case WebhookDeliverySummaryStateCancelled:
+		*s = WebhookDeliverySummaryStateCancelled
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Ref: #/components/schemas/WebhookEndpoint
 type WebhookEndpoint struct {
-	ID UUID `json:"id"`
+	// Nome opcional do endpoint; vazio em registros legados sem nome.
+	Name           string                 `json:"name"`
+	PayloadVersion string                 `json:"payload_version"`
+	LastDelivery   NilWebhookLastDelivery `json:"last_delivery"`
+	ID             UUID                   `json:"id"`
 	// URL HTTPS pública, sem credenciais ou fragmento; destinos privados são rejeitados.
-	URL                 url.URL                        `json:"url"`
-	EventTypes          []WebhookSubscribableEventType `json:"event_types"`
-	Enabled             bool                           `json:"enabled"`
-	MaxAttempts         int                            `json:"max_attempts"`
-	ConsecutiveFailures int                            `json:"consecutive_failures"`
-	DisabledAt          NilTimestamp                   `json:"disabled_at"`
-	SecretRotatedAt     NilTimestamp                   `json:"secret_rotated_at"`
-	Version             int64                          `json:"version"`
-	CreatedAt           Timestamp                      `json:"created_at"`
-	UpdatedAt           Timestamp                      `json:"updated_at"`
+	URL                 url.URL      `json:"url"`
+	Description         OptNilString `json:"description"`
+	EventTypes          []string     `json:"event_types"`
+	Enabled             bool         `json:"enabled"`
+	MaxAttempts         int          `json:"max_attempts"`
+	ConsecutiveFailures int          `json:"consecutive_failures"`
+	DisabledAt          NilTimestamp `json:"disabled_at"`
+	SecretRotatedAt     NilTimestamp `json:"secret_rotated_at"`
+	Version             int64        `json:"version"`
+	CreatedAt           Timestamp    `json:"created_at"`
+	UpdatedAt           Timestamp    `json:"updated_at"`
+}
+
+// GetName returns the value of Name.
+func (s *WebhookEndpoint) GetName() string {
+	return s.Name
+}
+
+// GetPayloadVersion returns the value of PayloadVersion.
+func (s *WebhookEndpoint) GetPayloadVersion() string {
+	return s.PayloadVersion
+}
+
+// GetLastDelivery returns the value of LastDelivery.
+func (s *WebhookEndpoint) GetLastDelivery() NilWebhookLastDelivery {
+	return s.LastDelivery
 }
 
 // GetID returns the value of ID.
@@ -15607,8 +19005,13 @@ func (s *WebhookEndpoint) GetURL() url.URL {
 	return s.URL
 }
 
+// GetDescription returns the value of Description.
+func (s *WebhookEndpoint) GetDescription() OptNilString {
+	return s.Description
+}
+
 // GetEventTypes returns the value of EventTypes.
-func (s *WebhookEndpoint) GetEventTypes() []WebhookSubscribableEventType {
+func (s *WebhookEndpoint) GetEventTypes() []string {
 	return s.EventTypes
 }
 
@@ -15652,6 +19055,21 @@ func (s *WebhookEndpoint) GetUpdatedAt() Timestamp {
 	return s.UpdatedAt
 }
 
+// SetName sets the value of Name.
+func (s *WebhookEndpoint) SetName(val string) {
+	s.Name = val
+}
+
+// SetPayloadVersion sets the value of PayloadVersion.
+func (s *WebhookEndpoint) SetPayloadVersion(val string) {
+	s.PayloadVersion = val
+}
+
+// SetLastDelivery sets the value of LastDelivery.
+func (s *WebhookEndpoint) SetLastDelivery(val NilWebhookLastDelivery) {
+	s.LastDelivery = val
+}
+
 // SetID sets the value of ID.
 func (s *WebhookEndpoint) SetID(val UUID) {
 	s.ID = val
@@ -15662,8 +19080,13 @@ func (s *WebhookEndpoint) SetURL(val url.URL) {
 	s.URL = val
 }
 
+// SetDescription sets the value of Description.
+func (s *WebhookEndpoint) SetDescription(val OptNilString) {
+	s.Description = val
+}
+
 // SetEventTypes sets the value of EventTypes.
-func (s *WebhookEndpoint) SetEventTypes(val []WebhookSubscribableEventType) {
+func (s *WebhookEndpoint) SetEventTypes(val []string) {
 	s.EventTypes = val
 }
 
@@ -15707,11 +19130,331 @@ func (s *WebhookEndpoint) SetUpdatedAt(val Timestamp) {
 	s.UpdatedAt = val
 }
 
-func (*WebhookEndpoint) patchWebhooksIDRes() {}
+func (*WebhookEndpoint) getWebhookEndpointRes() {}
+func (*WebhookEndpoint) patchWebhooksIDRes()    {}
+
+// Ref: #/components/schemas/WebhookEventCatalog
+type WebhookEventCatalog struct {
+	Events []WebhookEventCatalogEventsItem `json:"events"`
+}
+
+// GetEvents returns the value of Events.
+func (s *WebhookEventCatalog) GetEvents() []WebhookEventCatalogEventsItem {
+	return s.Events
+}
+
+// SetEvents sets the value of Events.
+func (s *WebhookEventCatalog) SetEvents(val []WebhookEventCatalogEventsItem) {
+	s.Events = val
+}
+
+func (*WebhookEventCatalog) getWebhookEventCatalogRes() {}
+
+type WebhookEventCatalogEventsItem struct {
+	Type          string                                `json:"type"`
+	Category      WebhookEventCatalogEventsItemCategory `json:"category"`
+	Description   string                                `json:"description"`
+	Source        string                                `json:"source"`
+	Emitted       bool                                  `json:"emitted"`
+	Subscribable  bool                                  `json:"subscribable"`
+	SchemaVersion string                                `json:"schema_version"`
+	// Exemplo sintético do corpo da versão indicada.
+	Example WebhookEventCatalogEventsItemExample `json:"example"`
+	// Best_effort_legacy indica publisher sem outbox durável.
+	DeliveryGuarantee OptString `json:"delivery_guarantee"`
+}
+
+// GetType returns the value of Type.
+func (s *WebhookEventCatalogEventsItem) GetType() string {
+	return s.Type
+}
+
+// GetCategory returns the value of Category.
+func (s *WebhookEventCatalogEventsItem) GetCategory() WebhookEventCatalogEventsItemCategory {
+	return s.Category
+}
+
+// GetDescription returns the value of Description.
+func (s *WebhookEventCatalogEventsItem) GetDescription() string {
+	return s.Description
+}
+
+// GetSource returns the value of Source.
+func (s *WebhookEventCatalogEventsItem) GetSource() string {
+	return s.Source
+}
+
+// GetEmitted returns the value of Emitted.
+func (s *WebhookEventCatalogEventsItem) GetEmitted() bool {
+	return s.Emitted
+}
+
+// GetSubscribable returns the value of Subscribable.
+func (s *WebhookEventCatalogEventsItem) GetSubscribable() bool {
+	return s.Subscribable
+}
+
+// GetSchemaVersion returns the value of SchemaVersion.
+func (s *WebhookEventCatalogEventsItem) GetSchemaVersion() string {
+	return s.SchemaVersion
+}
+
+// GetExample returns the value of Example.
+func (s *WebhookEventCatalogEventsItem) GetExample() WebhookEventCatalogEventsItemExample {
+	return s.Example
+}
+
+// GetDeliveryGuarantee returns the value of DeliveryGuarantee.
+func (s *WebhookEventCatalogEventsItem) GetDeliveryGuarantee() OptString {
+	return s.DeliveryGuarantee
+}
+
+// SetType sets the value of Type.
+func (s *WebhookEventCatalogEventsItem) SetType(val string) {
+	s.Type = val
+}
+
+// SetCategory sets the value of Category.
+func (s *WebhookEventCatalogEventsItem) SetCategory(val WebhookEventCatalogEventsItemCategory) {
+	s.Category = val
+}
+
+// SetDescription sets the value of Description.
+func (s *WebhookEventCatalogEventsItem) SetDescription(val string) {
+	s.Description = val
+}
+
+// SetSource sets the value of Source.
+func (s *WebhookEventCatalogEventsItem) SetSource(val string) {
+	s.Source = val
+}
+
+// SetEmitted sets the value of Emitted.
+func (s *WebhookEventCatalogEventsItem) SetEmitted(val bool) {
+	s.Emitted = val
+}
+
+// SetSubscribable sets the value of Subscribable.
+func (s *WebhookEventCatalogEventsItem) SetSubscribable(val bool) {
+	s.Subscribable = val
+}
+
+// SetSchemaVersion sets the value of SchemaVersion.
+func (s *WebhookEventCatalogEventsItem) SetSchemaVersion(val string) {
+	s.SchemaVersion = val
+}
+
+// SetExample sets the value of Example.
+func (s *WebhookEventCatalogEventsItem) SetExample(val WebhookEventCatalogEventsItemExample) {
+	s.Example = val
+}
+
+// SetDeliveryGuarantee sets the value of DeliveryGuarantee.
+func (s *WebhookEventCatalogEventsItem) SetDeliveryGuarantee(val OptString) {
+	s.DeliveryGuarantee = val
+}
+
+type WebhookEventCatalogEventsItemCategory string
+
+const (
+	WebhookEventCatalogEventsItemCategoryDelivery   WebhookEventCatalogEventsItemCategory = "delivery"
+	WebhookEventCatalogEventsItemCategoryEngagement WebhookEventCatalogEventsItemCategory = "engagement"
+	WebhookEventCatalogEventsItemCategoryInbound    WebhookEventCatalogEventsItemCategory = "inbound"
+	WebhookEventCatalogEventsItemCategoryDiagnostic WebhookEventCatalogEventsItemCategory = "diagnostic"
+)
+
+// AllValues returns all WebhookEventCatalogEventsItemCategory values.
+func (WebhookEventCatalogEventsItemCategory) AllValues() []WebhookEventCatalogEventsItemCategory {
+	return []WebhookEventCatalogEventsItemCategory{
+		WebhookEventCatalogEventsItemCategoryDelivery,
+		WebhookEventCatalogEventsItemCategoryEngagement,
+		WebhookEventCatalogEventsItemCategoryInbound,
+		WebhookEventCatalogEventsItemCategoryDiagnostic,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s WebhookEventCatalogEventsItemCategory) MarshalText() ([]byte, error) {
+	switch s {
+	case WebhookEventCatalogEventsItemCategoryDelivery:
+		return []byte(s), nil
+	case WebhookEventCatalogEventsItemCategoryEngagement:
+		return []byte(s), nil
+	case WebhookEventCatalogEventsItemCategoryInbound:
+		return []byte(s), nil
+	case WebhookEventCatalogEventsItemCategoryDiagnostic:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *WebhookEventCatalogEventsItemCategory) UnmarshalText(data []byte) error {
+	switch WebhookEventCatalogEventsItemCategory(data) {
+	case WebhookEventCatalogEventsItemCategoryDelivery:
+		*s = WebhookEventCatalogEventsItemCategoryDelivery
+		return nil
+	case WebhookEventCatalogEventsItemCategoryEngagement:
+		*s = WebhookEventCatalogEventsItemCategoryEngagement
+		return nil
+	case WebhookEventCatalogEventsItemCategoryInbound:
+		*s = WebhookEventCatalogEventsItemCategoryInbound
+		return nil
+	case WebhookEventCatalogEventsItemCategoryDiagnostic:
+		*s = WebhookEventCatalogEventsItemCategoryDiagnostic
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Exemplo sintético do corpo da versão indicada.
+type WebhookEventCatalogEventsItemExample map[string]jx.Raw
+
+func (s *WebhookEventCatalogEventsItemExample) init() WebhookEventCatalogEventsItemExample {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+// Ref: #/components/schemas/WebhookLastDelivery
+type WebhookLastDelivery struct {
+	DeliveryID   UUID                      `json:"delivery_id"`
+	State        string                    `json:"state"`
+	Status       WebhookLastDeliveryStatus `json:"status"`
+	CreatedAt    Timestamp                 `json:"created_at"`
+	UpdatedAt    Timestamp                 `json:"updated_at"`
+	ResponseCode NilInt                    `json:"response_code"`
+	DurationMs   NilInt                    `json:"duration_ms"`
+}
+
+// GetDeliveryID returns the value of DeliveryID.
+func (s *WebhookLastDelivery) GetDeliveryID() UUID {
+	return s.DeliveryID
+}
+
+// GetState returns the value of State.
+func (s *WebhookLastDelivery) GetState() string {
+	return s.State
+}
+
+// GetStatus returns the value of Status.
+func (s *WebhookLastDelivery) GetStatus() WebhookLastDeliveryStatus {
+	return s.Status
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *WebhookLastDelivery) GetCreatedAt() Timestamp {
+	return s.CreatedAt
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *WebhookLastDelivery) GetUpdatedAt() Timestamp {
+	return s.UpdatedAt
+}
+
+// GetResponseCode returns the value of ResponseCode.
+func (s *WebhookLastDelivery) GetResponseCode() NilInt {
+	return s.ResponseCode
+}
+
+// GetDurationMs returns the value of DurationMs.
+func (s *WebhookLastDelivery) GetDurationMs() NilInt {
+	return s.DurationMs
+}
+
+// SetDeliveryID sets the value of DeliveryID.
+func (s *WebhookLastDelivery) SetDeliveryID(val UUID) {
+	s.DeliveryID = val
+}
+
+// SetState sets the value of State.
+func (s *WebhookLastDelivery) SetState(val string) {
+	s.State = val
+}
+
+// SetStatus sets the value of Status.
+func (s *WebhookLastDelivery) SetStatus(val WebhookLastDeliveryStatus) {
+	s.Status = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *WebhookLastDelivery) SetCreatedAt(val Timestamp) {
+	s.CreatedAt = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *WebhookLastDelivery) SetUpdatedAt(val Timestamp) {
+	s.UpdatedAt = val
+}
+
+// SetResponseCode sets the value of ResponseCode.
+func (s *WebhookLastDelivery) SetResponseCode(val NilInt) {
+	s.ResponseCode = val
+}
+
+// SetDurationMs sets the value of DurationMs.
+func (s *WebhookLastDelivery) SetDurationMs(val NilInt) {
+	s.DurationMs = val
+}
+
+type WebhookLastDeliveryStatus string
+
+const (
+	WebhookLastDeliveryStatusPending   WebhookLastDeliveryStatus = "pending"
+	WebhookLastDeliveryStatusDelivered WebhookLastDeliveryStatus = "delivered"
+	WebhookLastDeliveryStatusFailed    WebhookLastDeliveryStatus = "failed"
+)
+
+// AllValues returns all WebhookLastDeliveryStatus values.
+func (WebhookLastDeliveryStatus) AllValues() []WebhookLastDeliveryStatus {
+	return []WebhookLastDeliveryStatus{
+		WebhookLastDeliveryStatusPending,
+		WebhookLastDeliveryStatusDelivered,
+		WebhookLastDeliveryStatusFailed,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s WebhookLastDeliveryStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case WebhookLastDeliveryStatusPending:
+		return []byte(s), nil
+	case WebhookLastDeliveryStatusDelivered:
+		return []byte(s), nil
+	case WebhookLastDeliveryStatusFailed:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *WebhookLastDeliveryStatus) UnmarshalText(data []byte) error {
+	switch WebhookLastDeliveryStatus(data) {
+	case WebhookLastDeliveryStatusPending:
+		*s = WebhookLastDeliveryStatusPending
+		return nil
+	case WebhookLastDeliveryStatusDelivered:
+		*s = WebhookLastDeliveryStatusDelivered
+		return nil
+	case WebhookLastDeliveryStatusFailed:
+		*s = WebhookLastDeliveryStatusFailed
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
 
 // Ref: #/components/schemas/WebhookList
 type WebhookList struct {
 	Webhooks []WebhookEndpoint `json:"webhooks"`
+	// Ausente na última página.
+	NextCursor OptString `json:"next_cursor"`
 }
 
 // GetWebhooks returns the value of Webhooks.
@@ -15719,12 +19462,189 @@ func (s *WebhookList) GetWebhooks() []WebhookEndpoint {
 	return s.Webhooks
 }
 
+// GetNextCursor returns the value of NextCursor.
+func (s *WebhookList) GetNextCursor() OptString {
+	return s.NextCursor
+}
+
 // SetWebhooks sets the value of Webhooks.
 func (s *WebhookList) SetWebhooks(val []WebhookEndpoint) {
 	s.Webhooks = val
 }
 
+// SetNextCursor sets the value of NextCursor.
+func (s *WebhookList) SetNextCursor(val OptString) {
+	s.NextCursor = val
+}
+
 func (*WebhookList) getWebhooksRes() {}
+
+// Janela de criação inclusiva/exclusiva; padrão 30 dias e máximo 90 dias. Contagens limitadas à
+// retenção disponível.
+// Ref: #/components/schemas/WebhookMetrics
+type WebhookMetrics struct {
+	// Endpoints atuais do tenant; independente do período das entregas.
+	EndpointTotal int `json:"endpoint_total"`
+	// Endpoints atualmente ativos do tenant; independente do período das entregas.
+	EndpointsActive int       `json:"endpoints_active"`
+	From            Timestamp `json:"from"`
+	To              Timestamp `json:"to"`
+	// UUIDs distintos em jobs kind=event; exclui teste e replay.
+	EventsTotal     int `json:"events_total"`
+	DeliveriesTotal int `json:"deliveries_total"`
+	Delivered       int `json:"delivered"`
+	Failed          int `json:"failed"`
+	Cancelled       int `json:"cancelled"`
+	Pending         int `json:"pending"`
+	// Tentativas no período, inclusive sem duração.
+	AttemptsTotal int `json:"attempts_total"`
+	// Delivered dividido por delivered+failed+cancelled; null sem terminais.
+	SuccessRate       NilFloat64 `json:"success_rate"`
+	AverageDurationMs NilFloat64 `json:"average_duration_ms"`
+	P95DurationMs     NilInt     `json:"p95_duration_ms"`
+}
+
+// GetEndpointTotal returns the value of EndpointTotal.
+func (s *WebhookMetrics) GetEndpointTotal() int {
+	return s.EndpointTotal
+}
+
+// GetEndpointsActive returns the value of EndpointsActive.
+func (s *WebhookMetrics) GetEndpointsActive() int {
+	return s.EndpointsActive
+}
+
+// GetFrom returns the value of From.
+func (s *WebhookMetrics) GetFrom() Timestamp {
+	return s.From
+}
+
+// GetTo returns the value of To.
+func (s *WebhookMetrics) GetTo() Timestamp {
+	return s.To
+}
+
+// GetEventsTotal returns the value of EventsTotal.
+func (s *WebhookMetrics) GetEventsTotal() int {
+	return s.EventsTotal
+}
+
+// GetDeliveriesTotal returns the value of DeliveriesTotal.
+func (s *WebhookMetrics) GetDeliveriesTotal() int {
+	return s.DeliveriesTotal
+}
+
+// GetDelivered returns the value of Delivered.
+func (s *WebhookMetrics) GetDelivered() int {
+	return s.Delivered
+}
+
+// GetFailed returns the value of Failed.
+func (s *WebhookMetrics) GetFailed() int {
+	return s.Failed
+}
+
+// GetCancelled returns the value of Cancelled.
+func (s *WebhookMetrics) GetCancelled() int {
+	return s.Cancelled
+}
+
+// GetPending returns the value of Pending.
+func (s *WebhookMetrics) GetPending() int {
+	return s.Pending
+}
+
+// GetAttemptsTotal returns the value of AttemptsTotal.
+func (s *WebhookMetrics) GetAttemptsTotal() int {
+	return s.AttemptsTotal
+}
+
+// GetSuccessRate returns the value of SuccessRate.
+func (s *WebhookMetrics) GetSuccessRate() NilFloat64 {
+	return s.SuccessRate
+}
+
+// GetAverageDurationMs returns the value of AverageDurationMs.
+func (s *WebhookMetrics) GetAverageDurationMs() NilFloat64 {
+	return s.AverageDurationMs
+}
+
+// GetP95DurationMs returns the value of P95DurationMs.
+func (s *WebhookMetrics) GetP95DurationMs() NilInt {
+	return s.P95DurationMs
+}
+
+// SetEndpointTotal sets the value of EndpointTotal.
+func (s *WebhookMetrics) SetEndpointTotal(val int) {
+	s.EndpointTotal = val
+}
+
+// SetEndpointsActive sets the value of EndpointsActive.
+func (s *WebhookMetrics) SetEndpointsActive(val int) {
+	s.EndpointsActive = val
+}
+
+// SetFrom sets the value of From.
+func (s *WebhookMetrics) SetFrom(val Timestamp) {
+	s.From = val
+}
+
+// SetTo sets the value of To.
+func (s *WebhookMetrics) SetTo(val Timestamp) {
+	s.To = val
+}
+
+// SetEventsTotal sets the value of EventsTotal.
+func (s *WebhookMetrics) SetEventsTotal(val int) {
+	s.EventsTotal = val
+}
+
+// SetDeliveriesTotal sets the value of DeliveriesTotal.
+func (s *WebhookMetrics) SetDeliveriesTotal(val int) {
+	s.DeliveriesTotal = val
+}
+
+// SetDelivered sets the value of Delivered.
+func (s *WebhookMetrics) SetDelivered(val int) {
+	s.Delivered = val
+}
+
+// SetFailed sets the value of Failed.
+func (s *WebhookMetrics) SetFailed(val int) {
+	s.Failed = val
+}
+
+// SetCancelled sets the value of Cancelled.
+func (s *WebhookMetrics) SetCancelled(val int) {
+	s.Cancelled = val
+}
+
+// SetPending sets the value of Pending.
+func (s *WebhookMetrics) SetPending(val int) {
+	s.Pending = val
+}
+
+// SetAttemptsTotal sets the value of AttemptsTotal.
+func (s *WebhookMetrics) SetAttemptsTotal(val int) {
+	s.AttemptsTotal = val
+}
+
+// SetSuccessRate sets the value of SuccessRate.
+func (s *WebhookMetrics) SetSuccessRate(val NilFloat64) {
+	s.SuccessRate = val
+}
+
+// SetAverageDurationMs sets the value of AverageDurationMs.
+func (s *WebhookMetrics) SetAverageDurationMs(val NilFloat64) {
+	s.AverageDurationMs = val
+}
+
+// SetP95DurationMs sets the value of P95DurationMs.
+func (s *WebhookMetrics) SetP95DurationMs(val NilInt) {
+	s.P95DurationMs = val
+}
+
+func (*WebhookMetrics) getWebhookMetricsRes() {}
 
 // Visão por lista de permissão. Campos arbitrários do payload original, destinatários, conteúdo e
 // URLs nunca são retornados.
@@ -15838,62 +19758,113 @@ func (s *WebhookReplayAccepted) SetSourceDeliveryID(val UUID) {
 
 func (*WebhookReplayAccepted) postWebhooksIDDeliveriesDeliveryIDReplayRes() {}
 
+// Ref: #/components/schemas/WebhookRequestedBy
+type WebhookRequestedBy struct {
+	ID   UUID                   `json:"id"`
+	Kind WebhookRequestedByKind `json:"kind"`
+}
+
+// GetID returns the value of ID.
+func (s *WebhookRequestedBy) GetID() UUID {
+	return s.ID
+}
+
+// GetKind returns the value of Kind.
+func (s *WebhookRequestedBy) GetKind() WebhookRequestedByKind {
+	return s.Kind
+}
+
+// SetID sets the value of ID.
+func (s *WebhookRequestedBy) SetID(val UUID) {
+	s.ID = val
+}
+
+// SetKind sets the value of Kind.
+func (s *WebhookRequestedBy) SetKind(val WebhookRequestedByKind) {
+	s.Kind = val
+}
+
+type WebhookRequestedByKind string
+
+const (
+	WebhookRequestedByKindUser   WebhookRequestedByKind = "user"
+	WebhookRequestedByKindAPIKey WebhookRequestedByKind = "api_key"
+)
+
+// AllValues returns all WebhookRequestedByKind values.
+func (WebhookRequestedByKind) AllValues() []WebhookRequestedByKind {
+	return []WebhookRequestedByKind{
+		WebhookRequestedByKindUser,
+		WebhookRequestedByKindAPIKey,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s WebhookRequestedByKind) MarshalText() ([]byte, error) {
+	switch s {
+	case WebhookRequestedByKindUser:
+		return []byte(s), nil
+	case WebhookRequestedByKindAPIKey:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *WebhookRequestedByKind) UnmarshalText(data []byte) error {
+	switch WebhookRequestedByKind(data) {
+	case WebhookRequestedByKindUser:
+		*s = WebhookRequestedByKindUser
+		return nil
+	case WebhookRequestedByKindAPIKey:
+		*s = WebhookRequestedByKindAPIKey
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Ref: #/components/schemas/WebhookSubscribableEventType
 type WebhookSubscribableEventType string
 
 const (
-	WebhookSubscribableEventTypeQueued          WebhookSubscribableEventType = "queued"
-	WebhookSubscribableEventTypeSent            WebhookSubscribableEventType = "sent"
-	WebhookSubscribableEventTypeDelivered       WebhookSubscribableEventType = "delivered"
-	WebhookSubscribableEventTypeDeferred        WebhookSubscribableEventType = "deferred"
-	WebhookSubscribableEventTypeSoftBounce      WebhookSubscribableEventType = "soft_bounce"
-	WebhookSubscribableEventTypeHardBounce      WebhookSubscribableEventType = "hard_bounce"
-	WebhookSubscribableEventTypeComplaint       WebhookSubscribableEventType = "complaint"
-	WebhookSubscribableEventTypeOpen            WebhookSubscribableEventType = "open"
-	WebhookSubscribableEventTypeClick           WebhookSubscribableEventType = "click"
-	WebhookSubscribableEventTypeUnsubscribe     WebhookSubscribableEventType = "unsubscribe"
-	WebhookSubscribableEventTypeRejected        WebhookSubscribableEventType = "rejected"
-	WebhookSubscribableEventTypeFailed          WebhookSubscribableEventType = "failed"
-	WebhookSubscribableEventTypeSuppressed      WebhookSubscribableEventType = "suppressed"
-	WebhookSubscribableEventTypeInboundReceived WebhookSubscribableEventType = "inbound.received"
+	WebhookSubscribableEventTypeSent        WebhookSubscribableEventType = "sent"
+	WebhookSubscribableEventTypeDelivered   WebhookSubscribableEventType = "delivered"
+	WebhookSubscribableEventTypeDeferred    WebhookSubscribableEventType = "deferred"
+	WebhookSubscribableEventTypeHardBounce  WebhookSubscribableEventType = "hard_bounce"
+	WebhookSubscribableEventTypeOpen        WebhookSubscribableEventType = "open"
+	WebhookSubscribableEventTypeClick       WebhookSubscribableEventType = "click"
+	WebhookSubscribableEventTypeUnsubscribe WebhookSubscribableEventType = "unsubscribe"
+	WebhookSubscribableEventTypeFailed      WebhookSubscribableEventType = "failed"
+	WebhookSubscribableEventTypeSuppressed  WebhookSubscribableEventType = "suppressed"
 )
 
 // AllValues returns all WebhookSubscribableEventType values.
 func (WebhookSubscribableEventType) AllValues() []WebhookSubscribableEventType {
 	return []WebhookSubscribableEventType{
-		WebhookSubscribableEventTypeQueued,
 		WebhookSubscribableEventTypeSent,
 		WebhookSubscribableEventTypeDelivered,
 		WebhookSubscribableEventTypeDeferred,
-		WebhookSubscribableEventTypeSoftBounce,
 		WebhookSubscribableEventTypeHardBounce,
-		WebhookSubscribableEventTypeComplaint,
 		WebhookSubscribableEventTypeOpen,
 		WebhookSubscribableEventTypeClick,
 		WebhookSubscribableEventTypeUnsubscribe,
-		WebhookSubscribableEventTypeRejected,
 		WebhookSubscribableEventTypeFailed,
 		WebhookSubscribableEventTypeSuppressed,
-		WebhookSubscribableEventTypeInboundReceived,
 	}
 }
 
 // MarshalText implements encoding.TextMarshaler.
 func (s WebhookSubscribableEventType) MarshalText() ([]byte, error) {
 	switch s {
-	case WebhookSubscribableEventTypeQueued:
-		return []byte(s), nil
 	case WebhookSubscribableEventTypeSent:
 		return []byte(s), nil
 	case WebhookSubscribableEventTypeDelivered:
 		return []byte(s), nil
 	case WebhookSubscribableEventTypeDeferred:
 		return []byte(s), nil
-	case WebhookSubscribableEventTypeSoftBounce:
-		return []byte(s), nil
 	case WebhookSubscribableEventTypeHardBounce:
-		return []byte(s), nil
-	case WebhookSubscribableEventTypeComplaint:
 		return []byte(s), nil
 	case WebhookSubscribableEventTypeOpen:
 		return []byte(s), nil
@@ -15901,13 +19872,9 @@ func (s WebhookSubscribableEventType) MarshalText() ([]byte, error) {
 		return []byte(s), nil
 	case WebhookSubscribableEventTypeUnsubscribe:
 		return []byte(s), nil
-	case WebhookSubscribableEventTypeRejected:
-		return []byte(s), nil
 	case WebhookSubscribableEventTypeFailed:
 		return []byte(s), nil
 	case WebhookSubscribableEventTypeSuppressed:
-		return []byte(s), nil
-	case WebhookSubscribableEventTypeInboundReceived:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -15917,9 +19884,6 @@ func (s WebhookSubscribableEventType) MarshalText() ([]byte, error) {
 // UnmarshalText implements encoding.TextUnmarshaler.
 func (s *WebhookSubscribableEventType) UnmarshalText(data []byte) error {
 	switch WebhookSubscribableEventType(data) {
-	case WebhookSubscribableEventTypeQueued:
-		*s = WebhookSubscribableEventTypeQueued
-		return nil
 	case WebhookSubscribableEventTypeSent:
 		*s = WebhookSubscribableEventTypeSent
 		return nil
@@ -15929,14 +19893,8 @@ func (s *WebhookSubscribableEventType) UnmarshalText(data []byte) error {
 	case WebhookSubscribableEventTypeDeferred:
 		*s = WebhookSubscribableEventTypeDeferred
 		return nil
-	case WebhookSubscribableEventTypeSoftBounce:
-		*s = WebhookSubscribableEventTypeSoftBounce
-		return nil
 	case WebhookSubscribableEventTypeHardBounce:
 		*s = WebhookSubscribableEventTypeHardBounce
-		return nil
-	case WebhookSubscribableEventTypeComplaint:
-		*s = WebhookSubscribableEventTypeComplaint
 		return nil
 	case WebhookSubscribableEventTypeOpen:
 		*s = WebhookSubscribableEventTypeOpen
@@ -15947,17 +19905,11 @@ func (s *WebhookSubscribableEventType) UnmarshalText(data []byte) error {
 	case WebhookSubscribableEventTypeUnsubscribe:
 		*s = WebhookSubscribableEventTypeUnsubscribe
 		return nil
-	case WebhookSubscribableEventTypeRejected:
-		*s = WebhookSubscribableEventTypeRejected
-		return nil
 	case WebhookSubscribableEventTypeFailed:
 		*s = WebhookSubscribableEventTypeFailed
 		return nil
 	case WebhookSubscribableEventTypeSuppressed:
 		*s = WebhookSubscribableEventTypeSuppressed
-		return nil
-	case WebhookSubscribableEventTypeInboundReceived:
-		*s = WebhookSubscribableEventTypeInboundReceived
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)

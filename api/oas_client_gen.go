@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/go-faster/errors"
+	"github.com/google/uuid"
 	"github.com/ogen-go/ogen/conv"
 	ht "github.com/ogen-go/ogen/http"
 	"github.com/ogen-go/ogen/ogenerrors"
@@ -22,12 +23,31 @@ func trimTrailingSlashes(u *url.URL) {
 
 // Invoker invokes operations described by OpenAPI v3 specification.
 type Invoker interface {
+	// BulkContactTags invokes bulkContactTags operation.
+	//
+	// Operação tenant-scoped; cada contato e etiqueta é validado no tenant ativo. Limites da API são
+	// 200 contatos e 50 etiquetas por chamada.
+	//
+	// POST /v1/contacts/tags
+	BulkContactTags(ctx context.Context, request *BulkContactTagRequest) (BulkContactTagsRes, error)
+	// CreateContactTag invokes createContactTag operation.
+	//
+	// POST /v1/tags.
+	//
+	// POST /v1/tags
+	CreateContactTag(ctx context.Context, request *CreateContactTagRequest) (CreateContactTagRes, error)
 	// DeleteAutomationsID invokes deleteAutomationsId operation.
 	//
 	// DELETE /v1/automations/{id}.
 	//
 	// DELETE /v1/automations/{id}
 	DeleteAutomationsID(ctx context.Context, params DeleteAutomationsIDParams) (DeleteAutomationsIDRes, error)
+	// DeleteContactTag invokes deleteContactTag operation.
+	//
+	// DELETE /v1/tags/{id}.
+	//
+	// DELETE /v1/tags/{id}
+	DeleteContactTag(ctx context.Context, params DeleteContactTagParams) (DeleteContactTagRes, error)
 	// DeleteContactsID invokes deleteContactsId operation.
 	//
 	// DELETE /v1/contacts/{id}.
@@ -102,6 +122,51 @@ type Invoker interface {
 	//
 	// GET /v1/automations/{id}/runs/{run_id}
 	GetAutomationsIDRunsRunID(ctx context.Context, params GetAutomationsIDRunsRunIDParams) (GetAutomationsIDRunsRunIDRes, error)
+	// GetBroadcasts invokes getBroadcasts operation.
+	//
+	// Retorna os broadcasts em ordem decrescente de criação. O cursor é opaco e deve ser reutilizado
+	// sem alterações.
+	//
+	// GET /v1/broadcasts
+	GetBroadcasts(ctx context.Context, params GetBroadcastsParams) (GetBroadcastsRes, error)
+	// GetBroadcastsID invokes getBroadcastsId operation.
+	//
+	// Obtém um broadcast e seus contadores de entrega.
+	//
+	// GET /v1/broadcasts/{id}
+	GetBroadcastsID(ctx context.Context, params GetBroadcastsIDParams) (GetBroadcastsIDRes, error)
+	// GetBroadcastsIDAnalytics invokes getBroadcastsIdAnalytics operation.
+	//
+	// Tenant-scoped e private, no-store. Datas from/to aceitam YYYY-MM-DD; top_links_limit entre 1 e 20,
+	// padrão 10.
+	//
+	// GET /v1/broadcasts/{id}/analytics
+	GetBroadcastsIDAnalytics(ctx context.Context, params GetBroadcastsIDAnalyticsParams) (GetBroadcastsIDAnalyticsRes, error)
+	// GetBroadcastsManage invokes getBroadcastsManage operation.
+	//
+	// Tenant-scoped. Filtros q, status, target_kind, segment_id, created_from, created_to, sort, order,
+	// page e page_size; private, no-store.
+	//
+	// GET /v1/broadcasts/manage
+	GetBroadcastsManage(ctx context.Context, params GetBroadcastsManageParams) (GetBroadcastsManageRes, error)
+	// GetBroadcastsOverview invokes getBroadcastsOverview operation.
+	//
+	// Tenant-scoped. Aceita created_from/to, target_kind e segment_id; resposta private, no-store.
+	//
+	// GET /v1/broadcasts/overview
+	GetBroadcastsOverview(ctx context.Context, params GetBroadcastsOverviewParams) (GetBroadcastsOverviewRes, error)
+	// GetContactTag invokes getContactTag operation.
+	//
+	// GET /v1/tags/{id}.
+	//
+	// GET /v1/tags/{id}
+	GetContactTag(ctx context.Context, params GetContactTagParams) (GetContactTagRes, error)
+	// GetContactTags invokes getContactTags operation.
+	//
+	// GET /v1/tags.
+	//
+	// GET /v1/tags
+	GetContactTags(ctx context.Context, params GetContactTagsParams) (GetContactTagsRes, error)
 	// GetContacts invokes getContacts operation.
 	//
 	// Lista somente os contatos ativos do tenant autenticado. `Audience` e `audience` são nomes internos;
@@ -354,6 +419,12 @@ type Invoker interface {
 	//
 	// GET /v1/templates/{id}/versions/{versionId}
 	GetTemplatesIDVersionsVersionID(ctx context.Context, params GetTemplatesIDVersionsVersionIDParams) (GetTemplatesIDVersionsVersionIDRes, error)
+	// GetTenantWebhookDeliveries invokes getTenantWebhookDeliveries operation.
+	//
+	// Logs de entrega de todos os endpoints do tenant.
+	//
+	// GET /v1/webhook-deliveries
+	GetTenantWebhookDeliveries(ctx context.Context, params GetTenantWebhookDeliveriesParams) (GetTenantWebhookDeliveriesRes, error)
 	// GetThemes invokes getThemes operation.
 	//
 	// GET /v1/themes.
@@ -366,12 +437,30 @@ type Invoker interface {
 	//
 	// GET /v1/usage
 	GetUsage(ctx context.Context) (GetUsageRes, error)
+	// GetWebhookEndpoint invokes getWebhookEndpoint operation.
+	//
+	// Detalhes de um endpoint do tenant.
+	//
+	// GET /v1/webhooks/{id}
+	GetWebhookEndpoint(ctx context.Context, params GetWebhookEndpointParams) (GetWebhookEndpointRes, error)
+	// GetWebhookEventCatalog invokes getWebhookEventCatalog operation.
+	//
+	// Catálogo versionado de eventos emitidos.
+	//
+	// GET /v1/webhooks/events
+	GetWebhookEventCatalog(ctx context.Context) (GetWebhookEventCatalogRes, error)
+	// GetWebhookMetrics invokes getWebhookMetrics operation.
+	//
+	// Indicadores reais por tenant e período.
+	//
+	// GET /v1/webhooks/metrics
+	GetWebhookMetrics(ctx context.Context, params GetWebhookMetricsParams) (GetWebhookMetricsRes, error)
 	// GetWebhooks invokes getWebhooks operation.
 	//
 	// GET /v1/webhooks.
 	//
 	// GET /v1/webhooks
-	GetWebhooks(ctx context.Context) (GetWebhooksRes, error)
+	GetWebhooks(ctx context.Context, params GetWebhooksParams) (GetWebhooksRes, error)
 	// GetWebhooksIDDeliveries invokes getWebhooksIdDeliveries operation.
 	//
 	// Retorna somente metadados operacionais. O corpo enviado, o corpo da resposta do destino, headers e
@@ -406,6 +495,14 @@ type Invoker interface {
 	//
 	// PATCH /v1/automations/{id}/draft
 	PatchAutomationsIDDraft(ctx context.Context, request *UpdateAutomationDraftRequest, params PatchAutomationsIDDraftParams) (PatchAutomationsIDDraftRes, error)
+	// PatchBroadcastsID invokes patchBroadcastsId operation.
+	//
+	// Tenant-scoped; só altera campanha draft. Espera expected_version e campos documentados em
+	// CreateBroadcastRequest. API Key ou sessão; sessão exige CSRF. A versão divergente retorna
+	// conflict. Resposta private, no-store.
+	//
+	// PATCH /v1/broadcasts/{id}
+	PatchBroadcastsID(ctx context.Context, request *PatchBroadcastsIDReq, params PatchBroadcastsIDParams) (PatchBroadcastsIDRes, error)
 	// PatchContactsID invokes patchContactsId operation.
 	//
 	// Substitui apenas os campos presentes. `first_name` e `last_name` aceitam `null` para limpar o valor;
@@ -469,6 +566,47 @@ type Invoker interface {
 	//
 	// POST /v1/automations/{id}/runs/{run_id}/cancel
 	PostAutomationsIDRunsRunIDCancel(ctx context.Context, params PostAutomationsIDRunsRunIDCancelParams) (PostAutomationsIDRunsRunIDCancelRes, error)
+	// PostBroadcasts invokes postBroadcasts operation.
+	//
+	// Cria um draft para um domínio verificado, uma versão atualmente publicada de template e, quando
+	// aplicável, um segmento estático ativo. Repetir a mesma solicitação com a mesma chave retorna o
+	// recurso original; reutilizar a chave com outro corpo retorna `409`.
+	//
+	// POST /v1/broadcasts
+	PostBroadcasts(ctx context.Context, request *CreateBroadcastRequest, params PostBroadcastsParams) (PostBroadcastsRes, error)
+	// PostBroadcastsIDCancel invokes postBroadcastsIdCancel operation.
+	//
+	// Cancela recipients ainda pendentes ou em processamento. Mensagens já enfileiradas não são
+	// recolhidas. Repetir a operação para um broadcast já cancelado é idempotente, mesmo com a versão
+	// original; demais versões divergentes e estados terminais incompatíveis retornam `409`.
+	//
+	// POST /v1/broadcasts/{id}/cancel
+	PostBroadcastsIDCancel(ctx context.Context, request *BroadcastVersionRequest, params PostBroadcastsIDCancelParams) (PostBroadcastsIDCancelRes, error)
+	// PostBroadcastsIDSchedule invokes postBroadcastsIdSchedule operation.
+	//
+	// Aceita somente draft na versão informada. Materializa até 1.000 contatos elegíveis e agenda o
+	// início para aproximadamente um segundo após a solicitação. Audiência vazia ou acima do limite
+	// retorna `400`; versão/estado incompatível ou domínio não mais verificado retorna `409`. Exige
+	// exatamente um `Idempotency-Key`; a mesma chave e solicitação devolvem o resultado persistido por
+	// 30 dias, e reutilização para outra campanha/versão/approval retorna `409`. OAuth MCP exige
+	// `plan_id`, `plan_hash`, um `approval_id` aprovado pelo proprietário em `X-ViaPost-MCP-Approval-ID`
+	// e `Idempotency-Key`. A API verifica e consome o plano com sua audiência UUID imutável,
+	// aprovação, resultado idempotente e auditoria na mesma transação. O agendamento é fail-closed e
+	// retorna `503 service_unavailable` sem materializar a audiência quando o gate de execução está
+	// desabilitado ou o tenant não está autorizado para o rollout.
+	//
+	// POST /v1/broadcasts/{id}/schedule
+	PostBroadcastsIDSchedule(ctx context.Context, request *BroadcastVersionRequest, params PostBroadcastsIDScheduleParams) (PostBroadcastsIDScheduleRes, error)
+	// PostBroadcastsIDTest invokes postBroadcastsIdTest operation.
+	//
+	// Envia o snapshot compilado somente ao próprio e-mail verificado do usuário que iniciou a chamada.
+	// Exige o scope específico `email:test` e `broadcasts:read`; não usa a audiência do broadcast. O
+	// recurso precisa continuar em draft e `expected_version` precisa corresponder. Domínio verificado,
+	// supressões, quota e demais gates da pipeline normal de envio continuam aplicáveis. Repetir uma
+	// chave de idempotência já usada não cria outra mensagem.
+	//
+	// POST /v1/broadcasts/{id}/test
+	PostBroadcastsIDTest(ctx context.Context, request *PostBroadcastsIDTestReq, params PostBroadcastsIDTestParams) (PostBroadcastsIDTestRes, error)
 	// PostContacts invokes postContacts operation.
 	//
 	// Cria um contato. O e-mail é normalizado para minúsculas e deve ser único dentro do tenant; a
@@ -478,14 +616,15 @@ type Invoker interface {
 	PostContacts(ctx context.Context, request *CreateContactRequest) (PostContactsRes, error)
 	// PostContactsImport invokes postContactsImport operation.
 	//
-	// Importação síncrona, atômica e somente de criação para no máximo 1.000 contatos do tenant.
-	// Aceita CSV UTF-8 (BOM opcional) com cabeçalho exato
-	// `email,first_name,last_name,subscribed,properties`. Contatos existentes não são alterados;
-	// duplicatas do arquivo preservam a primeira linha válida. `subscribed` vazio cria contato não
-	// inscrito por padrão seguro de consentimento.
+	// Importação síncrona, por padrão atômica e somente de criação de perfis para no máximo 1.000
+	// contatos do tenant. Aceita CSV UTF-8 (BOM opcional) com cabeçalho exato
+	// `email,first_name,last_name,subscribed,properties`. Perfis existentes não são alterados; etiquetas
+	// explicitamente informadas podem ser atualizadas. Uma sexta coluna tags aceita um array JSON de
+	// nomes; duplicatas preservam a primeira linha válida. `subscribed` vazio cria contato não inscrito
+	// por padrão seguro de consentimento.
 	//
 	// POST /v1/contacts/import
-	PostContactsImport(ctx context.Context, request PostContactsImportReq) (PostContactsImportRes, error)
+	PostContactsImport(ctx context.Context, request PostContactsImportReq, params PostContactsImportParams) (PostContactsImportRes, error)
 	// PostDomainTrackingDomainActivate invokes postDomainTrackingDomainActivate operation.
 	//
 	// Iniciar provisionamento do domínio de tracking.
@@ -725,6 +864,12 @@ type Invoker interface {
 	//
 	// POST /v1/webhooks/{id}/test
 	PostWebhooksIDTest(ctx context.Context, request *EmptyObjectRequest, params PostWebhooksIDTestParams) (PostWebhooksIDTestRes, error)
+	// UpdateContactTag invokes updateContactTag operation.
+	//
+	// PATCH /v1/tags/{id}.
+	//
+	// PATCH /v1/tags/{id}
+	UpdateContactTag(ctx context.Context, request *UpdateContactTagRequest, params UpdateContactTagParams) (UpdateContactTagRes, error)
 }
 
 // Client implements OAS client.
@@ -766,6 +911,183 @@ func (c *Client) requestURL(ctx context.Context) *url.URL {
 		return c.serverURL
 	}
 	return u
+}
+
+// BulkContactTags invokes bulkContactTags operation.
+//
+// Operação tenant-scoped; cada contato e etiqueta é validado no tenant ativo. Limites da API são
+// 200 contatos e 50 etiquetas por chamada.
+//
+// POST /v1/contacts/tags
+func (c *Client) BulkContactTags(ctx context.Context, request *BulkContactTagRequest) (BulkContactTagsRes, error) {
+	res, err := c.sendBulkContactTags(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendBulkContactTags(ctx context.Context, request *BulkContactTagRequest) (res BulkContactTagsRes, err error) {
+	// Validate request before sending.
+	if err := func() error {
+		if err := request.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return res, errors.Wrap(err, "validate")
+	}
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/v1/contacts/tags"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeBulkContactTagsRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, BulkContactTagsOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeBulkContactTagsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// CreateContactTag invokes createContactTag operation.
+//
+// POST /v1/tags.
+//
+// POST /v1/tags
+func (c *Client) CreateContactTag(ctx context.Context, request *CreateContactTagRequest) (CreateContactTagRes, error) {
+	res, err := c.sendCreateContactTag(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendCreateContactTag(ctx context.Context, request *CreateContactTagRequest) (res CreateContactTagRes, err error) {
+	// Validate request before sending.
+	if err := func() error {
+		if err := request.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return res, errors.Wrap(err, "validate")
+	}
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/v1/tags"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeCreateContactTagRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, CreateContactTagOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeCreateContactTagResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
 }
 
 // DeleteAutomationsID invokes deleteAutomationsId operation.
@@ -855,6 +1177,100 @@ func (c *Client) sendDeleteAutomationsID(ctx context.Context, params DeleteAutom
 	}()
 
 	result, err := decodeDeleteAutomationsIDResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// DeleteContactTag invokes deleteContactTag operation.
+//
+// DELETE /v1/tags/{id}.
+//
+// DELETE /v1/tags/{id}
+func (c *Client) DeleteContactTag(ctx context.Context, params DeleteContactTagParams) (DeleteContactTagRes, error) {
+	res, err := c.sendDeleteContactTag(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendDeleteContactTag(ctx context.Context, params DeleteContactTagParams) (res DeleteContactTagRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/v1/tags/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, DeleteContactTagOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeDeleteContactTagResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -2104,6 +2520,1036 @@ func (c *Client) sendGetAutomationsIDRunsRunID(ctx context.Context, params GetAu
 	return result, nil
 }
 
+// GetBroadcasts invokes getBroadcasts operation.
+//
+// Retorna os broadcasts em ordem decrescente de criação. O cursor é opaco e deve ser reutilizado
+// sem alterações.
+//
+// GET /v1/broadcasts
+func (c *Client) GetBroadcasts(ctx context.Context, params GetBroadcastsParams) (GetBroadcastsRes, error) {
+	res, err := c.sendGetBroadcasts(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetBroadcasts(ctx context.Context, params GetBroadcastsParams) (res GetBroadcastsRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/v1/broadcasts"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "cursor" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "cursor",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Cursor.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "limit" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Limit.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, GetBroadcastsOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetBroadcastsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetBroadcastsID invokes getBroadcastsId operation.
+//
+// Obtém um broadcast e seus contadores de entrega.
+//
+// GET /v1/broadcasts/{id}
+func (c *Client) GetBroadcastsID(ctx context.Context, params GetBroadcastsIDParams) (GetBroadcastsIDRes, error) {
+	res, err := c.sendGetBroadcastsID(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetBroadcastsID(ctx context.Context, params GetBroadcastsIDParams) (res GetBroadcastsIDRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/v1/broadcasts/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, GetBroadcastsIDOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetBroadcastsIDResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetBroadcastsIDAnalytics invokes getBroadcastsIdAnalytics operation.
+//
+// Tenant-scoped e private, no-store. Datas from/to aceitam YYYY-MM-DD; top_links_limit entre 1 e 20,
+// padrão 10.
+//
+// GET /v1/broadcasts/{id}/analytics
+func (c *Client) GetBroadcastsIDAnalytics(ctx context.Context, params GetBroadcastsIDAnalyticsParams) (GetBroadcastsIDAnalyticsRes, error) {
+	res, err := c.sendGetBroadcastsIDAnalytics(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetBroadcastsIDAnalytics(ctx context.Context, params GetBroadcastsIDAnalyticsParams) (res GetBroadcastsIDAnalyticsRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v1/broadcasts/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/analytics"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "from" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "from",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.From.Get(); ok {
+				return e.EncodeValue(conv.DateToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "to" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "to",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.To.Get(); ok {
+				return e.EncodeValue(conv.DateToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "top_links_limit" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "top_links_limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.TopLinksLimit.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, GetBroadcastsIDAnalyticsOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetBroadcastsIDAnalyticsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetBroadcastsManage invokes getBroadcastsManage operation.
+//
+// Tenant-scoped. Filtros q, status, target_kind, segment_id, created_from, created_to, sort, order,
+// page e page_size; private, no-store.
+//
+// GET /v1/broadcasts/manage
+func (c *Client) GetBroadcastsManage(ctx context.Context, params GetBroadcastsManageParams) (GetBroadcastsManageRes, error) {
+	res, err := c.sendGetBroadcastsManage(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetBroadcastsManage(ctx context.Context, params GetBroadcastsManageParams) (res GetBroadcastsManageRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/v1/broadcasts/manage"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "q" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "q",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Q.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "status" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "status",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Status.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "target_kind" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "target_kind",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.TargetKind.Get(); ok {
+				return e.EncodeValue(conv.StringToString(string(val)))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "segment_id" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "segment_id",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.SegmentID.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "created_from" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "created_from",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.CreatedFrom.Get(); ok {
+				return e.EncodeValue(conv.DateTimeToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "created_to" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "created_to",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.CreatedTo.Get(); ok {
+				return e.EncodeValue(conv.DateTimeToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "sort" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "sort",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Sort.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "order" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "order",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Order.Get(); ok {
+				return e.EncodeValue(conv.StringToString(string(val)))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "page" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "page",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Page.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "page_size" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "page_size",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.PageSize.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, GetBroadcastsManageOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetBroadcastsManageResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetBroadcastsOverview invokes getBroadcastsOverview operation.
+//
+// Tenant-scoped. Aceita created_from/to, target_kind e segment_id; resposta private, no-store.
+//
+// GET /v1/broadcasts/overview
+func (c *Client) GetBroadcastsOverview(ctx context.Context, params GetBroadcastsOverviewParams) (GetBroadcastsOverviewRes, error) {
+	res, err := c.sendGetBroadcastsOverview(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetBroadcastsOverview(ctx context.Context, params GetBroadcastsOverviewParams) (res GetBroadcastsOverviewRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/v1/broadcasts/overview"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "created_from" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "created_from",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.CreatedFrom.Get(); ok {
+				return e.EncodeValue(conv.DateTimeToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "created_to" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "created_to",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.CreatedTo.Get(); ok {
+				return e.EncodeValue(conv.DateTimeToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "target_kind" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "target_kind",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.TargetKind.Get(); ok {
+				return e.EncodeValue(conv.StringToString(string(val)))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "segment_id" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "segment_id",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.SegmentID.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, GetBroadcastsOverviewOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetBroadcastsOverviewResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetContactTag invokes getContactTag operation.
+//
+// GET /v1/tags/{id}.
+//
+// GET /v1/tags/{id}
+func (c *Client) GetContactTag(ctx context.Context, params GetContactTagParams) (GetContactTagRes, error) {
+	res, err := c.sendGetContactTag(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetContactTag(ctx context.Context, params GetContactTagParams) (res GetContactTagRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/v1/tags/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, GetContactTagOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetContactTagResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetContactTags invokes getContactTags operation.
+//
+// GET /v1/tags.
+//
+// GET /v1/tags
+func (c *Client) GetContactTags(ctx context.Context, params GetContactTagsParams) (GetContactTagsRes, error) {
+	res, err := c.sendGetContactTags(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetContactTags(ctx context.Context, params GetContactTagsParams) (res GetContactTagsRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/v1/tags"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "q" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "q",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Q.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "color" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "color",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Color.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "sort" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "sort",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Sort.Get(); ok {
+				return e.EncodeValue(conv.StringToString(string(val)))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "order" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "order",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Order.Get(); ok {
+				return e.EncodeValue(conv.StringToString(string(val)))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "limit" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Limit.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "cursor" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "cursor",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Cursor.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, GetContactTagsOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetContactTagsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // GetContacts invokes getContacts operation.
 //
 // Lista somente os contatos ativos do tenant autenticado. `Audience` e `audience` são nomes internos;
@@ -2168,6 +3614,40 @@ func (c *Client) sendGetContacts(ctx context.Context, params GetContactsParams) 
 		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
 			if val, ok := params.Search.Get(); ok {
 				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "tag_ids" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "tag_ids",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.TagIds.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "tag_match" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "tag_match",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.TagMatch.Get(); ok {
+				return e.EncodeValue(conv.StringToString(string(val)))
 			}
 			return nil
 		}); err != nil {
@@ -5829,6 +7309,238 @@ func (c *Client) sendGetTemplatesIDVersionsVersionID(ctx context.Context, params
 	return result, nil
 }
 
+// GetTenantWebhookDeliveries invokes getTenantWebhookDeliveries operation.
+//
+// Logs de entrega de todos os endpoints do tenant.
+//
+// GET /v1/webhook-deliveries
+func (c *Client) GetTenantWebhookDeliveries(ctx context.Context, params GetTenantWebhookDeliveriesParams) (GetTenantWebhookDeliveriesRes, error) {
+	res, err := c.sendGetTenantWebhookDeliveries(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetTenantWebhookDeliveries(ctx context.Context, params GetTenantWebhookDeliveriesParams) (res GetTenantWebhookDeliveriesRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/v1/webhook-deliveries"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "endpoint_id" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "endpoint_id",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.EndpointID.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "event_type" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "event_type",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.EventType.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "status" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "status",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Status.Get(); ok {
+				return e.EncodeValue(conv.StringToString(string(val)))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "from" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "from",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.From.Get(); ok {
+				return e.EncodeValue(conv.DateTimeToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "to" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "to",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.To.Get(); ok {
+				return e.EncodeValue(conv.DateTimeToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "limit" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Limit.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "cursor" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "cursor",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Cursor.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "response_code" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "response_code",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.ResponseCode.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "delivery_id" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "delivery_id",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.DeliveryID.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, GetTenantWebhookDeliveriesOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetTenantWebhookDeliveriesResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // GetThemes invokes getThemes operation.
 //
 // GET /v1/themes.
@@ -5981,22 +7693,464 @@ func (c *Client) sendGetUsage(ctx context.Context) (res GetUsageRes, err error) 
 	return result, nil
 }
 
+// GetWebhookEndpoint invokes getWebhookEndpoint operation.
+//
+// Detalhes de um endpoint do tenant.
+//
+// GET /v1/webhooks/{id}
+func (c *Client) GetWebhookEndpoint(ctx context.Context, params GetWebhookEndpointParams) (GetWebhookEndpointRes, error) {
+	res, err := c.sendGetWebhookEndpoint(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetWebhookEndpoint(ctx context.Context, params GetWebhookEndpointParams) (res GetWebhookEndpointRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/v1/webhooks/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := uuid.UUID(params.ID); true {
+				return e.EncodeValue(conv.UUIDToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, GetWebhookEndpointOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetWebhookEndpointResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetWebhookEventCatalog invokes getWebhookEventCatalog operation.
+//
+// Catálogo versionado de eventos emitidos.
+//
+// GET /v1/webhooks/events
+func (c *Client) GetWebhookEventCatalog(ctx context.Context) (GetWebhookEventCatalogRes, error) {
+	res, err := c.sendGetWebhookEventCatalog(ctx)
+	return res, err
+}
+
+func (c *Client) sendGetWebhookEventCatalog(ctx context.Context) (res GetWebhookEventCatalogRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/v1/webhooks/events"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, GetWebhookEventCatalogOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetWebhookEventCatalogResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetWebhookMetrics invokes getWebhookMetrics operation.
+//
+// Indicadores reais por tenant e período.
+//
+// GET /v1/webhooks/metrics
+func (c *Client) GetWebhookMetrics(ctx context.Context, params GetWebhookMetricsParams) (GetWebhookMetricsRes, error) {
+	res, err := c.sendGetWebhookMetrics(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetWebhookMetrics(ctx context.Context, params GetWebhookMetricsParams) (res GetWebhookMetricsRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/v1/webhooks/metrics"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "endpoint_id" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "endpoint_id",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.EndpointID.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "from" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "from",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.From.Get(); ok {
+				return e.EncodeValue(conv.DateTimeToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "to" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "to",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.To.Get(); ok {
+				return e.EncodeValue(conv.DateTimeToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, GetWebhookMetricsOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetWebhookMetricsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // GetWebhooks invokes getWebhooks operation.
 //
 // GET /v1/webhooks.
 //
 // GET /v1/webhooks
-func (c *Client) GetWebhooks(ctx context.Context) (GetWebhooksRes, error) {
-	res, err := c.sendGetWebhooks(ctx)
+func (c *Client) GetWebhooks(ctx context.Context, params GetWebhooksParams) (GetWebhooksRes, error) {
+	res, err := c.sendGetWebhooks(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendGetWebhooks(ctx context.Context) (res GetWebhooksRes, err error) {
+func (c *Client) sendGetWebhooks(ctx context.Context, params GetWebhooksParams) (res GetWebhooksRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
 	pathParts[0] = "/v1/webhooks"
 	uri.AddPathParts(u, pathParts[:]...)
+
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "q" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "q",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Q.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "enabled" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "enabled",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Enabled.Get(); ok {
+				return e.EncodeValue(conv.BoolToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "event_type" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "event_type",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.EventType.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "from" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "from",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.From.Get(); ok {
+				return e.EncodeValue(conv.DateTimeToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "to" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "to",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.To.Get(); ok {
+				return e.EncodeValue(conv.DateTimeToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "limit" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Limit.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "cursor" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "cursor",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Cursor.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "sort" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "sort",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Sort.Get(); ok {
+				return e.EncodeValue(conv.StringToString(string(val)))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
 
 	r, err := ht.NewRequest(ctx, "GET", u)
 	if err != nil {
@@ -6161,6 +8315,40 @@ func (c *Client) sendGetWebhooksIDDeliveries(ctx context.Context, params GetWebh
 					return e.EncodeValue(conv.StringToString(unwrapped))
 				}
 				return nil
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "response_code" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "response_code",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.ResponseCode.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "delivery_id" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "delivery_id",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.DeliveryID.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
 			}
 			return nil
 		}); err != nil {
@@ -6583,6 +8771,114 @@ func (c *Client) sendPatchAutomationsIDDraft(ctx context.Context, request *Updat
 	}()
 
 	result, err := decodePatchAutomationsIDDraftResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// PatchBroadcastsID invokes patchBroadcastsId operation.
+//
+// Tenant-scoped; só altera campanha draft. Espera expected_version e campos documentados em
+// CreateBroadcastRequest. API Key ou sessão; sessão exige CSRF. A versão divergente retorna
+// conflict. Resposta private, no-store.
+//
+// PATCH /v1/broadcasts/{id}
+func (c *Client) PatchBroadcastsID(ctx context.Context, request *PatchBroadcastsIDReq, params PatchBroadcastsIDParams) (PatchBroadcastsIDRes, error) {
+	res, err := c.sendPatchBroadcastsID(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendPatchBroadcastsID(ctx context.Context, request *PatchBroadcastsIDReq, params PatchBroadcastsIDParams) (res PatchBroadcastsIDRes, err error) {
+	// Validate request before sending.
+	if err := func() error {
+		if err := request.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return res, errors.Wrap(err, "validate")
+	}
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/v1/broadcasts/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "PATCH", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodePatchBroadcastsIDRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, PatchBroadcastsIDOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodePatchBroadcastsIDResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -7602,6 +9898,471 @@ func (c *Client) sendPostAutomationsIDRunsRunIDCancel(ctx context.Context, param
 	return result, nil
 }
 
+// PostBroadcasts invokes postBroadcasts operation.
+//
+// Cria um draft para um domínio verificado, uma versão atualmente publicada de template e, quando
+// aplicável, um segmento estático ativo. Repetir a mesma solicitação com a mesma chave retorna o
+// recurso original; reutilizar a chave com outro corpo retorna `409`.
+//
+// POST /v1/broadcasts
+func (c *Client) PostBroadcasts(ctx context.Context, request *CreateBroadcastRequest, params PostBroadcastsParams) (PostBroadcastsRes, error) {
+	res, err := c.sendPostBroadcasts(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendPostBroadcasts(ctx context.Context, request *CreateBroadcastRequest, params PostBroadcastsParams) (res PostBroadcastsRes, err error) {
+	// Validate request before sending.
+	if err := func() error {
+		if err := request.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return res, errors.Wrap(err, "validate")
+	}
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/v1/broadcasts"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodePostBroadcastsRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	h := uri.NewHeaderEncoder(r.Header)
+	{
+		cfg := uri.HeaderParameterEncodingConfig{
+			Name:    "Idempotency-Key",
+			Explode: false,
+		}
+		if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.StringToString(params.IdempotencyKey))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode header")
+		}
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, PostBroadcastsOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodePostBroadcastsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// PostBroadcastsIDCancel invokes postBroadcastsIdCancel operation.
+//
+// Cancela recipients ainda pendentes ou em processamento. Mensagens já enfileiradas não são
+// recolhidas. Repetir a operação para um broadcast já cancelado é idempotente, mesmo com a versão
+// original; demais versões divergentes e estados terminais incompatíveis retornam `409`.
+//
+// POST /v1/broadcasts/{id}/cancel
+func (c *Client) PostBroadcastsIDCancel(ctx context.Context, request *BroadcastVersionRequest, params PostBroadcastsIDCancelParams) (PostBroadcastsIDCancelRes, error) {
+	res, err := c.sendPostBroadcastsIDCancel(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendPostBroadcastsIDCancel(ctx context.Context, request *BroadcastVersionRequest, params PostBroadcastsIDCancelParams) (res PostBroadcastsIDCancelRes, err error) {
+	// Validate request before sending.
+	if err := func() error {
+		if err := request.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return res, errors.Wrap(err, "validate")
+	}
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v1/broadcasts/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/cancel"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodePostBroadcastsIDCancelRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, PostBroadcastsIDCancelOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodePostBroadcastsIDCancelResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// PostBroadcastsIDSchedule invokes postBroadcastsIdSchedule operation.
+//
+// Aceita somente draft na versão informada. Materializa até 1.000 contatos elegíveis e agenda o
+// início para aproximadamente um segundo após a solicitação. Audiência vazia ou acima do limite
+// retorna `400`; versão/estado incompatível ou domínio não mais verificado retorna `409`. Exige
+// exatamente um `Idempotency-Key`; a mesma chave e solicitação devolvem o resultado persistido por
+// 30 dias, e reutilização para outra campanha/versão/approval retorna `409`. OAuth MCP exige
+// `plan_id`, `plan_hash`, um `approval_id` aprovado pelo proprietário em `X-ViaPost-MCP-Approval-ID`
+// e `Idempotency-Key`. A API verifica e consome o plano com sua audiência UUID imutável,
+// aprovação, resultado idempotente e auditoria na mesma transação. O agendamento é fail-closed e
+// retorna `503 service_unavailable` sem materializar a audiência quando o gate de execução está
+// desabilitado ou o tenant não está autorizado para o rollout.
+//
+// POST /v1/broadcasts/{id}/schedule
+func (c *Client) PostBroadcastsIDSchedule(ctx context.Context, request *BroadcastVersionRequest, params PostBroadcastsIDScheduleParams) (PostBroadcastsIDScheduleRes, error) {
+	res, err := c.sendPostBroadcastsIDSchedule(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendPostBroadcastsIDSchedule(ctx context.Context, request *BroadcastVersionRequest, params PostBroadcastsIDScheduleParams) (res PostBroadcastsIDScheduleRes, err error) {
+	// Validate request before sending.
+	if err := func() error {
+		if err := request.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return res, errors.Wrap(err, "validate")
+	}
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v1/broadcasts/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/schedule"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodePostBroadcastsIDScheduleRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	h := uri.NewHeaderEncoder(r.Header)
+	{
+		cfg := uri.HeaderParameterEncodingConfig{
+			Name:    "Idempotency-Key",
+			Explode: false,
+		}
+		if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.StringToString(params.IdempotencyKey))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode header")
+		}
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, PostBroadcastsIDScheduleOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodePostBroadcastsIDScheduleResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// PostBroadcastsIDTest invokes postBroadcastsIdTest operation.
+//
+// Envia o snapshot compilado somente ao próprio e-mail verificado do usuário que iniciou a chamada.
+// Exige o scope específico `email:test` e `broadcasts:read`; não usa a audiência do broadcast. O
+// recurso precisa continuar em draft e `expected_version` precisa corresponder. Domínio verificado,
+// supressões, quota e demais gates da pipeline normal de envio continuam aplicáveis. Repetir uma
+// chave de idempotência já usada não cria outra mensagem.
+//
+// POST /v1/broadcasts/{id}/test
+func (c *Client) PostBroadcastsIDTest(ctx context.Context, request *PostBroadcastsIDTestReq, params PostBroadcastsIDTestParams) (PostBroadcastsIDTestRes, error) {
+	res, err := c.sendPostBroadcastsIDTest(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendPostBroadcastsIDTest(ctx context.Context, request *PostBroadcastsIDTestReq, params PostBroadcastsIDTestParams) (res PostBroadcastsIDTestRes, err error) {
+	// Validate request before sending.
+	if err := func() error {
+		if err := request.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return res, errors.Wrap(err, "validate")
+	}
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/v1/broadcasts/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/test"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodePostBroadcastsIDTestRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	h := uri.NewHeaderEncoder(r.Header)
+	{
+		cfg := uri.HeaderParameterEncodingConfig{
+			Name:    "Idempotency-Key",
+			Explode: false,
+		}
+		if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.StringToString(params.IdempotencyKey))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode header")
+		}
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, PostBroadcastsIDTestOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodePostBroadcastsIDTestResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // PostContacts invokes postContacts operation.
 //
 // Cria um contato. O e-mail é normalizado para minúsculas e deve ser único dentro do tenant; a
@@ -7693,24 +10454,96 @@ func (c *Client) sendPostContacts(ctx context.Context, request *CreateContactReq
 
 // PostContactsImport invokes postContactsImport operation.
 //
-// Importação síncrona, atômica e somente de criação para no máximo 1.000 contatos do tenant.
-// Aceita CSV UTF-8 (BOM opcional) com cabeçalho exato
-// `email,first_name,last_name,subscribed,properties`. Contatos existentes não são alterados;
-// duplicatas do arquivo preservam a primeira linha válida. `subscribed` vazio cria contato não
-// inscrito por padrão seguro de consentimento.
+// Importação síncrona, por padrão atômica e somente de criação de perfis para no máximo 1.000
+// contatos do tenant. Aceita CSV UTF-8 (BOM opcional) com cabeçalho exato
+// `email,first_name,last_name,subscribed,properties`. Perfis existentes não são alterados; etiquetas
+// explicitamente informadas podem ser atualizadas. Uma sexta coluna tags aceita um array JSON de
+// nomes; duplicatas preservam a primeira linha válida. `subscribed` vazio cria contato não inscrito
+// por padrão seguro de consentimento.
 //
 // POST /v1/contacts/import
-func (c *Client) PostContactsImport(ctx context.Context, request PostContactsImportReq) (PostContactsImportRes, error) {
-	res, err := c.sendPostContactsImport(ctx, request)
+func (c *Client) PostContactsImport(ctx context.Context, request PostContactsImportReq, params PostContactsImportParams) (PostContactsImportRes, error) {
+	res, err := c.sendPostContactsImport(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendPostContactsImport(ctx context.Context, request PostContactsImportReq) (res PostContactsImportRes, err error) {
+func (c *Client) sendPostContactsImport(ctx context.Context, request PostContactsImportReq, params PostContactsImportParams) (res PostContactsImportRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
 	pathParts[0] = "/v1/contacts/import"
 	uri.AddPathParts(u, pathParts[:]...)
+
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "tag_ids" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "tag_ids",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.TagIds.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "tag_mode" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "tag_mode",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.TagMode.Get(); ok {
+				return e.EncodeValue(conv.StringToString(string(val)))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "create_tags" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "create_tags",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.CreateTags.Get(); ok {
+				return e.EncodeValue(conv.BoolToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "partial" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "partial",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Partial.Get(); ok {
+				return e.EncodeValue(conv.BoolToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
 
 	r, err := ht.NewRequest(ctx, "POST", u)
 	if err != nil {
@@ -11016,6 +13849,112 @@ func (c *Client) sendPostWebhooksIDTest(ctx context.Context, request *EmptyObjec
 	}()
 
 	result, err := decodePostWebhooksIDTestResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// UpdateContactTag invokes updateContactTag operation.
+//
+// PATCH /v1/tags/{id}.
+//
+// PATCH /v1/tags/{id}
+func (c *Client) UpdateContactTag(ctx context.Context, request *UpdateContactTagRequest, params UpdateContactTagParams) (UpdateContactTagRes, error) {
+	res, err := c.sendUpdateContactTag(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendUpdateContactTag(ctx context.Context, request *UpdateContactTagRequest, params UpdateContactTagParams) (res UpdateContactTagRes, err error) {
+	// Validate request before sending.
+	if err := func() error {
+		if err := request.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return res, errors.Wrap(err, "validate")
+	}
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/v1/tags/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "PATCH", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdateContactTagRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAPIKey(ctx, UpdateContactTagOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAPIKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeUpdateContactTagResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

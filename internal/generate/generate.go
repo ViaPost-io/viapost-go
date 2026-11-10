@@ -19,25 +19,66 @@ import (
 //go:generate go run ../cmd/generate ../../openapi.yaml ../../api
 
 var (
-	unsupportedItems         = regexp.MustCompile(`(?m)^[\t ]*items: false[\t ]*\r?\n`)
-	canonicalUUIDBlock       = regexp.MustCompile(`(?m)^    UUID:\r?\n      type: string\r?\n      format: uuid[\t ]*$`)
-	uuidFormatLine           = regexp.MustCompile(`(?m)^[\t ]*format: uuid[\t ]*\r?\n`)
-	sessionReference         = regexp.MustCompile(`(?m)^[\t ]*- sessionCookie: \[\][\t ]*\r?\n`)
-	csrfListReference        = regexp.MustCompile(`(?m)^[\t ]*- \$ref: '#/components/parameters/CsrfHeader'[\t ]*\r?\n`)
-	csrfInlineParameters     = regexp.MustCompile(`(?m)^[\t ]*parameters: \[\{ \$ref: '#/components/parameters/CsrfHeader' \}\][\t ]*\r?\n`)
-	csrfComponent            = regexp.MustCompile(`(?ms)^    CsrfHeader:\r?\n.*?(^  securitySchemes:)`)
-	sessionScheme            = regexp.MustCompile(`(?ms)^    sessionCookie:\r?\n.*?(^  schemas:)`)
-	webhookDeliveryEvent     = regexp.MustCompile(`(?ms)^    WebhookDeliveryEventType:\r?\n      anyOf:\r?\n        - \$ref: '#/components/schemas/WebhookSubscribableEventType'\r?\n        - type: string\r?\n          const: webhook\.test[\t ]*$`)
-	messageTimelinePageUnion = regexp.MustCompile(`(?m)^                anyOf:\r?\n                  - \$ref: '#/components/schemas/MessageTimelinePage'\r?\n                  - \$ref: '#/components/schemas/MessageTimelineOptInPage'[\t ]*$`)
-	propertyComparisonValue  = regexp.MustCompile(`(?m)^        value:\r?\n          type:\r?\n            - string\r?\n            - number\r?\n            - boolean\r?\n`)
-	untypedConst             = regexp.MustCompile(`(?m)^([ \t]+)([[:alnum:]_]+):\r?\n([ \t]+)const: ([^\r\n]+)[\t ]*$`)
-	sendCustomEventSelection = regexp.MustCompile(`(?ms)(^    SendCustomEventRequest:\r?\n.*?)(^      anyOf:\r?\n.*?)(^      properties:\r?\n.*?)(^    [[:alnum:]_]+:|\z)`)
+	unsupportedItems          = regexp.MustCompile(`(?m)^[\t ]*items: false[\t ]*\r?\n`)
+	canonicalUUIDBlock        = regexp.MustCompile(`(?m)^    UUID:\r?\n      type: string\r?\n      format: uuid[\t ]*$`)
+	uuidFormatLine            = regexp.MustCompile(`(?m)^[\t ]*format: uuid[\t ]*\r?\n`)
+	sessionReference          = regexp.MustCompile(`(?m)^[\t ]*- sessionCookie: \[\][\t ]*\r?\n`)
+	csrfListReference         = regexp.MustCompile(`(?m)^[\t ]*- \$ref: '#/components/parameters/CsrfHeader'[\t ]*\r?\n`)
+	requiredCsrfListReference = regexp.MustCompile(`(?m)^[\t ]*- \$ref: '#/components/parameters/RequiredCsrfHeader'[\t ]*\r?\n`)
+	csrfInlineParameters      = regexp.MustCompile(`(?m)^[\t ]*parameters: \[\{ \$ref: '#/components/parameters/CsrfHeader' \}\][\t ]*\r?\n`)
+	csrfComponent             = regexp.MustCompile(`(?ms)^    CsrfHeader:\r?\n.*?(^  securitySchemes:)`)
+	sessionScheme             = regexp.MustCompile(`(?ms)^    sessionCookie:\r?\n.*?(^  schemas:)`)
+	webhookDeliveryEvent      = regexp.MustCompile(`(?ms)^    WebhookDeliveryEventType:\r?\n      anyOf:\r?\n        - \$ref: '#/components/schemas/WebhookSubscribableEventType'\r?\n        - type: string\r?\n          const: webhook\.test[\t ]*$`)
+	messageTimelinePageUnion  = regexp.MustCompile(`(?m)^                anyOf:\r?\n                  - \$ref: '#/components/schemas/MessageTimelinePage'\r?\n                  - \$ref: '#/components/schemas/MessageTimelineOptInPage'[\t ]*$`)
+	propertyComparisonValue   = regexp.MustCompile(`(?m)^        value:\r?\n          type:\r?\n            - string\r?\n            - number\r?\n            - boolean\r?\n`)
+	untypedConst              = regexp.MustCompile(`(?m)^([ \t]+)([[:alnum:]_]+):\r?\n([ \t]+)const: ([^\r\n]+)[\t ]*$`)
+	sendCustomEventSelection  = regexp.MustCompile(`(?ms)(^    SendCustomEventRequest:\r?\n.*?)(^      anyOf:\r?\n.*?)(^      properties:\r?\n.*?)(^    [[:alnum:]_]+:|\z)`)
+	mcpOAuthSecurity          = regexp.MustCompile(`(?m)^[\t ]*- mcpOAuth:\r?\n(?:^[\t ]+- [^\r\n]+\r?\n)+`)
+	mcpOAuthScheme            = regexp.MustCompile(`(?ms)^    mcpOAuth:\r?\n.*?(^    [A-Za-z][A-Za-z0-9_]*:)`)
+	mcpScheduleSchema         = regexp.MustCompile(`(?ms)^    MCPBroadcastScheduleRequest:\r?\n.*?(^    [A-Z][A-Za-z0-9_]+:\r?\n)`)
+	scheduleMCPRequestUnion   = regexp.MustCompile(`(?m)^              oneOf:\r?\n                - \$ref: '#/components/schemas/BroadcastVersionRequest'\r?\n                - \$ref: '#/components/schemas/MCPBroadcastScheduleRequest'[\t ]*$`)
 )
 
 const (
 	canonicalUUIDSchema = "    UUID:\n      type: string\n      format: uuid"
 	uuidSchemaSentinel  = "    UUID:\n      type: string\n      format: viapost-canonical-uuid"
 )
+
+var publicSDKExcludedPaths = map[string]struct{}{
+	"/.well-known/jwks.json":                  {},
+	"/.well-known/oauth-authorization-server": {},
+	"/.well-known/oauth-protected-resource":   {},
+	"/oauth/authorize":                        {},
+	"/oauth/register":                         {},
+	"/oauth/revoke":                           {},
+	"/oauth/token":                            {},
+	"/v1/broadcasts/{id}/send-plans":          {},
+}
+
+// stripPublicSDKExcludedPaths projects only the supported API-key SDK view of
+// the pinned contract. It deliberately leaves the checked-in OpenAPI snapshot
+// untouched so MCP remains documented for its own server/client tooling.
+func stripPublicSDKExcludedPaths(source string) string {
+	lines := strings.SplitAfter(source, "\n")
+	var out strings.Builder
+	remove := false
+	for _, line := range lines {
+		trimmed := strings.TrimSuffix(strings.TrimSuffix(line, "\n"), "\r")
+		if len(trimmed) > 2 && strings.HasPrefix(trimmed, "  ") && !strings.HasPrefix(trimmed, "   ") && strings.HasSuffix(trimmed, ":") {
+			path := strings.TrimSuffix(strings.TrimPrefix(trimmed, "  "), ":")
+			if _, excluded := publicSDKExcludedPaths[path]; excluded {
+				remove = true
+				continue
+			}
+			// A new top-level path or components section ends a removed path.
+			remove = false
+		}
+		if !remove {
+			out.WriteString(line)
+		}
+	}
+	return out.String()
+}
 
 func normalizeCodegenSpec(source []byte) ([]byte, error) {
 	filtered, err := excludeSessionOnlyOperations(source)
@@ -52,12 +93,21 @@ func normalizeCodegenSpec(source []byte) ([]byte, error) {
 		return nil, fmt.Errorf("expected exactly one canonical UUID schema, found %d", len(matches))
 	}
 	normalized = canonicalUUIDBlock.ReplaceAllString(normalized, uuidSchemaSentinel)
+	// The checked-in contract is shared by the public API and the MCP server.
+	// This generated client is the API-key/session SDK only: keep MCP OAuth
+	// discovery and approval-only schedule routes out of its callable surface.
+	normalized = stripPublicSDKExcludedPaths(normalized)
+	normalized = scheduleMCPRequestUnion.ReplaceAllString(normalized, "              $$ref: '#/components/schemas/BroadcastVersionRequest'")
+	normalized = mcpScheduleSchema.ReplaceAllString(normalized, "$1")
+	normalized = mcpOAuthSecurity.ReplaceAllString(normalized, "")
+	normalized = mcpOAuthScheme.ReplaceAllString(normalized, "$1")
 	normalized = strings.ReplaceAll(normalized, ", format: uuid", "")
 	normalized = uuidFormatLine.ReplaceAllString(normalized, "")
 	normalized = strings.Replace(normalized, uuidSchemaSentinel, canonicalUUIDSchema, 1)
 	normalized = unsupportedItems.ReplaceAllString(normalized, "")
 	normalized = sessionReference.ReplaceAllString(normalized, "")
 	normalized = csrfListReference.ReplaceAllString(normalized, "")
+	normalized = requiredCsrfListReference.ReplaceAllString(normalized, "")
 	normalized = csrfInlineParameters.ReplaceAllString(normalized, "")
 	normalized = csrfComponent.ReplaceAllString(normalized, "$1")
 	normalized = sessionScheme.ReplaceAllString(normalized, "$1")

@@ -21,7 +21,7 @@ func TestGeneratedClient_SegmentContactsReturnsPaginatedList(t *testing.T) {
 			t.Errorf("request = %s %s, want GET /v1/segments/%s/contacts", request.Method, request.URL.Path, segmentID)
 		}
 		response.Header().Set("Content-Type", "application/json")
-		_, _ = response.Write([]byte(`{"data":[{"id":"` + contactID + `","email":"person@example.com","subscribed":true,"properties":{},"created_at":"2026-09-16T12:00:00Z","updated_at":"2026-09-16T12:00:00Z"}],"next_cursor":"next-page"}`))
+		_, _ = response.Write([]byte(`{"data":[{"id":"` + contactID + `","email":"person@example.com","tags":[],"subscribed":true,"properties":{},"created_at":"2026-09-16T12:00:00Z","updated_at":"2026-09-16T12:00:00Z"}],"next_cursor":"next-page"}`))
 	}))
 	defer server.Close()
 

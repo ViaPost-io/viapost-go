@@ -539,7 +539,7 @@ func TestWebhooksCreate_ValidatesURLBeforeNetwork(t *testing.T) {
 					requests.Add(1)
 					w.Header().Set("Content-Type", "application/json")
 					w.WriteHeader(http.StatusCreated)
-					_, _ = w.Write([]byte(`{"endpoint":{"id":"018f0000-0000-7000-8000-000000000001","url":"https://hooks.example.com/viapost","event_types":["delivered"],"enabled":true,"max_attempts":5,"consecutive_failures":0,"disabled_at":null,"secret_rotated_at":null,"version":1,"created_at":"2026-09-11T12:00:00Z","updated_at":"2026-09-11T12:00:00Z"},"secret":"0123456789012345678901234567890123456789012"}`))
+					_, _ = w.Write([]byte(`{"endpoint":{"name":"test webhook","payload_version":"2026-10","last_delivery":null,"id":"018f0000-0000-7000-8000-000000000001","url":"https://hooks.example.com/viapost","event_types":["delivered"],"enabled":true,"max_attempts":5,"consecutive_failures":0,"disabled_at":null,"secret_rotated_at":null,"version":1,"created_at":"2026-09-11T12:00:00Z","updated_at":"2026-09-11T12:00:00Z"},"secret":"0123456789012345678901234567890123456789012"}`))
 				})
 
 				var server *httptest.Server

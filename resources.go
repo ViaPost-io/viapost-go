@@ -129,15 +129,34 @@ func (s *TemplatesService) Delete(ctx context.Context, id string) error {
 type WebhooksService struct{ client *Client }
 
 func (s *WebhooksService) List(ctx context.Context) ([]WebhookEndpoint, error) {
-	response, err := s.client.raw.GetWebhooks(ctx)
-	if err != nil {
-		return nil, err
+	params := api.GetWebhooksParams{}
+	var endpoints []WebhookEndpoint
+	seenCursors := make(map[string]struct{})
+	for {
+		response, err := s.client.raw.GetWebhooks(ctx, params)
+		if err != nil {
+			return nil, err
+		}
+		result, ok := response.(*api.WebhookList)
+		if !ok {
+			return nil, unexpectedResponse("GET /v1/webhooks", response)
+		}
+		page, err := convertGenerated[[]WebhookEndpoint](result.Webhooks)
+		if err != nil {
+			return nil, err
+		}
+		endpoints = append(endpoints, page...)
+
+		cursor, ok := result.NextCursor.Get()
+		if !ok || cursor == "" {
+			return endpoints, nil
+		}
+		if _, repeated := seenCursors[cursor]; repeated {
+			return nil, fmt.Errorf("viapost: repeated webhook pagination cursor %q", cursor)
+		}
+		seenCursors[cursor] = struct{}{}
+		params.Cursor = api.NewOptString(cursor)
 	}
-	result, ok := response.(*api.WebhookList)
-	if !ok {
-		return nil, unexpectedResponse("GET /v1/webhooks", response)
-	}
-	return convertGenerated[[]WebhookEndpoint](result.Webhooks)
 }
 
 func (s *WebhooksService) Create(ctx context.Context, endpointURL string, eventTypes []string) (*CreateWebhookResult, error) {

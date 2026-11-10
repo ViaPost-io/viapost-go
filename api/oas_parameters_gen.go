@@ -7,6 +7,12 @@ type DeleteAutomationsIDParams struct {
 	ID string
 }
 
+// DeleteContactTagParams is parameters of deleteContactTag operation.
+type DeleteContactTagParams struct {
+	// Identificador UUID do recurso dentro do tenant ativo.
+	ID string
+}
+
 // DeleteContactsIDParams is parameters of deleteContactsId operation.
 type DeleteContactsIDParams struct {
 	ID string
@@ -77,6 +83,66 @@ type GetAutomationsIDRunsRunIDParams struct {
 	RunID string
 }
 
+// GetBroadcastsParams is parameters of getBroadcasts operation.
+type GetBroadcastsParams struct {
+	// Cursor opaco base64url retornado pela API; timestamps RFC 3339 legados também são aceitos. Não o
+	// interprete ou modifique.
+	Cursor OptString `json:",omitempty,omitzero"`
+	// Máximo de broadcasts por página; padrão 50.
+	Limit OptInt `json:",omitempty,omitzero"`
+}
+
+// GetBroadcastsIDParams is parameters of getBroadcastsId operation.
+type GetBroadcastsIDParams struct {
+	ID string
+}
+
+// GetBroadcastsIDAnalyticsParams is parameters of getBroadcastsIdAnalytics operation.
+type GetBroadcastsIDAnalyticsParams struct {
+	ID            string
+	From          OptDate `json:",omitempty,omitzero"`
+	To            OptDate `json:",omitempty,omitzero"`
+	TopLinksLimit OptInt  `json:",omitempty,omitzero"`
+}
+
+// GetBroadcastsManageParams is parameters of getBroadcastsManage operation.
+type GetBroadcastsManageParams struct {
+	Q           OptString                        `json:",omitempty,omitzero"`
+	Status      OptString                        `json:",omitempty,omitzero"`
+	TargetKind  OptGetBroadcastsManageTargetKind `json:",omitempty,omitzero"`
+	SegmentID   OptString                        `json:",omitempty,omitzero"`
+	CreatedFrom OptDateTime                      `json:",omitempty,omitzero"`
+	CreatedTo   OptDateTime                      `json:",omitempty,omitzero"`
+	Sort        OptString                        `json:",omitempty,omitzero"`
+	Order       OptGetBroadcastsManageOrder      `json:",omitempty,omitzero"`
+	Page        OptInt                           `json:",omitempty,omitzero"`
+	PageSize    OptInt                           `json:",omitempty,omitzero"`
+}
+
+// GetBroadcastsOverviewParams is parameters of getBroadcastsOverview operation.
+type GetBroadcastsOverviewParams struct {
+	CreatedFrom OptDateTime                        `json:",omitempty,omitzero"`
+	CreatedTo   OptDateTime                        `json:",omitempty,omitzero"`
+	TargetKind  OptGetBroadcastsOverviewTargetKind `json:",omitempty,omitzero"`
+	SegmentID   OptString                          `json:",omitempty,omitzero"`
+}
+
+// GetContactTagParams is parameters of getContactTag operation.
+type GetContactTagParams struct {
+	// Identificador UUID do recurso dentro do tenant ativo.
+	ID string
+}
+
+// GetContactTagsParams is parameters of getContactTags operation.
+type GetContactTagsParams struct {
+	Q      OptString              `json:",omitempty,omitzero"`
+	Color  OptString              `json:",omitempty,omitzero"`
+	Sort   OptGetContactTagsSort  `json:",omitempty,omitzero"`
+	Order  OptGetContactTagsOrder `json:",omitempty,omitzero"`
+	Limit  OptInt                 `json:",omitempty,omitzero"`
+	Cursor OptString              `json:",omitempty,omitzero"`
+}
+
 // GetContactsParams is parameters of getContacts operation.
 type GetContactsParams struct {
 	// Cursor opaco base64url retornado pela API, com desempate estável por `(created_at,id)`; timestamps
@@ -87,6 +153,9 @@ type GetContactsParams struct {
 	Limit OptInt `json:",omitempty,omitzero"`
 	// Busca por e-mail ou nome do contato; máximo de 200 caracteres.
 	Search OptString `json:",omitempty,omitzero"`
+	// Até 50 UUIDs separados por vírgulas do tenant ativo.
+	TagIds   OptString              `json:",omitempty,omitzero"`
+	TagMatch OptGetContactsTagMatch `json:",omitempty,omitzero"`
 }
 
 // GetContactsIDParams is parameters of getContactsId operation.
@@ -294,14 +363,53 @@ type GetTemplatesIDVersionsVersionIDParams struct {
 	VersionID string
 }
 
+// GetTenantWebhookDeliveriesParams is parameters of getTenantWebhookDeliveries operation.
+type GetTenantWebhookDeliveriesParams struct {
+	EndpointID   OptString                           `json:",omitempty,omitzero"`
+	EventType    OptString                           `json:",omitempty,omitzero"`
+	Status       OptGetTenantWebhookDeliveriesStatus `json:",omitempty,omitzero"`
+	From         OptDateTime                         `json:",omitempty,omitzero"`
+	To           OptDateTime                         `json:",omitempty,omitzero"`
+	Limit        OptInt                              `json:",omitempty,omitzero"`
+	Cursor       OptString                           `json:",omitempty,omitzero"`
+	ResponseCode OptInt                              `json:",omitempty,omitzero"`
+	DeliveryID   OptString                           `json:",omitempty,omitzero"`
+}
+
+// GetWebhookEndpointParams is parameters of getWebhookEndpoint operation.
+type GetWebhookEndpointParams struct {
+	ID UUID
+}
+
+// GetWebhookMetricsParams is parameters of getWebhookMetrics operation.
+type GetWebhookMetricsParams struct {
+	EndpointID OptString   `json:",omitempty,omitzero"`
+	From       OptDateTime `json:",omitempty,omitzero"`
+	To         OptDateTime `json:",omitempty,omitzero"`
+}
+
+// GetWebhooksParams is parameters of getWebhooks operation.
+type GetWebhooksParams struct {
+	Q         OptString          `json:",omitempty,omitzero"`
+	Enabled   OptBool            `json:",omitempty,omitzero"`
+	EventType OptString          `json:",omitempty,omitzero"`
+	From      OptDateTime        `json:",omitempty,omitzero"`
+	To        OptDateTime        `json:",omitempty,omitzero"`
+	Limit     OptInt             `json:",omitempty,omitzero"`
+	Cursor    OptString          `json:",omitempty,omitzero"`
+	Sort      OptGetWebhooksSort `json:",omitempty,omitzero"`
+}
+
 // GetWebhooksIDDeliveriesParams is parameters of getWebhooksIdDeliveries operation.
 type GetWebhooksIDDeliveriesParams struct {
 	ID string
 	// Cursor opaco retornado em `next_cursor`.
-	Cursor    OptString                   `json:",omitempty,omitzero"`
-	Limit     OptInt                      `json:",omitempty,omitzero"`
-	Status    OptWebhookDeliveryStatus    `json:",omitempty,omitzero"`
-	EventType OptWebhookDeliveryEventType `json:",omitempty,omitzero"`
+	Cursor       OptString                   `json:",omitempty,omitzero"`
+	Limit        OptInt                      `json:",omitempty,omitzero"`
+	Status       OptWebhookDeliveryStatus    `json:",omitempty,omitzero"`
+	EventType    OptWebhookDeliveryEventType `json:",omitempty,omitzero"`
+	ResponseCode OptInt                      `json:",omitempty,omitzero"`
+	DeliveryID   OptString                   `json:",omitempty,omitzero"`
 }
 
 // GetWebhooksIDDeliveriesDeliveryIDParams is parameters of getWebhooksIdDeliveriesDeliveryId operation.
@@ -317,6 +425,11 @@ type PatchAutomationsIDParams struct {
 
 // PatchAutomationsIDDraftParams is parameters of patchAutomationsIdDraft operation.
 type PatchAutomationsIDDraftParams struct {
+	ID string
+}
+
+// PatchBroadcastsIDParams is parameters of patchBroadcastsId operation.
+type PatchBroadcastsIDParams struct {
 	ID string
 }
 
@@ -364,6 +477,43 @@ type PostAutomationsIDDuplicateParams struct {
 type PostAutomationsIDRunsRunIDCancelParams struct {
 	ID    string
 	RunID string
+}
+
+// PostBroadcastsParams is parameters of postBroadcasts operation.
+type PostBroadcastsParams struct {
+	// Chave de 1 a 200 bytes, sem espaços nas extremidades, reutilizável somente com o mesmo corpo
+	// normalizado.
+	IdempotencyKey string
+}
+
+// PostBroadcastsIDCancelParams is parameters of postBroadcastsIdCancel operation.
+type PostBroadcastsIDCancelParams struct {
+	ID string
+}
+
+// PostBroadcastsIDScheduleParams is parameters of postBroadcastsIdSchedule operation.
+type PostBroadcastsIDScheduleParams struct {
+	ID string
+	// Chave de 1 a 200 bytes, sem espaços nas extremidades, reutilizável somente com o mesmo corpo
+	// normalizado.
+	IdempotencyKey string
+}
+
+// PostBroadcastsIDTestParams is parameters of postBroadcastsIdTest operation.
+type PostBroadcastsIDTestParams struct {
+	ID string
+	// Chave opaca por tentativa (16–150 caracteres); o mesmo valor não deve ser reutilizado para nova
+	// prévia.
+	IdempotencyKey string
+}
+
+// PostContactsImportParams is parameters of postContactsImport operation.
+type PostContactsImportParams struct {
+	// Até 50 UUIDs comuns separados por vírgulas.
+	TagIds     OptString                    `json:",omitempty,omitzero"`
+	TagMode    OptPostContactsImportTagMode `json:",omitempty,omitzero"`
+	CreateTags OptBool                      `json:",omitempty,omitzero"`
+	Partial    OptBool                      `json:",omitempty,omitzero"`
 }
 
 // PostDomainTrackingDomainActivateParams is parameters of postDomainTrackingDomainActivate operation.
@@ -488,4 +638,10 @@ type PostWebhooksIDTestParams struct {
 	// Identifica uma operação de escrita. Deve ser reutilizada apenas ao repetir exatamente a mesma
 	// solicitação; uso conflitante retorna `409`.
 	IdempotencyKey string
+}
+
+// UpdateContactTagParams is parameters of updateContactTag operation.
+type UpdateContactTagParams struct {
+	// Identificador UUID do recurso dentro do tenant ativo.
+	ID string
 }

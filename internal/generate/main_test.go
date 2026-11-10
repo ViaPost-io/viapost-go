@@ -1,6 +1,7 @@
 package generate
 
 import (
+	"bytes"
 	"encoding/json"
 	"os"
 	"os/exec"
@@ -11,6 +12,42 @@ import (
 
 	"github.com/ghodss/yaml"
 )
+
+func TestNormalizeCodegenSpec_ExcludesMCPOnlySurface(t *testing.T) {
+	source, err := os.ReadFile("../../openapi.yaml")
+	if err != nil {
+		t.Fatalf("read pinned contract: %v", err)
+	}
+	normalized, err := normalizeCodegenSpec(source)
+	if err != nil {
+		t.Fatalf("normalizeCodegenSpec() error = %v", err)
+	}
+	for _, excluded := range []string{
+		"/.well-known/jwks.json:",
+		"/.well-known/oauth-authorization-server:",
+		"/.well-known/oauth-protected-resource:",
+		"/oauth/authorize:",
+		"/oauth/register:",
+		"/oauth/revoke:",
+		"/oauth/token:",
+		"/v1/broadcasts/{id}/send-plans:",
+		"mcpOAuth:",
+		"MCPBroadcastScheduleRequest",
+	} {
+		if bytes.Contains(normalized, []byte(excluded)) {
+			t.Fatalf("normalized public SDK still exposes MCP-only surface %q", excluded)
+		}
+	}
+	if !bytes.Contains(normalized, []byte("/v1/broadcasts/{id}/schedule:")) {
+		t.Fatal("normalized public SDK lost the supported broadcast schedule route")
+	}
+	if !bytes.Contains(normalized, []byte("$ref: '#/components/schemas/BroadcastVersionRequest'")) {
+		t.Fatal("normalized schedule route lost the API-key request schema")
+	}
+	if !bytes.Contains(source, []byte("MCPBroadcastScheduleRequest")) {
+		t.Fatal("test contract unexpectedly lost MCP schedule schema")
+	}
+}
 
 func TestNormalizeCodegenSpec_PreservesSourceAndRemovesUnsupportedConstraints(t *testing.T) {
 	source := []byte(`openapi: 3.1.1
