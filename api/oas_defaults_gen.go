@@ -3,6 +3,26 @@
 package api
 
 // setDefaults set default value of fields.
+func (s *CreateContactTagRequest) setDefaults() {
+	{
+		val := string("#64748B")
+		s.Color.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *CreateWebhookRequest) setDefaults() {
+	{
+		val := bool(true)
+		s.Enabled.SetTo(val)
+	}
+	{
+		val := int(8)
+		s.MaxAttempts.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
 func (s *SegmentPreviewRequest) setDefaults() {
 	{
 		val := int(20)
